@@ -1,84 +1,176 @@
-* {
-      font-size: 14pt;
-      color: black;
-    }
-    
-    textview text {
-      font-size: 12pt;
-      color: black;
-    }
-    
-    label {
-      font-size: 13pt;
-      color: black;
-    }
-    
-    /* указываем свой стиль,
-    но исключаем некоторые предопределённые стили;
-    они меняться не будут*/
-    button:not(.destructive-action):not(.suggested-action) {
-      font-size: 13pt;
-      color: black;
-            /* Убираем градиент/изображение фона, которое GTK4,
-            используемое по умолчанию для кнопок */
-      background-image: none;
-            /* # Плавная анимация смены цвета фона:
-            background-color: какое свойство анимируется
-            - 0.3s: длительность анимации в секундах
-            - ease: тип анимации (плавное ускорение/замедление) */
-      transition: background-color 0.2s ease;
-    }
-    
-    /* hover - псевдокласс, активируется при наведении мыши */
-    button:not(.destructive-action):not(.suggested-action):hover {
-      background-color: #ddffe0;
-              /* Снова убираем градиент, чтобы показался
-              только наш цвет background-color*/
-      background-image: none;
-    }
-    
-    entry {
-      font-size: 12pt;
-      color: black;
-    }
+*
+/* СТИЛЕВЫЕ КОНСТАНТЫ */
+{
+  /* Цвета */
+  --main-foreground-color: black;
+  --main-background-color: white;
+  --button-bg-hover: #b5ffbb;
+  --button-bg-active: #e2fee6;
+  --menu-bg-hover: #acffc4;
+  --active-color: #1bff39;
+  --destructive-color: #ffc1c1;
+  --destructive-hover-color: #ff5d5d;
+  --destructive-press-color: rgb(255, 42, 42);
+  --suggested-color: #c9daff;
+  --suggested-hover-color: #8a9fff;
+  --suggested-press-color: #2b52ff;
+  --notebook-header-color: #faefff;
+  --notebook-inactive-color: #f2d7ff;
+  --notebook-tab-line-color: #3dd33d;
 
-    /* Стилизация пунктов выпадающего меню */
-    popover.menu button,
-    modelbutton {
-      font-size: 13pt;
-      color: black;
-      background-image: none;
-      transition: background-color 0.0s ease;
-    }
-    
-    popover.menu button:hover,
-    modelbutton:hover {
-      background-image: none;
-      background-color: #d9ffea;
-    }
+  /* Размеры шрифтов */
+  --font-size-small: 12pt;
+  --font-size-medium: 13pt;
+  --font-size-default: 14pt;
 
-    /* Стилизация переключателя (Switch) */
-    switch {
-      background-image: none;
-      transition: background-color 0.0s ease;
-    }
-    
-    /* Переключатель в выключенном состоянии */
-    switch {
-      background-color: #ccc;
-    }
-    
-    /* Переключатель во включённом состоянии */
-    switch:checked {
-      background-color: #65f758;
-      background-image: none;
-    }
-    
-    /* Ползунок переключателя */
-    switch slider {
-      background-color: white;
-      background-image: none;
-    }
+  /* Остальные стили */
+  font-size: var(--font-size-default);
+  color: var(--main-foreground-color);
+}
+
+textview text {
+  font-size: var(--font-size-small);
+  color: var(--main-foreground-color);
+}
+
+label {
+  font-size: var(--font-size-medium);
+  color: var(--main-foreground-color);
+}
+
+/* Указываем свой стиль, но исключаем некоторые предопределённые стили;
+они меняться не будут*/
+button:not(.custom-suggested-button):not(.custom-destructive-button) {
+  font-size: var(--font-size-medium);
+  color: var(--main-foreground-color);
+  /* Убираем градиент/изображение фона, которое GTK4
+  использует по умолчанию для кнопок */
+  /* background-image: none; */
+  /* background-color: var(--button-bg-active); */
+  /* # Плавная анимация смены цвета фона:
+  background-color: какое свойство анимируется
+    0.3s: длительность анимации в секундах
+    ease: тип анимации (плавное ускорение/замедление) */
+  transition: background-color 0.1s ease;
+}
+
+/* hover — псевдокласс, активируется при наведении мыши */
+button:not(.custom-suggested-button):not(.custom-destructive-button):hover {
+  /* Убираем градиент, чтобы показался только наш цвет background-color*/
+  background-image: none;
+  background-color: var(--button-bg-hover);
+}
+
+button:not(.custom-suggested-button):not(.custom-destructive-button):active {
+  /* Убираем градиент, чтобы показался только наш цвет background-color*/
+  background-image: none;
+  background-color: var(--active-color);
+}
+
+entry {
+  font-size: var(--font-size-small);
+  color: var(--main-foreground-color);
+}
+
+/* Стилизация пунктов выпадающего меню */
+popover.menu button, modelbutton {
+  font-size: var(--font-size-medium);
+  color: var(--main-foreground-color);
+  background-image: none;
+  transition: background-color 0.0s ease;
+}
+
+popover.menu button:hover, modelbutton:hover {
+  background-image: none;
+  background-color: var(--menu-bg-hover);
+}
+
+/* Стилизация переключателя (Switch) */
+switch {
+  background-image: none;
+  transition: background-color 0.0s ease;
+  /* Переключатель в выключенном состоянии */
+  background-color: #ccc;
+}
+/* Переключатель во включённом состоянии */
+switch:checked {
+  background-color: var(--active-color);
+  background-image: none;
+}
+/* Ползунок переключателя */
+switch slider {
+  background-color: var(--main-background-color);
+  background-image: none;
+}
+
+
+
+/* ВКЛАДКИ */
+/* Контейнер вкладок */
+notebook > header {
+  background-image: none;
+  background-color: var(--notebook-header-color);
+}
+/* Все вкладки */
+tab {
+  background-image: none;
+  background-color: var(--notebook-inactive-color);
+  padding: 8px 16px;
+}
+/* Наведение на вкладку */
+notebook > header > tabs > tab:hover {
+  background-image: none;
+  background-color: var(--button-bg-hover);
+  color: var(--main-foreground-color);
+}
+/* Активная вкладка */
+tab:checked {
+  background-image: none;
+  background-color: var(--menu-bg-hover);
+  font-weight: bold;
+  box-shadow: inset 0 -5px var(--notebook-tab-line-color);
+}
+/* Метка текста внутри вкладки */
+notebook > header > tabs > tab label {
+  color: var(--main-foreground-color);
+}
+
+
+
+
+
+/* Применение стиля к отдельным элементам */
+.custom-suggested-button {
+  background-image: none;
+  background-color: var(--suggested-color);
+  color: var(--main-foreground-color);
+  font-weight: bold;
+}
+.custom-suggested-button:hover {
+  background-image: none;
+  background-color: var(--suggested-hover-color);
+}
+.custom-suggested-button:active {
+  background-image: none;
+  background-color: var(--suggested-press-color);
+}
+
+.custom-destructive-button {
+  background-image: none;
+  background-color: var(--destructive-color);
+  color: var(--main-foreground-color);
+  font-weight: bold;
+}
+.custom-destructive-button:hover {
+  background-image: none;
+  background-color: var(--destructive-hover-color);
+}
+.custom-destructive-button:active {
+  background-image: none;
+  background-color: var(--destructive-press-color);
+}
+
+
 
 
 
