@@ -16,13 +16,21 @@
 
 
 
-
-{.passL: "-lgtk-4".}
-{.passC: gorge("pkg-config --cflags gtk4").}
-{.passL: gorge("pkg-config --libs gtk4").}
+import strutils
 
 
-import sequtils
+
+when defined(windows):
+  # На Windows необходимо удалить символ новой строки из вывода pkg-config,
+  # иначе линкер получает некорректные параметры командной строки.
+  # Это делается так: pkg-config --libs gtk4 | tr -d '\n'
+  {.passC: gorge("pkg-config --cflags gtk4").}
+  {.passL: gorge("bash -c 'pkg-config --libs gtk4 | tr -d \"\\n\"'").}
+else:
+  {.passC: gorge("pkg-config --cflags gtk4").}
+  {.passL: gorge("pkg-config --libs gtk4").}
+
+
 
 
 # ============================================================================

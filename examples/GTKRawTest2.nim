@@ -1,4 +1,4 @@
-# nim c -d:release GTKRawTest2.nim
+# nim c -d:release --app:gui GTKRawTest2.nim
 
 
 
@@ -15,6 +15,18 @@ var
   entryField: GtkEntry
   progressBar: GtkProgressBar
   infoLabel: GtkLabel
+
+# Изменение размера шрифтов
+proc applyCss() =
+  let cssProvider = gtk_css_provider_new()
+  const cssData = staticRead("styles.css")
+  gtk_css_provider_load_from_data(cssProvider, cstring(cssData), cssData.len.cint)
+  gtk_style_context_add_provider_for_display(
+    gdk_display_get_default(),
+    cast[pointer](cssProvider),  # используем pointer вместо GtkStyleProvider
+    GTK_STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+
 
 # ============================================================================
 # ОБРАБОТЧИКИ КНОПОК ПАНЕЛИ ИНСТРУМЕНТОВ
@@ -93,6 +105,9 @@ proc quitAction(action: GSimpleAction, param: pointer, userData: pointer) {.cdec
 # ============================================================================
 
 proc onActivate(app: GtkApplication, userData: pointer) {.cdecl.} =
+  # Применяем стиль к виджетам
+  applyCss()
+
   # Создание главного окна
   let window = createAppWindow(app, "Эталонное GTK4 приложение на Nim", 1000, 600)
   
@@ -238,6 +253,7 @@ proc onActivate(app: GtkApplication, userData: pointer) {.cdecl.} =
   gtk_box_append(buttonBox, btnSecondary)
   
   let btnDestructive = createButton("Удалить", cast[GCallback](onDestructiveClicked))
+  # removeCssClass(btnDestructive)
   addCssClass(btnDestructive, "destructive-action")
   gtk_widget_set_hexpand(btnDestructive, true)
   gtk_box_append(buttonBox, btnDestructive)
