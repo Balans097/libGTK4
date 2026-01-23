@@ -1,0 +1,85 @@
+* {
+      font-size: 14pt;
+      color: black;
+    }
+    
+    textview text {
+      font-size: 12pt;
+      color: black;
+    }
+    
+    label {
+      font-size: 13pt;
+      color: black;
+    }
+    
+    /* указываем свой стиль,
+    но исключаем некоторые предопределённые стили;
+    они меняться не будут*/
+    button:not(.destructive-action):not(.suggested-action) {
+      font-size: 13pt;
+      color: black;
+            /* Убираем градиент/изображение фона, которое GTK4,
+            используемое по умолчанию для кнопок */
+      background-image: none;
+            /* # Плавная анимация смены цвета фона:
+            background-color: какое свойство анимируется
+            - 0.3s: длительность анимации в секундах
+            - ease: тип анимации (плавное ускорение/замедление) */
+      transition: background-color 0.2s ease;
+    }
+    
+    /* hover - псевдокласс, активируется при наведении мыши */
+    button:not(.destructive-action):not(.suggested-action):hover {
+      background-color: #ddffe0;
+              /* Снова убираем градиент, чтобы показался
+              только наш цвет background-color*/
+      background-image: none;
+    }
+    
+    entry {
+      font-size: 12pt;
+      color: black;
+    }
+
+    /* Стилизация пунктов выпадающего меню */
+    popover.menu button,
+    modelbutton {
+      font-size: 13pt;
+      color: black;
+      background-image: none;
+      transition: background-color 0.0s ease;
+    }
+    
+    popover.menu button:hover,
+    modelbutton:hover {
+      background-image: none;
+      background-color: #d9ffea;
+    }
+
+    /* Стилизация переключателя (Switch) */
+    switch {
+      background-image: none;
+      transition: background-color 0.0s ease;
+    }
+    
+    /* Переключатель в выключенном состоянии */
+    switch {
+      background-color: #ccc;
+    }
+    
+    /* Переключатель во включённом состоянии */
+    switch:checked {
+      background-color: #65f758;
+      background-image: none;
+    }
+    
+    /* Ползунок переключателя */
+    switch slider {
+      background-color: white;
+      background-image: none;
+    }
+
+
+
+
