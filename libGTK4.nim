@@ -201,14 +201,17 @@ type
   GAction* = pointer
   GActionMap* = pointer
   GFile* = pointer
+  GBytes* = pointer
 
   # Cairo
   cairo_t* = pointer
   cairo_surface_t* = pointer
 
   # Pixbuf
+  GdkDisplay* = pointer
   GdkPixbuf* = pointer
   GdkTexture* = pointer
+  GdkPaintable* = pointer
 
   # Clipboard
   GdkClipboard* = pointer
@@ -220,6 +223,7 @@ type
   # Стили и CSS
   GtkStyleContext* = pointer
   GtkCssProvider* = pointer
+  GtkStyleProvider* = pointer
 
   # Прочие GObject типы
   GObject* = pointer
@@ -228,6 +232,9 @@ type
   GVariant* = pointer
   GVariantType* = pointer
   GError* = pointer
+  GActionGroup* = pointer
+  GSimpleActionGroup* = pointer
+  GPropertyAction* = pointer
 
   # Callback типы
   GCallback* = pointer
@@ -419,6 +426,12 @@ type
     nParams*: cuint
     paramTypes*: ptr GType
 
+  GActionEntry* = object
+      name*: cstring
+      activate*: proc(action: GSimpleAction, parameter: GVariant, user_data: gpointer) {.cdecl.}
+      parameter_type*: cstring
+      state*: cstring
+      change_state*: proc(action: GSimpleAction, value: GVariant, user_data: gpointer) {.cdecl.}
 
 
 
@@ -707,6 +720,62 @@ proc g_action_map_add_action*(actionMap: GActionMap, action: GAction) {.importc.
 proc g_action_map_remove_action*(actionMap: GActionMap, actionName: cstring) {.importc.}
 proc g_action_map_lookup_action*(actionMap: GActionMap, actionName: cstring): GAction {.importc.}
 
+# Массовое добавление действий
+proc g_action_map_add_action_entries*(
+  action_map: GActionMap,
+  entries: ptr GActionEntry,
+  n_entries: gint,
+  user_data: gpointer) {.importc.}
+
+# Получение информации о действии
+proc g_action_get_name*(action: GAction): cstring {.importc.}
+proc g_action_get_parameter_type*(action: GAction): GVariantType {.importc.}
+proc g_action_get_state_type*(action: GAction): GVariantType {.importc.}
+proc g_action_get_state*(action: GAction): GVariant {.importc.}
+proc g_action_get_state_hint*(action: GAction): GVariant {.importc.}
+proc g_action_get_enabled*(action: GAction): gboolean {.importc.}
+
+# Активация действия
+proc g_action_activate*(action: GAction, parameter: GVariant) {.importc.}
+proc g_action_change_state*(action: GAction, value: GVariant) {.importc.}
+
+# Проверки
+proc g_action_name_is_valid*(action_name: cstring): gboolean {.importc.}
+proc g_property_action_new*(name: cstring, obj: gpointer, property_name: cstring): GPropertyAction {.importc.}
+
+# Установка действий для виджетов
+proc gtk_widget_insert_action_group*(widget: GtkWidget, name: cstring, group: GActionGroup) {.importc.}
+proc gtk_widget_action_set_enabled*(widget: GtkWidget, action_name: cstring, enabled: gboolean) {.importc.}
+
+proc g_action_group_list_actions*(action_group: GActionGroup): ptr cstring {.importc.}
+proc g_action_group_query_action*(
+  action_group: GActionGroup,
+  action_name: cstring,
+  enabled: ptr gboolean,
+  parameter_type: ptr GVariantType,
+  state_type: ptr GVariantType,
+  state_hint: ptr GVariant,
+  state: ptr GVariant
+): gboolean {.importc.}
+
+proc g_action_group_has_action*(action_group: GActionGroup, action_name: cstring): gboolean {.importc.}
+proc g_action_group_get_action_enabled*(action_group: GActionGroup, action_name: cstring): gboolean {.importc.}
+proc g_action_group_get_action_parameter_type*(action_group: GActionGroup, action_name: cstring): GVariantType {.importc.}
+proc g_action_group_get_action_state_type*(action_group: GActionGroup, action_name: cstring): GVariantType {.importc.}
+proc g_action_group_get_action_state_hint*(action_group: GActionGroup, action_name: cstring): GVariant {.importc.}
+proc g_action_group_get_action_state*(action_group: GActionGroup, action_name: cstring): GVariant {.importc.}
+
+proc g_action_group_change_action_state*(action_group: GActionGroup, action_name: cstring, value: GVariant) {.importc.}
+proc g_action_group_activate_action*(action_group: GActionGroup, action_name: cstring, parameter: GVariant) {.importc.}
+
+# Сигналы GActionGroup:
+# "action-added" (action_name: cstring)
+# "action-removed" (action_name: cstring)
+# "action-enabled-changed" (action_name: cstring, enabled: gboolean)
+# "action-state-changed" (action_name: cstring, state: GVariant)
+
+
+
 
 # ============================================================================
 # MENU
@@ -754,6 +823,10 @@ proc gtk_window_unmaximize*(window: GtkWindow) {.importc.}
 proc gtk_window_minimize*(window: GtkWindow) {.importc.}
 proc gtk_window_unminimize*(window: GtkWindow) {.importc.}
 proc gtk_window_present*(window: GtkWindow) {.importc.}
+proc gtk_window_set_default_icon_name*(name: cstring) {.importc.}
+proc gtk_window_set_icon_name*(window: GtkWindow, name: cstring) {.importc.}
+
+
 
 # ============================================================================
 # WIDGET (базовые функции для всех виджетов)
@@ -800,6 +873,8 @@ proc gtk_widget_get_first_child*(widget: GtkWidget): GtkWidget {.importc.}
 proc gtk_widget_get_last_child*(widget: GtkWidget): GtkWidget {.importc.}
 proc gtk_widget_get_next_sibling*(widget: GtkWidget): GtkWidget {.importc.}
 proc gtk_widget_get_prev_sibling*(widget: GtkWidget): GtkWidget {.importc.}
+
+
 
 # ============================================================================
 # BOX
@@ -1009,6 +1084,9 @@ proc gtk_frame_get_child*(frame: GtkFrame): GtkWidget {.importc.}
 
 proc gtk_separator_new*(orientation: GtkOrientation): GtkSeparator {.importc.}
 
+
+
+
 # ============================================================================
 # IMAGE
 # ============================================================================
@@ -1018,8 +1096,15 @@ proc gtk_image_new_from_file*(filename: cstring): GtkImage {.importc.}
 proc gtk_image_new_from_icon_name*(iconName: cstring): GtkImage {.importc.}
 proc gtk_image_set_from_file*(image: GtkImage, filename: cstring) {.importc.}
 proc gtk_image_set_from_icon_name*(image: GtkImage, iconName: cstring) {.importc.}
+proc gtk_image_set_from_paintable*(image: GtkImage; paintable: GdkPaintable) {.importc.}
+proc gtk_image_get_paintable*(image: GtkImage): GdkPaintable {.importc.}
 proc gtk_image_set_pixel_size*(image: GtkImage, pixelSize: gint) {.importc.}
 proc gtk_image_get_pixel_size*(image: GtkImage): gint {.importc.}
+
+# Создание GtkImage из GdkPaintable (GdkTexture является подтипом GdkPaintable)
+proc gtk_image_new_from_paintable*(paintable: GdkPaintable): GtkImage {.importc.}
+
+
 
 # ============================================================================
 # SPINNER
@@ -1233,6 +1318,8 @@ proc gtk_drawing_area_set_content_height*(area: GtkDrawingArea, height: gint) {.
 proc gtk_drawing_area_get_content_height*(area: GtkDrawingArea): gint {.importc.}
 proc gtk_drawing_area_set_draw_func*(area: GtkDrawingArea, drawFunc: pointer, userData: gpointer, destroy: GDestroyNotify) {.importc.}
 
+
+
 # ============================================================================
 # CSS PROVIDER
 # ============================================================================
@@ -1242,13 +1329,23 @@ proc gtk_css_provider_load_from_data*(cssProvider: GtkCssProvider, data: cstring
 proc gtk_css_provider_load_from_file*(cssProvider: GtkCssProvider, file: GFile) {.importc.}
 proc gtk_css_provider_load_from_path*(cssProvider: GtkCssProvider, path: cstring) {.importc.}
 
+
+
+
 # ============================================================================
-# STYLE CONTEXT
+# STYLE CONTEXT & DISPLAY
 # ============================================================================
 
 proc gtk_widget_get_style_context*(widget: GtkWidget): GtkStyleContext {.importc.}
 proc gtk_style_context_add_provider*(context: GtkStyleContext, provider: pointer, priority: guint) {.importc.}
 proc gtk_style_context_add_provider_for_display*(display: pointer, provider: pointer, priority: guint) {.importc.}
+
+proc gtk_widget_get_display*(widget: GtkWidget): GdkDisplay {.importc.}
+proc gtk_css_provider_load_from_string*(css_provider: GtkCssProvider, string: cstring) {.importc.}
+
+
+
+
 
 # ============================================================================
 # DISPLAY
@@ -1638,6 +1735,8 @@ proc gdk_display_get_clipboard*(display: pointer): GdkClipboard {.importc.}
 proc gdk_clipboard_set_text*(clipboard: GdkClipboard, text: cstring) {.importc.}
 proc gdk_clipboard_read_text_async*(clipboard: GdkClipboard, cancellable: pointer, callback: pointer, userData: gpointer) {.importc.}
 
+
+
 # ============================================================================
 # PIXBUF
 # ============================================================================
@@ -1648,6 +1747,20 @@ proc gdk_pixbuf_get_width*(pixbuf: GdkPixbuf): gint {.importc.}
 proc gdk_pixbuf_get_height*(pixbuf: GdkPixbuf): gint {.importc.}
 proc gdk_pixbuf_scale_simple*(src: GdkPixbuf, destWidth: gint, destHeight: gint, interpType: gint): GdkPixbuf {.importc.}
 proc gdk_pixbuf_savev*(pixbuf: GdkPixbuf, filename: cstring, `type`: cstring, optionKeys: ptr cstring, optionValues: ptr cstring, error: ptr GError): gboolean {.importc.}
+proc g_memory_input_stream_new_from_bytes*(bytes: GBytes): pointer {.importc.}
+proc gdk_pixbuf_new_from_stream*(stream: pointer, cancellable: pointer, error: ptr GError): GdkPixbuf {.importc.}
+proc gtk_window_set_default_icon_list*(list: openArray[GdkPixbuf]) {.importc.}
+
+# Для загрузки изображений из памяти
+proc gdk_pixbuf_loader_new*(): pointer {.importc.}
+proc gdk_pixbuf_loader_write*(loader: pointer, buf: ptr uint8, count: csize_t, 
+                               error: ptr GError): gboolean {.importc.}
+proc gdk_pixbuf_loader_close*(loader: pointer, error: ptr GError): gboolean {.importc.}
+proc gdk_pixbuf_loader_get_pixbuf*(loader: pointer): GdkPixbuf {.importc.}
+
+
+
+
 
 # ============================================================================
 # TEXTURE
@@ -1657,6 +1770,12 @@ proc gdk_texture_new_for_pixbuf*(pixbuf: GdkPixbuf): GdkTexture {.importc.}
 proc gdk_texture_new_from_file*(file: GFile, error: ptr GError): GdkTexture {.importc.}
 proc gdk_texture_get_width*(texture: GdkTexture): gint {.importc.}
 proc gdk_texture_get_height*(texture: GdkTexture): gint {.importc.}
+proc gdk_texture_new_from_bytes*(bytes: GBytes, error: ptr GError): GdkTexture {.importc.}
+proc g_bytes_new_static*(data: pointer, size: csize_t): GBytes {.importc.}
+proc g_bytes_unref*(bytes: GBytes) {.importc.}
+
+
+
 
 # ============================================================================
 # GLIB UTILITIES
@@ -2336,6 +2455,7 @@ proc gtk_native_dialog_set_title*(nativeDialog: GtkNativeDialog, title: cstring)
 proc gtk_native_dialog_get_title*(nativeDialog: GtkNativeDialog): cstring {.importc.}
 proc gtk_native_dialog_set_transient_for*(nativeDialog: GtkNativeDialog, parent: GtkWindow) {.importc.}
 proc gtk_native_dialog_get_transient_for*(nativeDialog: GtkNativeDialog): GtkWindow {.importc.}
+proc gtk_native_get_surface*(window: GtkWindow): pointer {.importc.}
 
 
 # ============================================================================
@@ -2760,6 +2880,10 @@ proc gtk_editable_label_new*(str: cstring): GtkEditableLabel {.importc.}
 proc gtk_editable_label_get_editing*(self: GtkEditableLabel): gboolean {.importc.}
 proc gtk_editable_label_start_editing*(self: GtkEditableLabel) {.importc.}
 proc gtk_editable_label_stop_editing*(self: GtkEditableLabel, commit: gboolean) {.importc.}
+
+
+
+
 
 
 # ============================================================================
@@ -3312,6 +3436,8 @@ proc createStack*(): GtkStack =
 proc addToStack*(stack: GtkStack, child: GtkWidget, name, title: string): GtkWidget =
   ## Добавление виджета в стек
   result = gtk_stack_add_titled(stack, child, name.cstring, title.cstring)
+
+
 
 # ----------------------------------------------------------------------------
 # Диалоги
