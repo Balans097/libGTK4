@@ -325,6 +325,105 @@ type
     GTK_POLICY_NEVER = 2
     GTK_POLICY_EXTERNAL = 3
 
+  GtkArrowType* {.size: sizeof(cint).} = enum
+    GTK_ARROW_UP
+    GTK_ARROW_DOWN
+    GTK_ARROW_LEFT
+    GTK_ARROW_RIGHT
+    GTK_ARROW_NONE
+
+  # Дополнительные типы
+  GQuark* = uint32
+  GBindingFlags* {.size: sizeof(cint).} = enum
+    G_BINDING_DEFAULT = 0
+    G_BINDING_BIDIRECTIONAL = 1
+    G_BINDING_SYNC_CREATE = 2
+    G_BINDING_INVERT_BOOLEAN = 4
+ 
+  # Типы для направления текста
+  GtkTextDirection* {.size: sizeof(cint).} = enum
+    GTK_TEXT_DIR_NONE
+    GTK_TEXT_DIR_LTR  # left to right
+    GTK_TEXT_DIR_RTL  # right to left
+
+  GtkApplicationInhibitFlags* {.size: sizeof(cint).} = enum
+    # Предотвратить выход из системы
+    GTK_APPLICATION_INHIBIT_LOGOUT = 1 shl 0
+    # Предотвратить переключение пользователя
+    GTK_APPLICATION_INHIBIT_SWITCH = 1 shl 1
+    # Предотвратить переход в спящий режим
+    GTK_APPLICATION_INHIBIT_SUSPEND = 1 shl 2
+    # Предотвратить автоматическую блокировку
+    GTK_APPLICATION_INHIBIT_IDLE = 1 shl 3
+
+  # Типы GApplication
+  GApplicationFlags* {.size: sizeof(cint).} = enum
+    G_APPLICATION_FLAGS_NONE = 0
+    G_APPLICATION_IS_SERVICE = 1 shl 0
+    G_APPLICATION_IS_LAUNCHER = 1 shl 1
+    G_APPLICATION_HANDLES_OPEN = 1 shl 2
+    G_APPLICATION_HANDLES_COMMAND_LINE = 1 shl 3
+    G_APPLICATION_SEND_ENVIRONMENT = 1 shl 4
+    G_APPLICATION_NON_UNIQUE = 1 shl 5
+    G_APPLICATION_CAN_OVERRIDE_APP_ID = 1 shl 6
+    G_APPLICATION_ALLOW_REPLACEMENT = 1 shl 7
+    G_APPLICATION_REPLACE = 1 shl 8
+
+  GOptionFlags* {.size: sizeof(cint).} = enum
+    G_OPTION_FLAG_NONE = 0
+    G_OPTION_FLAG_HIDDEN = 1 shl 0
+    G_OPTION_FLAG_IN_MAIN = 1 shl 1
+    G_OPTION_FLAG_REVERSE = 1 shl 2
+    G_OPTION_FLAG_NO_ARG = 1 shl 3
+    G_OPTION_FLAG_FILENAME = 1 shl 4
+    G_OPTION_FLAG_OPTIONAL_ARG = 1 shl 5
+    G_OPTION_FLAG_NOALIAS = 1 shl 6
+
+  GOptionArg* {.size: sizeof(cint).} = enum
+    G_OPTION_ARG_NONE
+    G_OPTION_ARG_STRING
+    G_OPTION_ARG_INT
+    G_OPTION_ARG_CALLBACK
+    G_OPTION_ARG_FILENAME
+    G_OPTION_ARG_STRING_ARRAY
+    G_OPTION_ARG_FILENAME_ARRAY
+    G_OPTION_ARG_DOUBLE
+    G_OPTION_ARG_INT64
+
+  GSignalMatchType* {.size: sizeof(cint).} = enum
+    G_SIGNAL_MATCH_ID = 1 shl 0
+    G_SIGNAL_MATCH_DETAIL = 1 shl 1
+    G_SIGNAL_MATCH_CLOSURE = 1 shl 2
+    G_SIGNAL_MATCH_FUNC = 1 shl 3
+    G_SIGNAL_MATCH_DATA = 1 shl 4
+    G_SIGNAL_MATCH_UNBLOCKED = 1 shl 5
+
+  GSignalFlags* {.size: sizeof(cint).} = enum
+    G_SIGNAL_RUN_FIRST = 1 shl 0
+    G_SIGNAL_RUN_LAST = 1 shl 1
+    G_SIGNAL_RUN_CLEANUP = 1 shl 2
+    G_SIGNAL_NO_RECURSE = 1 shl 3
+    G_SIGNAL_DETAILED = 1 shl 4
+    G_SIGNAL_ACTION = 1 shl 5
+    G_SIGNAL_NO_HOOKS = 1 shl 6
+    G_SIGNAL_MUST_COLLECT = 1 shl 7
+    G_SIGNAL_DEPRECATED = 1 shl 8
+    G_SIGNAL_ACCUMULATOR_FIRST_RUN = 1 shl 17
+
+  GSignalQuery* {.pure, final.} = object
+    signalId*: cuint
+    signalName*: cstring
+    itype*: GType
+    signalFlags*: GSignalFlags
+    returnType*: GType
+    nParams*: cuint
+    paramTypes*: ptr GType
+
+
+
+
+
+
 # ============================================================================
 # КОНСТАНТЫ
 # ============================================================================
@@ -354,12 +453,6 @@ const
   G_TYPE_VARIANT* = 21 shl 2
 
   G_APPLICATION_DEFAULT_FLAGS* = 0
-  G_APPLICATION_IS_SERVICE* = 1 shl 0
-  G_APPLICATION_IS_LAUNCHER* = 1 shl 1
-  G_APPLICATION_HANDLES_OPEN* = 1 shl 2
-  G_APPLICATION_HANDLES_COMMAND_LINE* = 1 shl 3
-  G_APPLICATION_SEND_ENVIRONMENT* = 1 shl 4
-  G_APPLICATION_NON_UNIQUE* = 1 shl 5
 
   GTK_WINDOW_TOPLEVEL* = 0
   GTK_WINDOW_POPUP* = 1
@@ -373,12 +466,58 @@ const
   GTK_STYLE_PROVIDER_PRIORITY_APPLICATION* = 600
   GTK_STYLE_PROVIDER_PRIORITY_USER* = 800
 
+# Флаги отладки
+  GTK_DEBUG_TEXT* = 1 shl 0
+  GTK_DEBUG_TREE* = 1 shl 1
+  GTK_DEBUG_KEYBINDINGS* = 1 shl 2
+  GTK_DEBUG_MODULES* = 1 shl 3
+  GTK_DEBUG_GEOMETRY* = 1 shl 4
+  GTK_DEBUG_ICONTHEME* = 1 shl 5
+  GTK_DEBUG_PRINTING* = 1 shl 6
+  GTK_DEBUG_BUILDER* = 1 shl 7
+  GTK_DEBUG_SIZE_REQUEST* = 1 shl 8
+  GTK_DEBUG_NO_CSS_CACHE* = 1 shl 9
+  GTK_DEBUG_INTERACTIVE* = 1 shl 10
+  GTK_DEBUG_TOUCHSCREEN* = 1 shl 11
+  GTK_DEBUG_ACTIONS* = 1 shl 12
+  GTK_DEBUG_LAYOUT* = 1 shl 13
+  GTK_DEBUG_SNAPSHOT* = 1 shl 14
+  GTK_DEBUG_CONSTRAINTS* = 1 shl 15
+  GTK_DEBUG_BUILDER_OBJECTS* = 1 shl 16
+  GTK_DEBUG_A11Y* = 1 shl 17
+  GTK_DEBUG_ICONFALLBACK* = 1 shl 18
+
+
+
+
+
 
 # ============================================================================
 # GTK INITIALIZATION
 # ============================================================================
 proc gtk_init*() {.importc.}
 proc gtk_init_check*(): gboolean {.importc.}
+
+# Проверка версии GTK
+proc gtk_get_major_version*(): cuint {.importc.}
+proc gtk_get_minor_version*(): cuint {.importc.}
+proc gtk_get_micro_version*(): cuint {.importc.}
+proc gtk_get_binary_age*(): cuint {.importc.}
+proc gtk_get_interface_age*(): cuint {.importc.}
+proc gtk_check_version*(requiredMajor: cuint, requiredMinor: cuint, requiredMicro: cuint): cstring {.importc.}
+
+# Информация о сборке
+proc gtk_get_locale_direction*(): GtkTextDirection {.importc.}
+proc gtk_get_default_language*(): pointer {.importc.}  # PangoLanguage
+
+# Проверка возможностей дисплея
+proc gtk_is_initialized*(): gboolean {.importc.}
+
+# Отладка и диагностика
+proc gtk_disable_setlocale*() {.importc.}
+proc gtk_set_debug_flags*(flags: cuint) {.importc.}
+proc gtk_get_debug_flags*(): cuint {.importc.}
+
 
 
 # ============================================================================
@@ -391,6 +530,33 @@ proc gtk_application_remove_window*(application: GtkApplication, window: GtkWind
 proc gtk_application_get_windows*(application: GtkApplication): pointer {.importc.}
 proc gtk_application_get_active_window*(application: GtkApplication): GtkWindow {.importc.}
 
+# Управление меню приложения
+proc gtk_application_set_menubar*(application: GtkApplication, menubar: GMenuModel) {.importc.}
+proc gtk_application_get_menubar*(application: GtkApplication): GMenuModel {.importc.}
+
+# Управление акселераторами (горячие клавиши)
+proc gtk_application_set_accels_for_action*(application: GtkApplication, detailedActionName: cstring, accels: ptr cstring) {.importc.}
+proc gtk_application_get_accels_for_action*(application: GtkApplication, detailedActionName: cstring): ptr cstring {.importc.}
+proc gtk_application_list_action_descriptions*(application: GtkApplication): ptr cstring {.importc.}
+
+# Получение окна по ID
+proc gtk_application_get_window_by_id*(application: GtkApplication, id: cuint): GtkWindow {.importc.}
+
+# Управление меню действий
+proc gtk_application_get_menu_by_id*(application: GtkApplication, id: cstring): GMenu {.importc.}
+
+# Управление режимом регистрации
+proc gtk_application_prefers_app_menu*(application: GtkApplication): gboolean {.importc.}
+
+# Ингибирование (предотвращение завершения/сна)
+proc gtk_application_inhibit*(application: GtkApplication, window: GtkWindow, flags: GtkApplicationInhibitFlags, reason: cstring): cuint {.importc.}
+proc gtk_application_uninhibit*(application: GtkApplication, cookie: cuint) {.importc.}
+proc gtk_application_is_inhibited*(application: GtkApplication, flags: GtkApplicationInhibitFlags): gboolean {.importc.}
+
+
+
+
+
 
 # ============================================================================
 # G APPLICATION
@@ -399,6 +565,54 @@ proc g_application_run*(application: GApplication, argc: gint, argv: pointer): g
 proc g_application_quit*(application: GApplication) {.importc.}
 proc g_application_hold*(application: GApplication) {.importc.}
 proc g_application_release*(application: GApplication) {.importc.}
+
+# Управление жизненным циклом
+proc g_application_activate*(application: GApplication) {.importc.}
+proc g_application_open*(application: GApplication, files: pointer, nFiles: gint, hint: cstring) {.importc.}
+proc g_application_register*(application: GApplication, cancellable: pointer, error: pointer): gboolean {.importc.}
+proc g_application_unregister*(application: GApplication) {.importc.}
+
+# Получение информации
+proc g_application_get_application_id*(application: GApplication): cstring {.importc.}
+proc g_application_set_application_id*(application: GApplication, applicationId: cstring) {.importc.}
+proc g_application_get_flags*(application: GApplication): GApplicationFlags {.importc.}
+proc g_application_set_flags*(application: GApplication, flags: GApplicationFlags) {.importc.}
+proc g_application_get_inactivity_timeout*(application: GApplication): cuint {.importc.}
+proc g_application_set_inactivity_timeout*(application: GApplication, inactivityTimeout: cuint) {.importc.}
+proc g_application_get_is_registered*(application: GApplication): gboolean {.importc.}
+proc g_application_get_is_remote*(application: GApplication): gboolean {.importc.}
+
+# Управление действиями (Actions)
+proc g_application_add_action*(application: GApplication, action: pointer) {.importc.}  # GAction
+proc g_application_remove_action*(application: GApplication, actionName: cstring) {.importc.}
+proc g_application_lookup_action*(application: GApplication, actionName: cstring): pointer {.importc.}  # GAction
+
+# Управление опциями командной строки
+proc g_application_add_main_option_entries*(application: GApplication, entries: pointer) {.importc.}  # GOptionEntry[]
+proc g_application_add_main_option*(application: GApplication, longName: cstring, shortName: char, flags: GOptionFlags, arg: GOptionArg, description: cstring, argDescription: cstring) {.importc.}
+proc g_application_add_option_group*(application: GApplication, group: pointer) {.importc.}  # GOptionGroup
+proc g_application_set_option_context_parameter_string*(application: GApplication, parameterString: cstring) {.importc.}
+proc g_application_set_option_context_summary*(application: GApplication, summary: cstring) {.importc.}
+proc g_application_set_option_context_description*(application: GApplication, description: cstring) {.importc.}
+
+# Управление ресурсами
+proc g_application_set_resource_base_path*(application: GApplication, resourcePath: cstring) {.importc.}
+proc g_application_get_resource_base_path*(application: GApplication): cstring {.importc.}
+
+# D-Bus (для Linux)
+proc g_application_get_dbus_connection*(application: GApplication): pointer {.importc.}  # GDBusConnection
+proc g_application_get_dbus_object_path*(application: GApplication): cstring {.importc.}
+
+# Отправка уведомлений
+proc g_application_send_notification*(application: GApplication, id: cstring, notification: pointer) {.importc.}  # GNotification
+proc g_application_withdraw_notification*(application: GApplication, id: cstring) {.importc.}
+
+# Привязка к busy state
+proc g_application_mark_busy*(application: GApplication) {.importc.}
+proc g_application_unmark_busy*(application: GApplication) {.importc.}
+proc g_application_get_is_busy*(application: GApplication): gboolean {.importc.}
+
+
 
 
 # ============================================================================
@@ -415,6 +629,70 @@ proc g_signal_handler_disconnect*(instance: gpointer, handlerId: gulong) {.impor
 proc g_signal_handler_block*(instance: gpointer, handlerId: gulong) {.importc.}
 proc g_signal_handler_unblock*(instance: gpointer, handlerId: gulong) {.importc.}
 proc g_signal_emit_by_name*(instance: gpointer, detailedSignal: cstring) {.importc, varargs.}
+
+# Проверка и поиск обработчиков
+proc g_signal_handler_find*(instance: gpointer, mask: GSignalMatchType, signalId: cuint, 
+                            detail: GQuark, closure: pointer, `func`: gpointer, 
+                            data: gpointer): gulong {.importc.}
+proc g_signal_handler_is_connected*(instance: gpointer, handlerId: gulong): gboolean {.importc.}
+proc g_signal_handlers_block_matched*(instance: gpointer, mask: GSignalMatchType, 
+                                      signalId: cuint, detail: GQuark, closure: pointer,
+                                      `func`: gpointer, data: gpointer): cuint {.importc.}
+proc g_signal_handlers_unblock_matched*(instance: gpointer, mask: GSignalMatchType,
+                                        signalId: cuint, detail: GQuark, closure: pointer,
+                                        `func`: gpointer, data: gpointer): cuint {.importc.}
+proc g_signal_handlers_disconnect_matched*(instance: gpointer, mask: GSignalMatchType,
+                                           signalId: cuint, detail: GQuark, closure: pointer,
+                                           `func`: gpointer, data: gpointer): cuint {.importc.}
+
+# Блокировка по callback
+proc g_signal_handlers_block_by_func*(instance: gpointer, `func`: gpointer, data: gpointer) {.importc.}
+proc g_signal_handlers_unblock_by_func*(instance: gpointer, `func`: gpointer, data: gpointer) {.importc.}
+proc g_signal_handlers_disconnect_by_func*(instance: gpointer, `func`: gpointer, data: gpointer) {.importc.}
+proc g_signal_handlers_disconnect_by_data*(instance: gpointer, data: gpointer) {.importc.}
+
+# Информация о сигналах
+proc g_signal_lookup*(name: cstring, itype: GType): cuint {.importc.}
+proc g_signal_name*(signalId: cuint): cstring {.importc.}
+proc g_signal_list_ids*(itype: GType, nIds: ptr cuint): ptr cuint {.importc.}
+proc g_signal_query*(signalId: cuint, query: ptr GSignalQuery) {.importc.}
+
+# Эмиссия сигналов
+proc g_signal_emit*(instance: gpointer, signalId: cuint, detail: GQuark) {.importc, varargs.}
+proc g_signal_emitv*(instanceAndParams: pointer, signalId: cuint, detail: GQuark, 
+                     returnValue: pointer) {.importc.}
+
+# Управление эмиссией
+proc g_signal_stop_emission*(instance: gpointer, signalId: cuint, detail: GQuark) {.importc.}
+proc g_signal_stop_emission_by_name*(instance: gpointer, detailedSignal: cstring) {.importc.}
+
+# Проверка возможности эмиссии
+proc g_signal_has_handler_pending*(instance: gpointer, signalId: cuint, detail: GQuark, 
+                                   mayBeBlocked: gboolean): gboolean {.importc.}
+
+# Аккумуляторы и преобразователи (для создания своих сигналов)
+proc g_signal_new*(signalName: cstring, itype: GType, signalFlags: GSignalFlags,
+                   classOffset: cuint, accumulator: pointer, accuData: gpointer,
+                   cMarshaller: pointer, returnType: GType, nParams: cuint): cuint {.importc, varargs.}
+proc g_signal_newv*(signalName: cstring, itype: GType, signalFlags: GSignalFlags,
+                    classClosure: pointer, accumulator: pointer, accuData: gpointer,
+                    cMarshaller: pointer, returnType: GType, nParams: cuint,
+                    paramTypes: ptr GType): cuint {.importc.}
+
+# Переопределение обработчиков класса
+proc g_signal_override_class_handler*(signalName: cstring, instanceType: GType, 
+                                      classHandler: GCallback) {.importc.}
+proc g_signal_chain_from_overridden*(instanceAndParams: pointer, returnValue: pointer) {.importc.}
+
+# Добавление emission hooks
+proc g_signal_add_emission_hook*(signalId: cuint, detail: GQuark, hookFunc: pointer,
+                                 hookData: gpointer, dataDestroy: pointer): gulong {.importc.}
+proc g_signal_remove_emission_hook*(signalId: cuint, hookId: gulong) {.importc.}
+
+
+
+
+
 
 
 # ============================================================================
@@ -1011,6 +1289,51 @@ proc g_object_ref*(obj: gpointer): gpointer {.importc.}
 proc g_object_unref*(obj: gpointer) {.importc.}
 proc g_object_set_data*(obj: GObject, key: cstring, data: gpointer) {.importc.}
 proc g_object_get_data*(obj: GObject, key: cstring): gpointer {.importc.}
+# Управление свойствами
+proc g_object_set*(obj: GObject, firstPropertyName: cstring) {.importc, varargs.}
+proc g_object_get*(obj: GObject, firstPropertyName: cstring) {.importc, varargs.}
+proc g_object_set_property*(obj: GObject, propertyName: cstring, value: pointer) {.importc.}
+proc g_object_get_property*(obj: GObject, propertyName: cstring, value: pointer) {.importc.}
+# Уведомления об изменениях свойств
+proc g_object_notify*(obj: GObject, propertyName: cstring) {.importc.}
+proc g_object_notify_by_pspec*(obj: GObject, pspec: pointer) {.importc.}
+proc g_object_freeze_notify*(obj: GObject) {.importc.}
+proc g_object_thaw_notify*(obj: GObject) {.importc.}
+# Управление ссылками с данными
+proc g_object_set_data_full*(obj: GObject, key: cstring, data: gpointer, destroy: pointer) {.importc.}
+proc g_object_steal_data*(obj: GObject, key: cstring): gpointer {.importc.}
+# Weak references (слабые ссылки)
+proc g_object_weak_ref*(obj: GObject, notify: pointer, data: gpointer) {.importc.}
+proc g_object_weak_unref*(obj: GObject, notify: pointer, data: gpointer) {.importc.}
+proc g_object_add_weak_pointer*(obj: GObject, weakPointerLocation: ptr gpointer) {.importc.}
+proc g_object_remove_weak_pointer*(obj: GObject, weakPointerLocation: ptr gpointer) {.importc.}
+# Toggle references (для языковых биндингов)
+proc g_object_add_toggle_ref*(obj: GObject, notify: pointer, data: gpointer) {.importc.}
+proc g_object_remove_toggle_ref*(obj: GObject, notify: pointer, data: gpointer) {.importc.}
+# Проверка типов
+proc g_object_is_floating*(obj: GObject): gboolean {.importc.}
+proc g_object_ref_sink*(obj: gpointer): gpointer {.importc.}
+proc g_object_force_floating*(obj: GObject) {.importc.}
+# Информация о типе
+proc g_object_get_type*(): GType {.importc.}
+proc g_object_class_find_property*(oclass: pointer, propertyName: cstring): pointer {.importc.}
+proc g_object_class_list_properties*(oclass: pointer, nProperties: ptr cuint): ptr pointer {.importc.}
+# Создание объектов
+proc g_object_new*(objectType: GType, firstPropertyName: cstring): gpointer {.importc, varargs.}
+proc g_object_newv*(objectType: GType, nParameters: cuint, parameters: pointer): gpointer {.importc.}
+# Соединение данных с объектами
+proc g_object_set_qdata*(obj: GObject, quark: GQuark, data: gpointer) {.importc.}
+proc g_object_get_qdata*(obj: GObject, quark: GQuark): gpointer {.importc.}
+proc g_object_set_qdata_full*(obj: GObject, quark: GQuark, data: gpointer, destroy: pointer) {.importc.}
+proc g_object_steal_qdata*(obj: GObject, quark: GQuark): gpointer {.importc.}
+# Связывание свойств (property binding)
+proc g_object_bind_property*(source: GObject, sourceProperty: cstring, target: GObject, targetProperty: cstring, flags: GBindingFlags): pointer {.importc.}
+proc g_object_bind_property_full*(source: GObject, sourceProperty: cstring, target: GObject, targetProperty: cstring, flags: GBindingFlags, transformTo: pointer, transformFrom: pointer, userData: gpointer, notify: pointer): pointer {.importc.}
+# Функции для работы с GQuark
+proc g_quark_from_string*(str: cstring): GQuark {.importc.}
+proc g_quark_to_string*(quark: GQuark): cstring {.importc.}
+proc g_quark_try_string*(str: cstring): GQuark {.importc.}
+
 
 # ============================================================================
 # POPOVER
@@ -1035,6 +1358,31 @@ proc gtk_menu_button_set_menu_model*(menuButton: GtkMenuButton, menuModel: GMenu
 proc gtk_menu_button_get_menu_model*(menuButton: GtkMenuButton): GMenuModel {.importc.}
 proc gtk_menu_button_set_icon_name*(menuButton: GtkMenuButton, iconName: cstring) {.importc.}
 proc gtk_menu_button_get_icon_name*(menuButton: GtkMenuButton): cstring {.importc.}
+proc gtk_menu_button_get_active*(menuButton: GtkMenuButton): gboolean {.importc.}
+proc gtk_menu_button_set_active*(menuButton: GtkMenuButton, active: gboolean) {.importc.}
+proc gtk_menu_button_popup*(menuButton: GtkMenuButton) {.importc.}
+proc gtk_menu_button_popdown*(menuButton: GtkMenuButton) {.importc.}
+# Направление открытия меню
+proc gtk_menu_button_set_direction*(menuButton: GtkMenuButton, direction: GtkArrowType) {.importc.}
+proc gtk_menu_button_get_direction*(menuButton: GtkMenuButton): GtkArrowType {.importc.}
+# Использование underline для мнемоник
+proc gtk_menu_button_set_use_underline*(menuButton: GtkMenuButton, useUnderline: gboolean) {.importc.}
+proc gtk_menu_button_get_use_underline*(menuButton: GtkMenuButton): gboolean {.importc.}
+# Установка дочернего виджета (вместо label/icon)
+proc gtk_menu_button_set_child*(menuButton: GtkMenuButton, child: GtkWidget) {.importc.}
+proc gtk_menu_button_get_child*(menuButton: GtkMenuButton): GtkWidget {.importc.}
+# Установка виджета для отображения с иконкой
+proc gtk_menu_button_set_has_frame*(menuButton: GtkMenuButton, hasFrame: gboolean) {.importc.}
+proc gtk_menu_button_get_has_frame*(menuButton: GtkMenuButton): gboolean {.importc.}
+# Основной виджет (для позиционирования popover относительно него)
+proc gtk_menu_button_set_primary*(menuButton: GtkMenuButton, primary: gboolean) {.importc.}
+proc gtk_menu_button_get_primary*(menuButton: GtkMenuButton): gboolean {.importc.}
+# Создание popover из модели меню (альтернатива set_menu_model)
+proc gtk_menu_button_set_create_popup_func*(menuButton: GtkMenuButton, callback: pointer, userData: pointer, destroyNotify: pointer) {.importc.}
+# Управление отображением стрелки
+proc gtk_menu_button_set_always_show_arrow*(menuButton: GtkMenuButton, alwaysShowArrow: gboolean) {.importc.}
+proc gtk_menu_button_get_always_show_arrow*(menuButton: GtkMenuButton): gboolean {.importc.}
+
 
 # ============================================================================
 # EXPANDER
@@ -2169,10 +2517,7 @@ proc g_file_query_file_type*(file: GFile, flags: gint, cancellable: pointer): gi
 proc gtk_show_uri*(parent: GtkWindow, uri: cstring, timestamp: guint32, error: ptr GError) {.importc.}
 proc gtk_show_uri_full*(parent: GtkWindow, uri: cstring, timestamp: guint32, cancellable: pointer, callback: pointer, userData: gpointer) {.importc.}
 proc gtk_show_uri_full_finish*(parent: GtkWindow, result: pointer, error: ptr GError): gboolean {.importc.}
-proc gtk_is_initialized*(): gboolean {.importc.}
-proc gtk_disable_setlocale*() {.importc.}
-proc gtk_get_default_language*(): pointer {.importc.}
-proc gtk_get_locale_direction*(): gint {.importc.}
+
 
 
 # ============================================================================
@@ -3237,8 +3582,14 @@ const
   ICON_DIALOG_INFORMATION* = "dialog-information"
   ICON_DIALOG_QUESTION* = "dialog-question"
 
+
+
+
+
+
+
 # ----------------------------------------------------------------------------
-# Экспортируемые макросы для упрощения кода
+# Экспортируемые шаблоны для упрощения кода
 # ----------------------------------------------------------------------------
 
 template withSignalBlock*(widget: GtkWidget, handlerId: gulong, body: untyped) =
@@ -3259,6 +3610,17 @@ template connectSimple*(widget: GtkWidget, signal: string, code: untyped): gulon
         echo "Error in signal handler: ", getCurrentExceptionMsg()
     g_signal_connect(widget, signal.cstring, cast[GCallback](callback), nil)
 
+# G_CONNECT_AFTER
+template g_signal_connect_after*(instance, signal, callback, data: untyped): untyped =
+  g_signal_connect_data(instance, signal, cast[GCallback](callback), data, nil, 1)
+
+# G_CONNECT_SWAPPED
+template g_signal_connect_swapped*(instance, signal, callback, data: untyped): untyped =
+  g_signal_connect_data(instance, signal, cast[GCallback](callback), data, nil, 2)
+
+
+
+
 # ----------------------------------------------------------------------------
 # Работа с настройками приложения
 # ----------------------------------------------------------------------------
@@ -3273,6 +3635,8 @@ proc isDarkTheme*(): bool =
   let settings = getDefaultSettings()
   # В реальном коде нужно проверить свойство prefer-dark-theme
   result = false # Заглушка
+
+
 
 # ----------------------------------------------------------------------------
 # Утилиты для работы с памятью
