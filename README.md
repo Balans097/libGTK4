@@ -8,7 +8,7 @@ A full-featured wrapper for the GTK4 library in the Nim programming language
 
 
 ## Usage
-nimble install https://github.com/Balans097/libGTK4
+`nimble install https://github.com/Balans097/libGTK4`
 
 
 
