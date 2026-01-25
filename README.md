@@ -7,6 +7,9 @@ A full-featured wrapper for the GTK4 library in the Nim programming language
 ## How it looks on Fedora Linux
 ![How it looks on Fedora Linux](./images/Screen-01.png)
 
+## How it looks on Windows 11
+![How it looks on Windows](./images/Screen-02.png)
+
 
 
 
