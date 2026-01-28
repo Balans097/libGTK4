@@ -275,6 +275,11 @@ type
     GTK_POS_TOP = 2
     GTK_POS_BOTTOM = 3
   
+  GtkBaselinePosition* {.size: sizeof(cint).} = enum
+    GTK_BASELINE_POSITION_TOP = 0
+    GTK_BASELINE_POSITION_CENTER = 1
+    GTK_BASELINE_POSITION_BOTTOM = 2
+  
   GtkMessageType* {.size: sizeof(cint).} = enum
     GTK_MESSAGE_INFO = 0
     GTK_MESSAGE_WARNING = 1
@@ -308,12 +313,12 @@ type
     GTK_SELECTION_SINGLE = 1
     GTK_SELECTION_BROWSE = 2
     GTK_SELECTION_MULTIPLE = 3
-  
+
   GtkFileChooserAction* {.size: sizeof(cint).} = enum
     GTK_FILE_CHOOSER_ACTION_OPEN = 0
     GTK_FILE_CHOOSER_ACTION_SAVE = 1
     GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER = 2
-  
+
   GtkInputPurpose* {.size: sizeof(cint).} = enum
     GTK_INPUT_PURPOSE_FREE_FORM = 0
     GTK_INPUT_PURPOSE_ALPHA = 1
@@ -325,6 +330,7 @@ type
     GTK_INPUT_PURPOSE_NAME = 7
     GTK_INPUT_PURPOSE_PASSWORD = 8
     GTK_INPUT_PURPOSE_PIN = 9
+    GTK_INPUT_PURPOSE_TERMINAL = 10
 
   GtkPolicyType* {.size: sizeof(cint).} = enum
     GTK_POLICY_ALWAYS = 0
@@ -432,6 +438,60 @@ type
       parameter_type*: cstring
       state*: cstring
       change_state*: proc(action: GSimpleAction, value: GVariant, user_data: gpointer) {.cdecl.}
+
+  # Pango типы для Label
+  PangoWrapMode* {.size: sizeof(cint).} = enum
+    PANGO_WRAP_WORD = 0
+    PANGO_WRAP_CHAR = 1
+    PANGO_WRAP_WORD_CHAR = 2
+
+  PangoEllipsizeMode* {.size: sizeof(cint).} = enum
+    PANGO_ELLIPSIZE_NONE = 0
+    PANGO_ELLIPSIZE_START = 1
+    PANGO_ELLIPSIZE_MIDDLE = 2
+    PANGO_ELLIPSIZE_END = 3
+
+  GtkNaturalWrapMode* {.size: sizeof(cint).} = enum
+    GTK_NATURAL_WRAP_INHERIT = 0
+    GTK_NATURAL_WRAP_NONE = 1
+    GTK_NATURAL_WRAP_WORD = 2
+
+  # Непрозрачные типы Pango (opaque pointers)
+  PangoAttrList* = distinct pointer
+  PangoLayout* = distinct pointer
+  PangoTabArray* = distinct pointer
+
+
+  # Для виджета Entry
+  GtkEntryBuffer* = distinct pointer
+  GtkEntryCompletion* = distinct pointer
+  GIcon* = distinct pointer
+  
+  GtkEntryIconPosition* {.size: sizeof(cint).} = enum
+    GTK_ENTRY_ICON_PRIMARY = 0
+    GTK_ENTRY_ICON_SECONDARY = 1
+  
+  GtkImageType* {.size: sizeof(cint).} = enum
+    GTK_IMAGE_EMPTY = 0
+    GTK_IMAGE_ICON_NAME = 1
+    GTK_IMAGE_GICON = 2
+    GTK_IMAGE_PAINTABLE = 3
+
+  GtkInputHints* {.size: sizeof(cint).} = enum
+    GTK_INPUT_HINT_NONE = 0
+    GTK_INPUT_HINT_SPELLCHECK = 1
+    GTK_INPUT_HINT_NO_SPELLCHECK = 2
+    GTK_INPUT_HINT_WORD_COMPLETION = 4
+    GTK_INPUT_HINT_LOWERCASE = 8
+    GTK_INPUT_HINT_UPPERCASE_CHARS = 16
+    GTK_INPUT_HINT_UPPERCASE_WORDS = 32
+    GTK_INPUT_HINT_UPPERCASE_SENTENCES = 64
+    GTK_INPUT_HINT_INHIBIT_OSK = 128
+    GTK_INPUT_HINT_VERTICAL_WRITING = 256
+    GTK_INPUT_HINT_EMOJI = 512
+    GTK_INPUT_HINT_NO_EMOJI = 1024
+    GTK_INPUT_HINT_PRIVATE = 2048
+
 
 
 
@@ -825,6 +885,11 @@ proc gtk_window_unminimize*(window: GtkWindow) {.importc.}
 proc gtk_window_present*(window: GtkWindow) {.importc.}
 proc gtk_window_set_default_icon_name*(name: cstring) {.importc.}
 proc gtk_window_set_icon_name*(window: GtkWindow, name: cstring) {.importc.}
+# Установка иконки через paintable (GTK4)
+proc gtk_window_set_icon_paintable*(window: GtkWindow, paintable: pointer) {.importc.}
+# Полноэкранный режим
+proc gtk_window_is_fullscreen*(window: GtkWindow): gboolean {.importc.}
+
 
 
 
@@ -890,8 +955,15 @@ proc gtk_box_set_spacing*(box: GtkBox, spacing: gint) {.importc.}
 proc gtk_box_get_spacing*(box: GtkBox): gint {.importc.}
 proc gtk_box_set_homogeneous*(box: GtkBox, homogeneous: gboolean) {.importc.}
 proc gtk_box_get_homogeneous*(box: GtkBox): gboolean {.importc.}
-proc gtk_box_set_baseline_position*(box: GtkBox, position: GtkPositionType) {.importc.}
-proc gtk_box_get_baseline_position*(box: GtkBox): GtkPositionType {.importc.}
+proc gtk_box_set_baseline_position*(box: GtkBox, position: GtkBaselinePosition) {.importc.}
+proc gtk_box_get_baseline_position*(box: GtkBox): GtkBaselinePosition {.importc.}
+# Базовая ячейка (baseline child):
+# позволяют указать индекс дочернего виджета, который будет использоваться
+# для выравнивания по базовой линии (-1 означает отсутствие такого виджета)
+proc gtk_box_set_baseline_child*(box: GtkBox, child: gint) {.importc.}
+proc gtk_box_get_baseline_child*(box: GtkBox): gint {.importc.}
+
+
 
 # ============================================================================
 # GRID
@@ -911,6 +983,25 @@ proc gtk_grid_get_row_homogeneous*(grid: GtkGrid): gboolean {.importc.}
 proc gtk_grid_set_column_homogeneous*(grid: GtkGrid, homogeneous: gboolean) {.importc.}
 proc gtk_grid_get_column_homogeneous*(grid: GtkGrid): gboolean {.importc.}
 
+# Baseline
+proc gtk_grid_set_row_baseline_position*(grid: GtkGrid, row: gint, pos: GtkBaselinePosition) {.importc.}
+proc gtk_grid_get_row_baseline_position*(grid: GtkGrid, row: gint): GtkBaselinePosition {.importc.}
+proc gtk_grid_set_baseline_row*(grid: GtkGrid, row: gint) {.importc.}
+proc gtk_grid_get_baseline_row*(grid: GtkGrid): gint {.importc.}
+
+# Динамическая вставка/удаление строк и столбцов
+proc gtk_grid_insert_row*(grid: GtkGrid, position: gint) {.importc.}
+proc gtk_grid_insert_column*(grid: GtkGrid, position: gint) {.importc.}
+proc gtk_grid_remove_row*(grid: GtkGrid, position: gint) {.importc.}
+proc gtk_grid_remove_column*(grid: GtkGrid, position: gint) {.importc.}
+# Вставка строки или столбца рядом с виджетом
+proc gtk_grid_insert_next_to*(grid: GtkGrid, sibling: GtkWidget, side: GtkPositionType) {.importc.}
+
+# Запрос позиции и размера дочернего виджета
+proc gtk_grid_query_child*(grid: GtkGrid, child: GtkWidget, column: ptr gint, row: ptr gint, width: ptr gint, height: ptr gint) {.importc.}
+
+
+
 # ============================================================================
 # BUTTON
 # ============================================================================
@@ -918,6 +1009,8 @@ proc gtk_grid_get_column_homogeneous*(grid: GtkGrid): gboolean {.importc.}
 proc gtk_button_new*(): GtkButton {.importc.}
 proc gtk_button_new_with_label*(label: cstring): GtkButton {.importc.}
 proc gtk_button_new_with_mnemonic*(label: cstring): GtkButton {.importc.}
+# создание кнопки с иконкой по имени иконки
+proc gtk_button_new_from_icon_name*(icon_name: cstring): GtkButton {.importc.}
 proc gtk_button_set_label*(button: GtkButton, label: cstring) {.importc.}
 proc gtk_button_get_label*(button: GtkButton): cstring {.importc.}
 proc gtk_button_set_use_underline*(button: GtkButton, useUnderline: gboolean) {.importc.}
@@ -928,6 +1021,11 @@ proc gtk_button_set_has_frame*(button: GtkButton, hasFrame: gboolean) {.importc.
 proc gtk_button_get_has_frame*(button: GtkButton): gboolean {.importc.}
 proc gtk_button_set_icon_name*(button: GtkButton, iconName: cstring) {.importc.}
 proc gtk_button_get_icon_name*(button: GtkButton): cstring {.importc.}
+# Управление возможностью сжатия кнопки меньше естественного размера
+proc gtk_button_set_can_shrink*(button: GtkButton, can_shrink: gboolean) {.importc.}
+proc gtk_button_get_can_shrink*(button: GtkButton): gboolean {.importc.}
+
+
 
 # ============================================================================
 # TOGGLE BUTTON
@@ -939,11 +1037,18 @@ proc gtk_toggle_button_new_with_mnemonic*(label: cstring): GtkToggleButton {.imp
 proc gtk_toggle_button_set_active*(toggleButton: GtkToggleButton, isActive: gboolean) {.importc.}
 proc gtk_toggle_button_get_active*(toggleButton: GtkToggleButton): gboolean {.importc.}
 proc gtk_toggle_button_toggled*(toggleButton: GtkToggleButton) {.importc.}
+# Группирование радиокнопок: позволяет создавать радиокнопки.
+# Когда несколько toggle-кнопок в одной группе, только одна может быть активна одновременно.
+# Передача nil удаляет кнопку из группы.
+proc gtk_toggle_button_set_group*(toggle_button: GtkToggleButton, group: GtkToggleButton) {.importc.}
+
+
 
 # ============================================================================
 # CHECK BUTTON
 # ============================================================================
-
+# В GTK4 API был переработан — теперь GtkCheckButton используется
+# и для обычных чекбоксов, и для радиокнопок через группирование.
 proc gtk_check_button_new*(): GtkCheckButton {.importc.}
 proc gtk_check_button_new_with_label*(label: cstring): GtkCheckButton {.importc.}
 proc gtk_check_button_new_with_mnemonic*(label: cstring): GtkCheckButton {.importc.}
@@ -951,21 +1056,37 @@ proc gtk_check_button_set_active*(checkButton: GtkCheckButton, setting: gboolean
 proc gtk_check_button_get_active*(checkButton: GtkCheckButton): gboolean {.importc.}
 proc gtk_check_button_set_inconsistent*(checkButton: GtkCheckButton, inconsistent: gboolean) {.importc.}
 proc gtk_check_button_get_inconsistent*(checkButton: GtkCheckButton): gboolean {.importc.}
+# Группирование (для радиокнопок)
+proc gtk_check_button_set_group*(check_button: GtkCheckButton, group: GtkCheckButton) {.importc.}
+# Управление меткой и дочерним виджетом
+proc gtk_check_button_set_label*(check_button: GtkCheckButton, label: cstring) {.importc.}
+proc gtk_check_button_get_label*(check_button: GtkCheckButton): cstring {.importc.}
+proc gtk_check_button_set_use_underline*(check_button: GtkCheckButton, use_underline: gboolean) {.importc.}
+proc gtk_check_button_get_use_underline*(check_button: GtkCheckButton): gboolean {.importc.}
+proc gtk_check_button_set_child*(check_button: GtkCheckButton, child: GtkWidget) {.importc.}
+proc gtk_check_button_get_child*(check_button: GtkCheckButton): GtkWidget {.importc.}
+
+
 
 # ============================================================================
 # SWITCH
 # ============================================================================
-
+# active — немедленно переключает визуальное состояние;
+# state — позволяет отложить изменение состояния,
+# например, если нужно показать диалог подтверждения
+# или выполнить асинхронную операцию перед фактическим переключением
 proc gtk_switch_new*(): GtkSwitch {.importc.}
 proc gtk_switch_set_active*(sw: GtkSwitch, isActive: gboolean) {.importc.}
 proc gtk_switch_get_active*(sw: GtkSwitch): gboolean {.importc.}
 proc gtk_switch_set_state*(sw: GtkSwitch, state: gboolean) {.importc.}
 proc gtk_switch_get_state*(sw: GtkSwitch): gboolean {.importc.}
 
+
+
+
 # ============================================================================
 # LABEL
 # ============================================================================
-
 proc gtk_label_new*(str: cstring): GtkLabel {.importc.}
 proc gtk_label_new_with_mnemonic*(str: cstring): GtkLabel {.importc.}
 proc gtk_label_set_text*(label: GtkLabel, str: cstring) {.importc.}
@@ -979,22 +1100,72 @@ proc gtk_label_set_justify*(label: GtkLabel, jtype: GtkJustification) {.importc.
 proc gtk_label_get_justify*(label: GtkLabel): GtkJustification {.importc.}
 proc gtk_label_set_wrap*(label: GtkLabel, wrap: gboolean) {.importc.}
 proc gtk_label_get_wrap*(label: GtkLabel): gboolean {.importc.}
-proc gtk_label_set_wrap_mode*(label: GtkLabel, wrapMode: GtkWrapMode) {.importc.}
-proc gtk_label_get_wrap_mode*(label: GtkLabel): GtkWrapMode {.importc.}
+proc gtk_label_set_wrap_mode*(label: GtkLabel, wrapMode: PangoWrapMode) {.importc.}
+proc gtk_label_get_wrap_mode*(label: GtkLabel): PangoWrapMode {.importc.}
 proc gtk_label_set_selectable*(label: GtkLabel, setting: gboolean) {.importc.}
 proc gtk_label_get_selectable*(label: GtkLabel): gboolean {.importc.}
 proc gtk_label_set_width_chars*(label: GtkLabel, nChars: gint) {.importc.}
 proc gtk_label_get_width_chars*(label: GtkLabel): gint {.importc.}
 proc gtk_label_set_max_width_chars*(label: GtkLabel, nChars: gint) {.importc.}
 proc gtk_label_get_max_width_chars*(label: GtkLabel): gint {.importc.}
-proc gtk_label_set_ellipsize*(label: GtkLabel, mode: gint) {.importc.}
-proc gtk_label_get_ellipsize*(label: GtkLabel): gint {.importc.}
+proc gtk_label_set_ellipsize*(label: GtkLabel, mode: PangoEllipsizeMode) {.importc.}
+proc gtk_label_get_ellipsize*(label: GtkLabel): PangoEllipsizeMode {.importc.}
+
+# Выделение текста
+proc gtk_label_select_region*(label: GtkLabel, start_offset: gint, end_offset: gint) {.importc.}
+proc gtk_label_get_selection_bounds*(label: GtkLabel, start: ptr gint, `end`: ptr gint): gboolean {.importc.}
+
+# Атрибуты (Pango)
+proc gtk_label_set_attributes*(label: GtkLabel, attrs: PangoAttrList) {.importc.}
+proc gtk_label_get_attributes*(label: GtkLabel): PangoAttrList {.importc.}
+
+# Виджет-мнемоник
+proc gtk_label_set_mnemonic_widget*(label: GtkLabel, widget: GtkWidget) {.importc.}
+proc gtk_label_get_mnemonic_widget*(label: GtkLabel): GtkWidget {.importc.}
+
+# Дополнительные свойства текста
+proc gtk_label_set_single_line_mode*(label: GtkLabel, single_line_mode: gboolean) {.importc.}
+proc gtk_label_get_single_line_mode*(label: GtkLabel): gboolean {.importc.}
+proc gtk_label_set_lines*(label: GtkLabel, lines: gint) {.importc.}
+proc gtk_label_get_lines*(label: GtkLabel): gint {.importc.}
+
+# XAlign и YAlign
+proc gtk_label_set_xalign*(label: GtkLabel, xalign: cfloat) {.importc.}
+proc gtk_label_get_xalign*(label: GtkLabel): cfloat {.importc.}
+proc gtk_label_set_yalign*(label: GtkLabel, yalign: cfloat) {.importc.}
+proc gtk_label_get_yalign*(label: GtkLabel): cfloat {.importc.}
+
+# Extra menu (контекстное меню)
+proc gtk_label_set_extra_menu*(label: GtkLabel, model: GMenuModel) {.importc.}
+proc gtk_label_get_extra_menu*(label: GtkLabel): GMenuModel {.importc.}
+
+# Естественное заполнение (natural wrap mode)
+proc gtk_label_set_natural_wrap_mode*(label: GtkLabel, wrap_mode: GtkNaturalWrapMode) {.importc.}
+proc gtk_label_get_natural_wrap_mode*(label: GtkLabel): GtkNaturalWrapMode {.importc.}
+
+# Tabs (позиции табуляции)
+proc gtk_label_set_tabs*(label: GtkLabel, tabs: PangoTabArray) {.importc.}
+proc gtk_label_get_tabs*(label: GtkLabel): PangoTabArray {.importc.}
+
+# Получение текущей URI (если кликнут на ссылку)
+proc gtk_label_get_current_uri*(label: GtkLabel): cstring {.importc.}
+
+# Markup с мнемоникой
+proc gtk_label_set_markup_with_mnemonic*(label: GtkLabel, str: cstring) {.importc.}
+
+# Получение layout (Pango)
+proc gtk_label_get_layout*(label: GtkLabel): PangoLayout {.importc.}
+proc gtk_label_get_layout_offsets*(label: GtkLabel, x: ptr gint, y: ptr gint) {.importc.}
+
+
+
+
 
 # ============================================================================
 # ENTRY
 # ============================================================================
-
 proc gtk_entry_new*(): GtkEntry {.importc.}
+proc gtk_entry_new_with_buffer*(buffer: GtkEntryBuffer): GtkEntry {.importc.}
 proc gtk_entry_set_text*(entry: GtkEntry, text: cstring) {.importc.}
 proc gtk_entry_get_text*(entry: GtkEntry): cstring {.importc.}
 proc gtk_entry_set_placeholder_text*(entry: GtkEntry, text: cstring) {.importc.}
@@ -1007,6 +1178,88 @@ proc gtk_entry_set_has_frame*(entry: GtkEntry, setting: gboolean) {.importc.}
 proc gtk_entry_get_has_frame*(entry: GtkEntry): gboolean {.importc.}
 proc gtk_entry_set_alignment*(entry: GtkEntry, xalign: gfloat) {.importc.}
 proc gtk_entry_get_alignment*(entry: GtkEntry): gfloat {.importc.}
+
+# Буфер текста
+proc gtk_entry_set_buffer*(entry: GtkEntry, buffer: GtkEntryBuffer) {.importc.}
+proc gtk_entry_get_buffer*(entry: GtkEntry): GtkEntryBuffer {.importc.}
+
+# Невидимый символ для паролей
+proc gtk_entry_set_invisible_char*(entry: GtkEntry, ch: gunichar) {.importc.}
+proc gtk_entry_get_invisible_char*(entry: GtkEntry): gunichar {.importc.}
+proc gtk_entry_unset_invisible_char*(entry: GtkEntry) {.importc.}
+
+# Активация
+proc gtk_entry_set_activates_default*(entry: GtkEntry, setting: gboolean) {.importc.}
+proc gtk_entry_get_activates_default*(entry: GtkEntry): gboolean {.importc.}
+
+# Ширина в символах
+proc gtk_entry_set_width_chars*(entry: GtkEntry, n_chars: gint) {.importc.}
+proc gtk_entry_get_width_chars*(entry: GtkEntry): gint {.importc.}
+proc gtk_entry_set_max_width_chars*(entry: GtkEntry, n_chars: gint) {.importc.}
+proc gtk_entry_get_max_width_chars*(entry: GtkEntry): gint {.importc.}
+
+# Атрибуты (Pango)
+proc gtk_entry_set_attributes*(entry: GtkEntry, attrs: PangoAttrList) {.importc.}
+proc gtk_entry_get_attributes*(entry: GtkEntry): PangoAttrList {.importc.}
+
+# Tabs (позиции табуляции)
+proc gtk_entry_set_tabs*(entry: GtkEntry, tabs: PangoTabArray) {.importc.}
+proc gtk_entry_get_tabs*(entry: GtkEntry): PangoTabArray {.importc.}
+
+# Прогресс (progress bar в entry)
+proc gtk_entry_set_progress_fraction*(entry: GtkEntry, fraction: gdouble) {.importc.}
+proc gtk_entry_get_progress_fraction*(entry: GtkEntry): gdouble {.importc.}
+proc gtk_entry_set_progress_pulse_step*(entry: GtkEntry, fraction: gdouble) {.importc.}
+proc gtk_entry_get_progress_pulse_step*(entry: GtkEntry): gdouble {.importc.}
+proc gtk_entry_progress_pulse*(entry: GtkEntry) {.importc.}
+
+# Completion (автодополнение)
+proc gtk_entry_set_completion*(entry: GtkEntry, completion: GtkEntryCompletion) {.importc.}
+proc gtk_entry_get_completion*(entry: GtkEntry): GtkEntryCompletion {.importc.}
+
+# Позиция курсора
+proc gtk_entry_get_text_length*(entry: GtkEntry): guint16 {.importc.}
+
+# Иконки
+proc gtk_entry_set_icon_from_icon_name*(entry: GtkEntry, icon_pos: GtkEntryIconPosition, icon_name: cstring) {.importc.}
+proc gtk_entry_set_icon_from_gicon*(entry: GtkEntry, icon_pos: GtkEntryIconPosition, icon: GIcon) {.importc.}
+proc gtk_entry_set_icon_from_paintable*(entry: GtkEntry, icon_pos: GtkEntryIconPosition, paintable: GdkPaintable) {.importc.}
+proc gtk_entry_get_icon_storage_type*(entry: GtkEntry, icon_pos: GtkEntryIconPosition): GtkImageType {.importc.}
+proc gtk_entry_get_icon_name*(entry: GtkEntry, icon_pos: GtkEntryIconPosition): cstring {.importc.}
+proc gtk_entry_get_icon_gicon*(entry: GtkEntry, icon_pos: GtkEntryIconPosition): GIcon {.importc.}
+proc gtk_entry_get_icon_paintable*(entry: GtkEntry, icon_pos: GtkEntryIconPosition): GdkPaintable {.importc.}
+proc gtk_entry_set_icon_activatable*(entry: GtkEntry, icon_pos: GtkEntryIconPosition, activatable: gboolean) {.importc.}
+proc gtk_entry_get_icon_activatable*(entry: GtkEntry, icon_pos: GtkEntryIconPosition): gboolean {.importc.}
+proc gtk_entry_set_icon_sensitive*(entry: GtkEntry, icon_pos: GtkEntryIconPosition, sensitive: gboolean) {.importc.}
+proc gtk_entry_get_icon_sensitive*(entry: GtkEntry, icon_pos: GtkEntryIconPosition): gboolean {.importc.}
+proc gtk_entry_set_icon_tooltip_text*(entry: GtkEntry, icon_pos: GtkEntryIconPosition, tooltip: cstring) {.importc.}
+proc gtk_entry_get_icon_tooltip_text*(entry: GtkEntry, icon_pos: GtkEntryIconPosition): cstring {.importc.}
+proc gtk_entry_set_icon_tooltip_markup*(entry: GtkEntry, icon_pos: GtkEntryIconPosition, tooltip: cstring) {.importc.}
+proc gtk_entry_get_icon_tooltip_markup*(entry: GtkEntry, icon_pos: GtkEntryIconPosition): cstring {.importc.}
+proc gtk_entry_get_icon_at_pos*(entry: GtkEntry, x: gint, y: gint): gint {.importc.}
+
+# Input purpose и hints
+proc gtk_entry_set_input_purpose*(entry: GtkEntry, purpose: GtkInputPurpose) {.importc.}
+proc gtk_entry_get_input_purpose*(entry: GtkEntry): GtkInputPurpose {.importc.}
+proc gtk_entry_set_input_hints*(entry: GtkEntry, hints: GtkInputHints) {.importc.}
+proc gtk_entry_get_input_hints*(entry: GtkEntry): GtkInputHints {.importc.}
+
+# Дополнительное меню
+proc gtk_entry_set_extra_menu*(entry: GtkEntry, model: GMenuModel) {.importc.}
+proc gtk_entry_get_extra_menu*(entry: GtkEntry): GMenuModel {.importc.}
+
+# Сброс IM контекста
+proc gtk_entry_reset_im_context*(entry: GtkEntry) {.importc.}
+
+# Получение текущего emoji chooser
+proc gtk_entry_get_current_icon_drag_source*(entry: GtkEntry): gint {.importc.}
+
+# Grab focus без выделения
+proc gtk_entry_grab_focus_without_selecting*(entry: GtkEntry): gboolean {.importc.}
+
+
+
+
 
 # ============================================================================
 # PASSWORD ENTRY
@@ -1068,6 +1321,7 @@ proc gtk_scrolled_window_get_policy*(scrolledWindow: GtkScrolledWindow, hscrollb
 proc gtk_scrolled_window_set_has_frame*(scrolledWindow: GtkScrolledWindow, hasFrame: gboolean) {.importc.}
 proc gtk_scrolled_window_get_has_frame*(scrolledWindow: GtkScrolledWindow): gboolean {.importc.}
 
+
 # ============================================================================
 # FRAME
 # ============================================================================
@@ -1077,6 +1331,15 @@ proc gtk_frame_set_label*(frame: GtkFrame, label: cstring) {.importc.}
 proc gtk_frame_get_label*(frame: GtkFrame): cstring {.importc.}
 proc gtk_frame_set_child*(frame: GtkFrame, child: GtkWidget) {.importc.}
 proc gtk_frame_get_child*(frame: GtkFrame): GtkWidget {.importc.}
+# Label widget и alignment
+# произвольный виджет вместо текстовой метки
+proc gtk_frame_set_label_widget*(frame: GtkFrame, label_widget: GtkWidget) {.importc.}
+proc gtk_frame_get_label_widget*(frame: GtkFrame): GtkWidget {.importc.}
+# Выравнивание метки (0.0 = слева, 0.5 = по центру, 1.0 = справа)
+proc gtk_frame_set_label_align*(frame: GtkFrame, xalign: cfloat) {.importc.}
+proc gtk_frame_get_label_align*(frame: GtkFrame): cfloat {.importc.}
+
+
 
 # ============================================================================
 # SEPARATOR
@@ -1113,6 +1376,8 @@ proc gtk_image_new_from_paintable*(paintable: GdkPaintable): GtkImage {.importc.
 proc gtk_spinner_new*(): GtkSpinner {.importc.}
 proc gtk_spinner_start*(spinner: GtkSpinner) {.importc.}
 proc gtk_spinner_stop*(spinner: GtkSpinner) {.importc.}
+
+
 
 # ============================================================================
 # PROGRESS BAR
@@ -1212,6 +1477,8 @@ proc gtk_list_box_row_set_child*(row: GtkListBoxRow, child: GtkWidget) {.importc
 proc gtk_list_box_row_get_child*(row: GtkListBoxRow): GtkWidget {.importc.}
 proc gtk_list_box_row_get_index*(row: GtkListBoxRow): gint {.importc.}
 
+
+
 # ============================================================================
 # NOTEBOOK
 # ============================================================================
@@ -1229,6 +1496,8 @@ proc gtk_notebook_set_tab_pos*(notebook: GtkNotebook, pos: GtkPositionType) {.im
 proc gtk_notebook_get_tab_pos*(notebook: GtkNotebook): GtkPositionType {.importc.}
 proc gtk_notebook_set_show_tabs*(notebook: GtkNotebook, showTabs: gboolean) {.importc.}
 proc gtk_notebook_get_show_tabs*(notebook: GtkNotebook): gboolean {.importc.}
+proc gtk_notebook_set_scrollable*(notebook: GtkNotebook, scrollable: bool) {.importc.}
+
 
 # ============================================================================
 # PANED
@@ -1442,6 +1711,11 @@ proc gtk_popover_get_child*(popover: GtkPopover): GtkWidget {.importc.}
 proc gtk_popover_popup*(popover: GtkPopover) {.importc.}
 proc gtk_popover_popdown*(popover: GtkPopover) {.importc.}
 proc gtk_popover_set_parent*(popover: GtkPopover, parent: GtkWidget) {.importc.}
+proc gtk_widget_get_ancestor*(widget: GtkWidget, widget_type: GType): GtkWidget  {.importc.}
+proc gtk_popover_get_type*(): GType {.importc.}
+
+
+
 
 # ============================================================================
 # MENU BUTTON
@@ -2138,44 +2412,9 @@ proc gtk_text_view_get_input_purpose*(textView: GtkTextView): GtkInputPurpose {.
 proc gtk_text_view_set_extra_menu*(textView: GtkTextView, model: GMenuModel) {.importc.}
 proc gtk_text_view_get_extra_menu*(textView: GtkTextView): GMenuModel {.importc.}
 
-# ============================================================================
-# ENTRY (дополнительные функции)
-# ============================================================================
 
-proc gtk_entry_get_buffer*(entry: GtkEntry): pointer {.importc.}
-proc gtk_entry_set_buffer*(entry: GtkEntry, buffer: pointer) {.importc.}
-proc gtk_entry_get_text_length*(entry: GtkEntry): guint16 {.importc.}
-proc gtk_entry_set_icon_from_icon_name*(entry: GtkEntry, iconPos: gint, iconName: cstring) {.importc.}
-proc gtk_entry_set_icon_from_pixbuf*(entry: GtkEntry, iconPos: gint, pixbuf: GdkPixbuf) {.importc.}
-proc gtk_entry_set_icon_from_paintable*(entry: GtkEntry, iconPos: gint, paintable: pointer) {.importc.}
-proc gtk_entry_get_icon_storage_type*(entry: GtkEntry, iconPos: gint): gint {.importc.}
-proc gtk_entry_get_icon_name*(entry: GtkEntry, iconPos: gint): cstring {.importc.}
-proc gtk_entry_get_icon_pixbuf*(entry: GtkEntry, iconPos: gint): GdkPixbuf {.importc.}
-proc gtk_entry_get_icon_paintable*(entry: GtkEntry, iconPos: gint): pointer {.importc.}
-proc gtk_entry_set_icon_activatable*(entry: GtkEntry, iconPos: gint, activatable: gboolean) {.importc.}
-proc gtk_entry_get_icon_activatable*(entry: GtkEntry, iconPos: gint): gboolean {.importc.}
-proc gtk_entry_set_icon_sensitive*(entry: GtkEntry, iconPos: gint, sensitive: gboolean) {.importc.}
-proc gtk_entry_get_icon_sensitive*(entry: GtkEntry, iconPos: gint): gboolean {.importc.}
-proc gtk_entry_get_icon_at_pos*(entry: GtkEntry, x: gint, y: gint): gint {.importc.}
-proc gtk_entry_set_icon_tooltip_text*(entry: GtkEntry, iconPos: gint, tooltip: cstring) {.importc.}
-proc gtk_entry_get_icon_tooltip_text*(entry: GtkEntry, iconPos: gint): cstring {.importc.}
-proc gtk_entry_set_icon_tooltip_markup*(entry: GtkEntry, iconPos: gint, tooltip: cstring) {.importc.}
-proc gtk_entry_get_icon_tooltip_markup*(entry: GtkEntry, iconPos: gint): cstring {.importc.}
-proc gtk_entry_set_input_purpose*(entry: GtkEntry, purpose: GtkInputPurpose) {.importc.}
-proc gtk_entry_get_input_purpose*(entry: GtkEntry): GtkInputPurpose {.importc.}
-proc gtk_entry_set_completion*(entry: GtkEntry, completion: pointer) {.importc.}
-proc gtk_entry_get_completion*(entry: GtkEntry): pointer {.importc.}
-proc gtk_entry_set_progress_fraction*(entry: GtkEntry, fraction: gdouble) {.importc.}
-proc gtk_entry_get_progress_fraction*(entry: GtkEntry): gdouble {.importc.}
-proc gtk_entry_set_progress_pulse_step*(entry: GtkEntry, fraction: gdouble) {.importc.}
-proc gtk_entry_get_progress_pulse_step*(entry: GtkEntry): gdouble {.importc.}
-proc gtk_entry_progress_pulse*(entry: GtkEntry) {.importc.}
-proc gtk_entry_reset_im_context*(entry: GtkEntry) {.importc.}
-proc gtk_entry_set_attributes*(entry: GtkEntry, attrs: pointer) {.importc.}
-proc gtk_entry_get_attributes*(entry: GtkEntry): pointer {.importc.}
-proc gtk_entry_set_tabs*(entry: GtkEntry, tabs: pointer) {.importc.}
-proc gtk_entry_get_tabs*(entry: GtkEntry): pointer {.importc.}
-proc gtk_entry_grab_focus_without_selecting*(entry: GtkEntry): gboolean {.importc.}
+
+
 
 
 # ============================================================================
@@ -2889,8 +3128,6 @@ proc gtk_editable_label_stop_editing*(self: GtkEditableLabel, commit: gboolean) 
 # ============================================================================
 # PASSWORD ENTRY BUFFER
 # ============================================================================
-type
-  GtkEntryBuffer* = pointer
 proc gtk_entry_buffer_new*(initialChars: cstring, nInitialChars: gint): GtkEntryBuffer {.importc.}
 proc gtk_entry_buffer_get_text*(buffer: GtkEntryBuffer): cstring {.importc.}
 proc gtk_entry_buffer_set_text*(buffer: GtkEntryBuffer, chars: cstring, nChars: gint) {.importc.}
