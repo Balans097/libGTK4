@@ -74,6 +74,7 @@ type
   GtkFileChooserDialog* = pointer
   GtkColorChooserDialog* = pointer
   GtkFontChooserDialog* = pointer
+  GtkStackPage* = pointer
 
   # Контейнеры
   GtkBox* = pointer
@@ -112,6 +113,7 @@ type
   GtkTextMark* = pointer
   GtkTextTag* = pointer
   GtkTextTagTable* = pointer
+  GtkTextChildAnchor* = pointer
   GtkTextIter* = object
     dummy1: pointer
     dummy2: pointer
@@ -212,6 +214,12 @@ type
   GdkPixbuf* = pointer
   GdkTexture* = pointer
   GdkPaintable* = pointer
+
+  GdkRectangle* {.bycopy.} = object
+    x*: gint
+    y*: gint
+    width*: gint
+    height*: gint
 
   # Clipboard
   GdkClipboard* = pointer
@@ -368,6 +376,14 @@ type
     GTK_APPLICATION_INHIBIT_SUSPEND = 1 shl 2
     # Предотвратить автоматическую блокировку
     GTK_APPLICATION_INHIBIT_IDLE = 1 shl 3
+  
+  GtkTextWindowType* {.size: sizeof(cint).} = enum
+    GTK_TEXT_WINDOW_WIDGET = 1
+    GTK_TEXT_WINDOW_TEXT = 2
+    GTK_TEXT_WINDOW_LEFT = 3
+    GTK_TEXT_WINDOW_RIGHT = 4
+    GTK_TEXT_WINDOW_TOP = 5
+    GTK_TEXT_WINDOW_BOTTOM = 6
 
   # Типы GApplication
   GApplicationFlags* {.size: sizeof(cint).} = enum
@@ -491,6 +507,28 @@ type
     GTK_INPUT_HINT_EMOJI = 512
     GTK_INPUT_HINT_NO_EMOJI = 1024
     GTK_INPUT_HINT_PRIVATE = 2048
+
+  GtkStackTransitionType* = enum
+    GTK_STACK_TRANSITION_TYPE_NONE = 0
+    GTK_STACK_TRANSITION_TYPE_CROSSFADE = 1
+    GTK_STACK_TRANSITION_TYPE_SLIDE_RIGHT = 2
+    GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT = 3
+    GTK_STACK_TRANSITION_TYPE_SLIDE_UP = 4
+    GTK_STACK_TRANSITION_TYPE_SLIDE_DOWN = 5
+    GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT = 6
+    GTK_STACK_TRANSITION_TYPE_SLIDE_UP_DOWN = 7
+    GTK_STACK_TRANSITION_TYPE_OVER_UP = 8
+    GTK_STACK_TRANSITION_TYPE_OVER_DOWN = 9
+    GTK_STACK_TRANSITION_TYPE_OVER_LEFT = 10
+    GTK_STACK_TRANSITION_TYPE_OVER_RIGHT = 11
+    GTK_STACK_TRANSITION_TYPE_UNDER_UP = 12
+    GTK_STACK_TRANSITION_TYPE_UNDER_DOWN = 13
+    GTK_STACK_TRANSITION_TYPE_UNDER_LEFT = 14
+    GTK_STACK_TRANSITION_TYPE_UNDER_RIGHT = 15
+    GTK_STACK_TRANSITION_TYPE_OVER_UP_DOWN = 16
+    GTK_STACK_TRANSITION_TYPE_OVER_DOWN_UP = 17
+    GTK_STACK_TRANSITION_TYPE_OVER_LEFT_RIGHT = 18
+    GTK_STACK_TRANSITION_TYPE_OVER_RIGHT_LEFT = 19
 
 
 
@@ -834,6 +872,12 @@ proc g_action_group_activate_action*(action_group: GActionGroup, action_name: cs
 # "action-enabled-changed" (action_name: cstring, enabled: gboolean)
 # "action-state-changed" (action_name: cstring, state: GVariant)
 
+proc gtk_actionable_set_action_name*(actionable: pointer; action_name: cstring) {.importc.}
+proc gtk_actionable_get_action_name*(actionable: pointer): cstring {.importc.}
+proc gtk_actionable_set_action_target_value*(actionable: pointer; target_value: GVariant) {.importc.}
+proc gtk_actionable_get_action_target_value*(actionable: pointer): GVariant {.importc.}
+
+
 
 
 
@@ -1024,6 +1068,8 @@ proc gtk_button_get_icon_name*(button: GtkButton): cstring {.importc.}
 # Управление возможностью сжатия кнопки меньше естественного размера
 proc gtk_button_set_can_shrink*(button: GtkButton, can_shrink: gboolean) {.importc.}
 proc gtk_button_get_can_shrink*(button: GtkButton): gboolean {.importc.}
+proc gtk_button_set_action_name*(button: GtkButton; action_name: cstring) {.importc.}
+proc gtk_button_get_action_name*(button: GtkButton): cstring {.importc.}
 
 
 
@@ -1260,7 +1306,6 @@ proc gtk_entry_grab_focus_without_selecting*(entry: GtkEntry): gboolean {.import
 
 
 
-
 # ============================================================================
 # PASSWORD ENTRY
 # ============================================================================
@@ -1268,6 +1313,12 @@ proc gtk_entry_grab_focus_without_selecting*(entry: GtkEntry): gboolean {.import
 proc gtk_password_entry_new*(): GtkPasswordEntry {.importc.}
 proc gtk_password_entry_set_show_peek_icon*(entry: GtkPasswordEntry, showPeekIcon: gboolean) {.importc.}
 proc gtk_password_entry_get_show_peek_icon*(entry: GtkPasswordEntry): gboolean {.importc.}
+# Дополнительное меню
+proc gtk_password_entry_set_extra_menu*(entry: GtkPasswordEntry, model: GMenuModel) {.importc.}
+proc gtk_password_entry_get_extra_menu*(entry: GtkPasswordEntry): GMenuModel {.importc.}
+
+
+
 
 # ============================================================================
 # SEARCH ENTRY
@@ -1275,39 +1326,260 @@ proc gtk_password_entry_get_show_peek_icon*(entry: GtkPasswordEntry): gboolean {
 
 proc gtk_search_entry_new*(): GtkSearchEntry {.importc.}
 
+# Placeholder text
+proc gtk_search_entry_set_placeholder_text*(entry: GtkSearchEntry, text: cstring) {.importc.}
+proc gtk_search_entry_get_placeholder_text*(entry: GtkSearchEntry): cstring {.importc.}
+
+# Задержка поиска (search delay)
+proc gtk_search_entry_set_search_delay*(entry: GtkSearchEntry, delay: guint) {.importc.}
+proc gtk_search_entry_get_search_delay*(entry: GtkSearchEntry): guint {.importc.}
+
+# Клавиша захвата фокуса
+proc gtk_search_entry_set_key_capture_widget*(entry: GtkSearchEntry, widget: GtkWidget) {.importc.}
+proc gtk_search_entry_get_key_capture_widget*(entry: GtkSearchEntry): GtkWidget {.importc.}
+
+# Input purpose и hints
+proc gtk_search_entry_set_input_purpose*(entry: GtkSearchEntry, purpose: GtkInputPurpose) {.importc.}
+proc gtk_search_entry_get_input_purpose*(entry: GtkSearchEntry): GtkInputPurpose {.importc.}
+proc gtk_search_entry_set_input_hints*(entry: GtkSearchEntry, hints: GtkInputHints) {.importc.}
+proc gtk_search_entry_get_input_hints*(entry: GtkSearchEntry): GtkInputHints {.importc.}
+
+
+
+
 # ============================================================================
 # TEXT VIEW
 # ============================================================================
-
 proc gtk_text_view_new*(): GtkTextView {.importc.}
 proc gtk_text_view_new_with_buffer*(buffer: GtkTextBuffer): GtkTextView {.importc.}
 proc gtk_text_view_get_buffer*(textView: GtkTextView): GtkTextBuffer {.importc.}
 proc gtk_text_view_set_buffer*(textView: GtkTextView, buffer: GtkTextBuffer) {.importc.}
 proc gtk_text_view_set_editable*(textView: GtkTextView, setting: gboolean) {.importc.}
 proc gtk_text_view_get_editable*(textView: GtkTextView): gboolean {.importc.}
-proc gtk_text_view_set_wrap_mode*(textView: GtkTextView, wrapMode: GtkWrapMode) {.importc.}
-proc gtk_text_view_get_wrap_mode*(textView: GtkTextView): GtkWrapMode {.importc.}
+proc gtk_text_view_set_wrap_mode*(textView: GtkTextView, wrap_mode: PangoWrapMode) {.importc.}
+proc gtk_text_view_get_wrap_mode*(textView: GtkTextView): PangoWrapMode {.importc.}
 proc gtk_text_view_set_cursor_visible*(textView: GtkTextView, setting: gboolean) {.importc.}
 proc gtk_text_view_get_cursor_visible*(textView: GtkTextView): gboolean {.importc.}
 proc gtk_text_view_set_monospace*(textView: GtkTextView, monospace: gboolean) {.importc.}
 proc gtk_text_view_get_monospace*(textView: GtkTextView): gboolean {.importc.}
 
+# Отступы и выравнивание
+proc gtk_text_view_set_pixels_above_lines*(text_view: GtkTextView, pixels_above_lines: gint) {.importc.}
+proc gtk_text_view_get_pixels_above_lines*(text_view: GtkTextView): gint {.importc.}
+proc gtk_text_view_set_pixels_below_lines*(text_view: GtkTextView, pixels_below_lines: gint) {.importc.}
+proc gtk_text_view_get_pixels_below_lines*(text_view: GtkTextView): gint {.importc.}
+proc gtk_text_view_set_pixels_inside_wrap*(text_view: GtkTextView, pixels_inside_wrap: gint) {.importc.}
+proc gtk_text_view_get_pixels_inside_wrap*(text_view: GtkTextView): gint {.importc.}
+proc gtk_text_view_set_justification*(text_view: GtkTextView, justification: GtkJustification) {.importc.}
+proc gtk_text_view_get_justification*(text_view: GtkTextView): GtkJustification {.importc.}
+proc gtk_text_view_set_left_margin*(text_view: GtkTextView, left_margin: gint) {.importc.}
+proc gtk_text_view_get_left_margin*(text_view: GtkTextView): gint {.importc.}
+proc gtk_text_view_set_right_margin*(text_view: GtkTextView, right_margin: gint) {.importc.}
+proc gtk_text_view_get_right_margin*(text_view: GtkTextView): gint {.importc.}
+proc gtk_text_view_set_top_margin*(text_view: GtkTextView, top_margin: gint) {.importc.}
+proc gtk_text_view_get_top_margin*(text_view: GtkTextView): gint {.importc.}
+proc gtk_text_view_set_bottom_margin*(text_view: GtkTextView, bottom_margin: gint) {.importc.}
+proc gtk_text_view_get_bottom_margin*(text_view: GtkTextView): gint {.importc.}
+proc gtk_text_view_set_indent*(text_view: GtkTextView, indent: gint) {.importc.}
+proc gtk_text_view_get_indent*(text_view: GtkTextView): gint {.importc.}
+
+# Tabs
+proc gtk_text_view_set_tabs*(text_view: GtkTextView, tabs: PangoTabArray) {.importc.}
+proc gtk_text_view_get_tabs*(text_view: GtkTextView): PangoTabArray {.importc.}
+
+# Accepts tab
+proc gtk_text_view_set_accepts_tab*(text_view: GtkTextView, accepts_tab: gboolean) {.importc.}
+proc gtk_text_view_get_accepts_tab*(text_view: GtkTextView): gboolean {.importc.}
+
+# Overwrite mode
+proc gtk_text_view_set_overwrite*(text_view: GtkTextView, overwrite: gboolean) {.importc.}
+proc gtk_text_view_get_overwrite*(text_view: GtkTextView): gboolean {.importc.}
+
+# Input purpose и hints
+proc gtk_text_view_set_input_purpose*(text_view: GtkTextView, purpose: GtkInputPurpose) {.importc.}
+proc gtk_text_view_get_input_purpose*(text_view: GtkTextView): GtkInputPurpose {.importc.}
+proc gtk_text_view_set_input_hints*(text_view: GtkTextView, hints: GtkInputHints) {.importc.}
+proc gtk_text_view_get_input_hints*(text_view: GtkTextView): GtkInputHints {.importc.}
+
+# Прокрутка к маркеру/итератору
+proc gtk_text_view_scroll_to_mark*(text_view: GtkTextView, mark: GtkTextMark, 
+                                   within_margin: gdouble, use_align: gboolean,
+                                   xalign: gdouble, yalign: gdouble) {.importc.}
+proc gtk_text_view_scroll_to_iter*(text_view: GtkTextView, iter: ptr GtkTextIter,
+                                   within_margin: gdouble, use_align: gboolean,
+                                   xalign: gdouble, yalign: gdouble): gboolean {.importc.}
+proc gtk_text_view_scroll_mark_onscreen*(text_view: GtkTextView, mark: GtkTextMark) {.importc.}
+
+# Перемещение маркера на экран
+proc gtk_text_view_move_mark_onscreen*(text_view: GtkTextView, mark: GtkTextMark): gboolean {.importc.}
+
+# Видимость области
+proc gtk_text_view_get_visible_rect*(text_view: GtkTextView, visible_rect: ptr GdkRectangle) {.importc.}
+
+# Преобразование координат
+proc gtk_text_view_get_iter_location*(text_view: GtkTextView, iter: ptr GtkTextIter, 
+                                      location: ptr GdkRectangle) {.importc.}
+proc gtk_text_view_get_iter_at_location*(text_view: GtkTextView, iter: ptr GtkTextIter,
+                                         x: gint, y: gint): gboolean {.importc.}
+proc gtk_text_view_get_iter_at_position*(text_view: GtkTextView, iter: ptr GtkTextIter,
+                                         trailing: ptr gint, x: gint, y: gint): gboolean {.importc.}
+proc gtk_text_view_get_line_at_y*(text_view: GtkTextView, target_iter: ptr GtkTextIter,
+                                  y: gint, line_top: ptr gint) {.importc.}
+proc gtk_text_view_get_line_yrange*(text_view: GtkTextView, iter: ptr GtkTextIter,
+                                    y: ptr gint, height: ptr gint) {.importc.}
+proc gtk_text_view_buffer_to_window_coords*(text_view: GtkTextView, win: GtkTextWindowType,
+                                            buffer_x: gint, buffer_y: gint,
+                                            window_x: ptr gint, window_y: ptr gint) {.importc.}
+proc gtk_text_view_window_to_buffer_coords*(text_view: GtkTextView, win: GtkTextWindowType,
+                                            window_x: gint, window_y: gint,
+                                            buffer_x: ptr gint, buffer_y: ptr gint) {.importc.}
+
+# Gutter (боковые области)
+proc gtk_text_view_set_gutter*(text_view: GtkTextView, win: GtkTextWindowType, widget: GtkWidget) {.importc.}
+proc gtk_text_view_get_gutter*(text_view: GtkTextView, win: GtkTextWindowType): GtkWidget {.importc.}
+
+# Дополнительное меню
+proc gtk_text_view_set_extra_menu*(text_view: GtkTextView, model: GMenuModel) {.importc.}
+proc gtk_text_view_get_extra_menu*(text_view: GtkTextView): GMenuModel {.importc.}
+
+# Добавление дочерних виджетов
+proc gtk_text_view_add_child_at_anchor*(text_view: GtkTextView, child: GtkWidget, 
+                                        anchor: GtkTextChildAnchor) {.importc.}
+proc gtk_text_view_add_overlay*(text_view: GtkTextView, child: GtkWidget, xpos: gint, ypos: gint) {.importc.}
+proc gtk_text_view_move_overlay*(text_view: GtkTextView, child: GtkWidget, xpos: gint, ypos: gint) {.importc.}
+proc gtk_text_view_remove*(text_view: GtkTextView, child: GtkWidget) {.importc.}
+
+# IM контекст
+proc gtk_text_view_reset_im_context*(text_view: GtkTextView) {.importc.}
+
+# RTL (right-to-left) контекст меню
+proc gtk_text_view_get_rtl_context*(text_view: GtkTextView): gboolean {.importc.}
+
+# LTR (left-to-right) контекст меню  
+proc gtk_text_view_get_ltr_context*(text_view: GtkTextView): gboolean {.importc.}
+
+# Начать выделение через drag
+proc gtk_text_view_start_selection_drag*(text_view: GtkTextView, iter: ptr GtkTextIter,
+                                         event: GdkEvent) {.importc.}
+
+# Размещение курсора на экране
+proc gtk_text_view_place_cursor_onscreen*(text_view: GtkTextView): gboolean {.importc.}
+
+# Позиции курсора (strong и weak для bidirectional text)
+proc gtk_text_view_get_cursor_locations*(text_view: GtkTextView, iter: ptr GtkTextIter, 
+                                         strong: ptr GdkRectangle, weak: ptr GdkRectangle) {.importc.}
+
+# Навигация по display lines (визуальным строкам с учетом переноса)
+proc gtk_text_view_forward_display_line*(text_view: GtkTextView, iter: ptr GtkTextIter): gboolean {.importc.}
+proc gtk_text_view_backward_display_line*(text_view: GtkTextView, iter: ptr GtkTextIter): gboolean {.importc.}
+proc gtk_text_view_forward_display_line_end*(text_view: GtkTextView, iter: ptr GtkTextIter): gboolean {.importc.}
+proc gtk_text_view_backward_display_line_start*(text_view: GtkTextView, iter: ptr GtkTextIter): gboolean {.importc.}
+proc gtk_text_view_starts_display_line*(text_view: GtkTextView, iter: ptr GtkTextIter): gboolean {.importc.}
+proc gtk_text_view_move_visually*(text_view: GtkTextView, iter: ptr GtkTextIter, count: gint): gboolean {.importc.}
+
+# Input method context
+proc gtk_text_view_im_context_filter_keypress*(text_view: GtkTextView, event: GdkEvent): gboolean {.importc.}
+
+
+
+
 # ============================================================================
 # TEXT BUFFER
 # ============================================================================
-
 proc gtk_text_buffer_new*(table: GtkTextTagTable): GtkTextBuffer {.importc.}
 proc gtk_text_buffer_set_text*(buffer: GtkTextBuffer, text: cstring, len: gint) {.importc.}
-proc gtk_text_buffer_get_text*(buffer: GtkTextBuffer, start: ptr GtkTextIter, `end`: ptr GtkTextIter, includeHiddenChars: gboolean): cstring {.importc.}
+proc gtk_text_buffer_get_text*(buffer: GtkTextBuffer, start: ptr GtkTextIter, `end`: ptr GtkTextIter, include_hidden_chars: gboolean): cstring {.importc.}
+proc gtk_text_buffer_get_slice*(buffer: GtkTextBuffer, start: ptr GtkTextIter, `end`: ptr GtkTextIter, include_hidden_chars: gboolean): cstring {.importc.}
 proc gtk_text_buffer_insert*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, text: cstring, len: gint) {.importc.}
 proc gtk_text_buffer_insert_at_cursor*(buffer: GtkTextBuffer, text: cstring, len: gint) {.importc.}
+proc gtk_text_buffer_insert_range*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, start: ptr GtkTextIter, `end`: ptr GtkTextIter) {.importc.}
+proc gtk_text_buffer_insert_range_interactive*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, start: ptr GtkTextIter, `end`: ptr GtkTextIter, default_editable: gboolean): gboolean {.importc.}
+proc gtk_text_buffer_insert_interactive*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, text: cstring, len: gint, default_editable: gboolean): gboolean {.importc.}
+proc gtk_text_buffer_insert_interactive_at_cursor*(buffer: GtkTextBuffer, text: cstring, len: gint, default_editable: gboolean): gboolean {.importc.}
 proc gtk_text_buffer_delete*(buffer: GtkTextBuffer, start: ptr GtkTextIter, `end`: ptr GtkTextIter) {.importc.}
+proc gtk_text_buffer_delete_interactive*(buffer: GtkTextBuffer, start_iter: ptr GtkTextIter, end_iter: ptr GtkTextIter, default_editable: gboolean): gboolean {.importc.}
+proc gtk_text_buffer_backspace*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, interactive: gboolean, default_editable: gboolean): gboolean {.importc.}
 proc gtk_text_buffer_get_char_count*(buffer: GtkTextBuffer): gint {.importc.}
 proc gtk_text_buffer_get_line_count*(buffer: GtkTextBuffer): gint {.importc.}
+
+# Итераторы
 proc gtk_text_buffer_get_start_iter*(buffer: GtkTextBuffer, iter: ptr GtkTextIter) {.importc.}
 proc gtk_text_buffer_get_end_iter*(buffer: GtkTextBuffer, iter: ptr GtkTextIter) {.importc.}
-proc gtk_text_buffer_get_iter_at_line*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, lineNumber: gint) {.importc.}
-proc gtk_text_buffer_get_iter_at_offset*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, charOffset: gint) {.importc.}
+proc gtk_text_buffer_get_iter_at_line*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, line_number: gint) {.importc.}
+proc gtk_text_buffer_get_iter_at_offset*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, char_offset: gint) {.importc.}
+proc gtk_text_buffer_get_iter_at_line_offset*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, line_number: gint, char_offset: gint) {.importc.}
+proc gtk_text_buffer_get_iter_at_line_index*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, line_number: gint, byte_index: gint) {.importc.}
+proc gtk_text_buffer_get_iter_at_mark*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, mark: GtkTextMark) {.importc.}
+proc gtk_text_buffer_get_iter_at_child_anchor*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, anchor: GtkTextChildAnchor) {.importc.}
+proc gtk_text_buffer_get_bounds*(buffer: GtkTextBuffer, start: ptr GtkTextIter, `end`: ptr GtkTextIter) {.importc.}
+
+# Маркеры (marks)
+proc gtk_text_buffer_create_mark*(buffer: GtkTextBuffer, mark_name: cstring, where: ptr GtkTextIter, left_gravity: gboolean): GtkTextMark {.importc.}
+proc gtk_text_buffer_add_mark*(buffer: GtkTextBuffer, mark: GtkTextMark, where: ptr GtkTextIter) {.importc.}
+proc gtk_text_buffer_move_mark*(buffer: GtkTextBuffer, mark: GtkTextMark, where: ptr GtkTextIter) {.importc.}
+proc gtk_text_buffer_move_mark_by_name*(buffer: GtkTextBuffer, name: cstring, where: ptr GtkTextIter) {.importc.}
+proc gtk_text_buffer_delete_mark*(buffer: GtkTextBuffer, mark: GtkTextMark) {.importc.}
+proc gtk_text_buffer_delete_mark_by_name*(buffer: GtkTextBuffer, name: cstring) {.importc.}
+proc gtk_text_buffer_get_mark*(buffer: GtkTextBuffer, name: cstring): GtkTextMark {.importc.}
+proc gtk_text_buffer_get_insert*(buffer: GtkTextBuffer): GtkTextMark {.importc.}
+proc gtk_text_buffer_get_selection_bound*(buffer: GtkTextBuffer): GtkTextMark {.importc.}
+proc gtk_text_buffer_place_cursor*(buffer: GtkTextBuffer, where: ptr GtkTextIter) {.importc.}
+proc gtk_text_buffer_select_range*(buffer: GtkTextBuffer, ins: ptr GtkTextIter, bound: ptr GtkTextIter) {.importc.}
+
+# Выделение
+proc gtk_text_buffer_get_selection_bounds*(buffer: GtkTextBuffer, start: ptr GtkTextIter, `end`: ptr GtkTextIter): gboolean {.importc.}
+proc gtk_text_buffer_get_has_selection*(buffer: GtkTextBuffer): gboolean {.importc.}
+proc gtk_text_buffer_delete_selection*(buffer: GtkTextBuffer, interactive: gboolean, default_editable: gboolean): gboolean {.importc.}
+
+# Теги
+proc gtk_text_buffer_apply_tag*(buffer: GtkTextBuffer, tag: GtkTextTag, start: ptr GtkTextIter, `end`: ptr GtkTextIter) {.importc.}
+proc gtk_text_buffer_remove_tag*(buffer: GtkTextBuffer, tag: GtkTextTag, start: ptr GtkTextIter, `end`: ptr GtkTextIter) {.importc.}
+proc gtk_text_buffer_apply_tag_by_name*(buffer: GtkTextBuffer, name: cstring, start: ptr GtkTextIter, `end`: ptr GtkTextIter) {.importc.}
+proc gtk_text_buffer_remove_tag_by_name*(buffer: GtkTextBuffer, name: cstring, start: ptr GtkTextIter, `end`: ptr GtkTextIter) {.importc.}
+proc gtk_text_buffer_remove_all_tags*(buffer: GtkTextBuffer, start: ptr GtkTextIter, `end`: ptr GtkTextIter) {.importc.}
+proc gtk_text_buffer_create_tag*(buffer: GtkTextBuffer, tag_name: cstring): GtkTextTag {.importc, varargs.}
+proc gtk_text_buffer_get_tag_table*(buffer: GtkTextBuffer): GtkTextTagTable {.importc.}
+
+# Вставка с тегами
+proc gtk_text_buffer_insert_with_tags*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, text: cstring, len: gint) {.importc, varargs.}
+proc gtk_text_buffer_insert_with_tags_by_name*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, text: cstring, len: gint) {.importc, varargs.}
+
+# Якоря для дочерних виджетов
+proc gtk_text_buffer_create_child_anchor*(buffer: GtkTextBuffer, iter: ptr GtkTextIter): GtkTextChildAnchor {.importc.}
+
+# Вставка изображений и виджетов (через markup)
+proc gtk_text_buffer_insert_markup*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, markup: cstring, len: gint) {.importc.}
+proc gtk_text_buffer_insert_paintable*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, paintable: GdkPaintable) {.importc.}
+
+# Clipboard
+proc gtk_text_buffer_cut_clipboard*(buffer: GtkTextBuffer, clipboard: GdkClipboard, default_editable: gboolean) {.importc.}
+proc gtk_text_buffer_copy_clipboard*(buffer: GtkTextBuffer, clipboard: GdkClipboard) {.importc.}
+proc gtk_text_buffer_paste_clipboard*(buffer: GtkTextBuffer, clipboard: GdkClipboard, override_location: ptr GtkTextIter, default_editable: gboolean) {.importc.}
+
+# Изменения (modified flag)
+proc gtk_text_buffer_set_modified*(buffer: GtkTextBuffer, setting: gboolean) {.importc.}
+proc gtk_text_buffer_get_modified*(buffer: GtkTextBuffer): gboolean {.importc.}
+
+# Undo/Redo
+proc gtk_text_buffer_set_enable_undo*(buffer: GtkTextBuffer, enable_undo: gboolean) {.importc.}
+proc gtk_text_buffer_get_enable_undo*(buffer: GtkTextBuffer): gboolean {.importc.}
+proc gtk_text_buffer_get_can_undo*(buffer: GtkTextBuffer): gboolean {.importc.}
+proc gtk_text_buffer_get_can_redo*(buffer: GtkTextBuffer): gboolean {.importc.}
+proc gtk_text_buffer_undo*(buffer: GtkTextBuffer) {.importc.}
+proc gtk_text_buffer_redo*(buffer: GtkTextBuffer) {.importc.}
+proc gtk_text_buffer_begin_irreversible_action*(buffer: GtkTextBuffer) {.importc.}
+proc gtk_text_buffer_end_irreversible_action*(buffer: GtkTextBuffer) {.importc.}
+
+# User action group (для группировки операций для undo)
+proc gtk_text_buffer_begin_user_action*(buffer: GtkTextBuffer) {.importc.}
+proc gtk_text_buffer_end_user_action*(buffer: GtkTextBuffer) {.importc.}
+
+# Max undo levels
+proc gtk_text_buffer_set_max_undo_levels*(buffer: GtkTextBuffer, max_undo_levels: guint) {.importc.}
+proc gtk_text_buffer_get_max_undo_levels*(buffer: GtkTextBuffer): guint {.importc.}
+
+
+
 
 # ============================================================================
 # SCROLLED WINDOW
@@ -1529,6 +1801,27 @@ proc gtk_stack_get_visible_child_name*(stack: GtkStack): cstring {.importc.}
 proc gtk_stack_switcher_new*(): GtkStackSwitcher {.importc.}
 proc gtk_stack_switcher_set_stack*(switcher: GtkStackSwitcher, stack: GtkStack) {.importc.}
 proc gtk_stack_switcher_get_stack*(switcher: GtkStackSwitcher): GtkStack {.importc.}
+
+proc gtk_stack_set_transition_type*(stack: GtkStack, transition: GtkStackTransitionType) {.importc.}
+  ## Sets the type of animation that will be used for transitions between pages in stack.
+  ## Available types include various kinds of fades and slides.
+
+proc gtk_stack_set_transition_duration*(stack: GtkStack, duration: cuint) {.importc.}
+  ## Sets the duration that transitions between pages in stack will take (in milliseconds).
+
+# proc gtk_stack_add_named*(stack: GtkStack, child: GtkWidget, name: cstring): GtkStackPage {.importc.}
+## Adds a child to stack. The child is identified by the name.
+## Returns: The GtkStackPage for child.
+
+proc gtk_stack_get_transition_type*(stack: GtkStack): GtkStackTransitionType {.importc.}
+  ## Gets the type of animation that will be used for transitions between pages in stack.
+
+proc gtk_stack_get_transition_duration*(stack: GtkStack): cuint {.importc.}
+  ## Returns the amount of time (in milliseconds) that transitions between pages in stack will take.
+
+
+
+
 
 # ============================================================================
 # HEADER BAR
@@ -2047,7 +2340,7 @@ proc gdk_texture_get_height*(texture: GdkTexture): gint {.importc.}
 proc gdk_texture_new_from_bytes*(bytes: GBytes, error: ptr GError): GdkTexture {.importc.}
 proc g_bytes_new_static*(data: pointer, size: csize_t): GBytes {.importc.}
 proc g_bytes_unref*(bytes: GBytes) {.importc.}
-
+proc gdk_texture_new_from_filename*(filename: cstring; error: pointer): GdkTexture {.importc.}
 
 
 
@@ -2243,15 +2536,7 @@ proc gtk_text_mark_get_name*(mark: GtkTextMark): cstring {.importc.}
 proc gtk_text_mark_get_buffer*(mark: GtkTextMark): GtkTextBuffer {.importc.}
 proc gtk_text_mark_get_left_gravity*(mark: GtkTextMark): gboolean {.importc.}
 
-proc gtk_text_buffer_add_mark*(buffer: GtkTextBuffer, mark: GtkTextMark, where: ptr GtkTextIter) {.importc.}
-proc gtk_text_buffer_create_mark*(buffer: GtkTextBuffer, markName: cstring, where: ptr GtkTextIter, leftGravity: gboolean): GtkTextMark {.importc.}
-proc gtk_text_buffer_move_mark*(buffer: GtkTextBuffer, mark: GtkTextMark, where: ptr GtkTextIter) {.importc.}
-proc gtk_text_buffer_delete_mark*(buffer: GtkTextBuffer, mark: GtkTextMark) {.importc.}
-proc gtk_text_buffer_get_mark*(buffer: GtkTextBuffer, name: cstring): GtkTextMark {.importc.}
-proc gtk_text_buffer_get_insert*(buffer: GtkTextBuffer): GtkTextMark {.importc.}
-proc gtk_text_buffer_get_selection_bound*(buffer: GtkTextBuffer): GtkTextMark {.importc.}
-proc gtk_text_buffer_place_cursor*(buffer: GtkTextBuffer, where: ptr GtkTextIter) {.importc.}
-proc gtk_text_buffer_select_range*(buffer: GtkTextBuffer, ins: ptr GtkTextIter, bound: ptr GtkTextIter) {.importc.}
+
 
 # ============================================================================
 # TEXT ITER
@@ -2331,88 +2616,11 @@ proc gtk_text_iter_editable*(iter: ptr GtkTextIter, defaultSetting: gboolean): g
 # TEXT BUFFER (дополнительные функции)
 # ============================================================================
 
-proc gtk_text_buffer_get_modified*(buffer: GtkTextBuffer): gboolean {.importc.}
-proc gtk_text_buffer_set_modified*(buffer: GtkTextBuffer, setting: gboolean) {.importc.}
-proc gtk_text_buffer_delete_selection*(buffer: GtkTextBuffer, interactive: gboolean, defaultEditable: gboolean): gboolean {.importc.}
-proc gtk_text_buffer_paste_clipboard*(buffer: GtkTextBuffer, clipboard: GdkClipboard, overrideLocation: ptr GtkTextIter, defaultEditable: gboolean) {.importc.}
-proc gtk_text_buffer_copy_clipboard*(buffer: GtkTextBuffer, clipboard: GdkClipboard) {.importc.}
-proc gtk_text_buffer_cut_clipboard*(buffer: GtkTextBuffer, clipboard: GdkClipboard, defaultEditable: gboolean) {.importc.}
-proc gtk_text_buffer_get_selection_bounds*(buffer: GtkTextBuffer, start: ptr GtkTextIter, `end`: ptr GtkTextIter): gboolean {.importc.}
-proc gtk_text_buffer_begin_user_action*(buffer: GtkTextBuffer) {.importc.}
-proc gtk_text_buffer_end_user_action*(buffer: GtkTextBuffer) {.importc.}
 proc gtk_text_buffer_add_selection_clipboard*(buffer: GtkTextBuffer, clipboard: GdkClipboard) {.importc.}
 proc gtk_text_buffer_remove_selection_clipboard*(buffer: GtkTextBuffer, clipboard: GdkClipboard) {.importc.}
-proc gtk_text_buffer_insert_range*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, start: ptr GtkTextIter, `end`: ptr GtkTextIter) {.importc.}
-proc gtk_text_buffer_insert_range_interactive*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, start: ptr GtkTextIter, `end`: ptr GtkTextIter, defaultEditable: gboolean): gboolean {.importc.}
 proc gtk_text_buffer_insert_with_tags*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, text: cstring, len: gint, firstTag: GtkTextTag) {.importc, varargs.}
 proc gtk_text_buffer_insert_with_tags_by_name*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, text: cstring, len: gint, firstTagName: cstring) {.importc, varargs.}
 proc gtk_text_buffer_create_tag*(buffer: GtkTextBuffer, tagName: cstring, firstPropertyName: cstring): GtkTextTag {.importc, varargs.}
-proc gtk_text_buffer_apply_tag*(buffer: GtkTextBuffer, tag: GtkTextTag, start: ptr GtkTextIter, `end`: ptr GtkTextIter) {.importc.}
-proc gtk_text_buffer_remove_tag*(buffer: GtkTextBuffer, tag: GtkTextTag, start: ptr GtkTextIter, `end`: ptr GtkTextIter) {.importc.}
-proc gtk_text_buffer_apply_tag_by_name*(buffer: GtkTextBuffer, name: cstring, start: ptr GtkTextIter, `end`: ptr GtkTextIter) {.importc.}
-proc gtk_text_buffer_remove_tag_by_name*(buffer: GtkTextBuffer, name: cstring, start: ptr GtkTextIter, `end`: ptr GtkTextIter) {.importc.}
-proc gtk_text_buffer_remove_all_tags*(buffer: GtkTextBuffer, start: ptr GtkTextIter, `end`: ptr GtkTextIter) {.importc.}
-proc gtk_text_buffer_get_tag_table*(buffer: GtkTextBuffer): GtkTextTagTable {.importc.}
-proc gtk_text_buffer_get_bounds*(buffer: GtkTextBuffer, start: ptr GtkTextIter, `end`: ptr GtkTextIter) {.importc.}
-
-# ============================================================================
-# TEXT VIEW (дополнительные функции)
-# ============================================================================
-
-proc gtk_text_view_scroll_to_iter*(textView: GtkTextView, iter: ptr GtkTextIter, withinMargin: gdouble, useAlign: gboolean, xalign: gdouble, yalign: gdouble): gboolean {.importc.}
-proc gtk_text_view_scroll_to_mark*(textView: GtkTextView, mark: GtkTextMark, withinMargin: gdouble, useAlign: gboolean, xalign: gdouble, yalign: gdouble) {.importc.}
-proc gtk_text_view_scroll_mark_onscreen*(textView: GtkTextView, mark: GtkTextMark) {.importc.}
-proc gtk_text_view_move_mark_onscreen*(textView: GtkTextView, mark: GtkTextMark): gboolean {.importc.}
-proc gtk_text_view_place_cursor_onscreen*(textView: GtkTextView): gboolean {.importc.}
-proc gtk_text_view_get_visible_rect*(textView: GtkTextView, visibleRect: pointer) {.importc.}
-proc gtk_text_view_get_iter_location*(textView: GtkTextView, iter: ptr GtkTextIter, location: pointer) {.importc.}
-proc gtk_text_view_get_cursor_locations*(textView: GtkTextView, iter: ptr GtkTextIter, strong: pointer, weak: pointer) {.importc.}
-proc gtk_text_view_get_line_at_y*(textView: GtkTextView, targetIter: ptr GtkTextIter, y: gint, lineTop: ptr gint) {.importc.}
-proc gtk_text_view_get_line_yrange*(textView: GtkTextView, iter: ptr GtkTextIter, y: ptr gint, height: ptr gint) {.importc.}
-proc gtk_text_view_get_iter_at_location*(textView: GtkTextView, iter: ptr GtkTextIter, x: gint, y: gint): gboolean {.importc.}
-proc gtk_text_view_get_iter_at_position*(textView: GtkTextView, iter: ptr GtkTextIter, trailing: ptr gint, x: gint, y: gint): gboolean {.importc.}
-proc gtk_text_view_buffer_to_window_coords*(textView: GtkTextView, win: gint, bufferX: gint, bufferY: gint, windowX: ptr gint, windowY: ptr gint) {.importc.}
-proc gtk_text_view_window_to_buffer_coords*(textView: GtkTextView, win: gint, windowX: gint, windowY: gint, bufferX: ptr gint, bufferY: ptr gint) {.importc.}
-proc gtk_text_view_forward_display_line*(textView: GtkTextView, iter: ptr GtkTextIter): gboolean {.importc.}
-proc gtk_text_view_backward_display_line*(textView: GtkTextView, iter: ptr GtkTextIter): gboolean {.importc.}
-proc gtk_text_view_forward_display_line_end*(textView: GtkTextView, iter: ptr GtkTextIter): gboolean {.importc.}
-proc gtk_text_view_backward_display_line_start*(textView: GtkTextView, iter: ptr GtkTextIter): gboolean {.importc.}
-proc gtk_text_view_starts_display_line*(textView: GtkTextView, iter: ptr GtkTextIter): gboolean {.importc.}
-proc gtk_text_view_move_visually*(textView: GtkTextView, iter: ptr GtkTextIter, count: gint): gboolean {.importc.}
-proc gtk_text_view_im_context_filter_keypress*(textView: GtkTextView, event: GdkEvent): gboolean {.importc.}
-proc gtk_text_view_reset_im_context*(textView: GtkTextView) {.importc.}
-proc gtk_text_view_get_gutter*(textView: GtkTextView, win: gint): GtkWidget {.importc.}
-proc gtk_text_view_set_gutter*(textView: GtkTextView, win: gint, widget: GtkWidget) {.importc.}
-proc gtk_text_view_set_left_margin*(textView: GtkTextView, leftMargin: gint) {.importc.}
-proc gtk_text_view_get_left_margin*(textView: GtkTextView): gint {.importc.}
-proc gtk_text_view_set_right_margin*(textView: GtkTextView, rightMargin: gint) {.importc.}
-proc gtk_text_view_get_right_margin*(textView: GtkTextView): gint {.importc.}
-proc gtk_text_view_set_top_margin*(textView: GtkTextView, topMargin: gint) {.importc.}
-proc gtk_text_view_get_top_margin*(textView: GtkTextView): gint {.importc.}
-proc gtk_text_view_set_bottom_margin*(textView: GtkTextView, bottomMargin: gint) {.importc.}
-proc gtk_text_view_get_bottom_margin*(textView: GtkTextView): gint {.importc.}
-proc gtk_text_view_set_indent*(textView: GtkTextView, indent: gint) {.importc.}
-proc gtk_text_view_get_indent*(textView: GtkTextView): gint {.importc.}
-proc gtk_text_view_set_tabs*(textView: GtkTextView, tabs: pointer) {.importc.}
-proc gtk_text_view_get_tabs*(textView: GtkTextView): pointer {.importc.}
-proc gtk_text_view_set_accepts_tab*(textView: GtkTextView, acceptsTab: gboolean) {.importc.}
-proc gtk_text_view_get_accepts_tab*(textView: GtkTextView): gboolean {.importc.}
-proc gtk_text_view_set_pixels_above_lines*(textView: GtkTextView, pixelsAboveLines: gint) {.importc.}
-proc gtk_text_view_get_pixels_above_lines*(textView: GtkTextView): gint {.importc.}
-proc gtk_text_view_set_pixels_below_lines*(textView: GtkTextView, pixelsBelowLines: gint) {.importc.}
-proc gtk_text_view_get_pixels_below_lines*(textView: GtkTextView): gint {.importc.}
-proc gtk_text_view_set_pixels_inside_wrap*(textView: GtkTextView, pixelsInsideWrap: gint) {.importc.}
-proc gtk_text_view_get_pixels_inside_wrap*(textView: GtkTextView): gint {.importc.}
-proc gtk_text_view_set_justification*(textView: GtkTextView, justification: GtkJustification) {.importc.}
-proc gtk_text_view_get_justification*(textView: GtkTextView): GtkJustification {.importc.}
-proc gtk_text_view_set_overwrite*(textView: GtkTextView, overwrite: gboolean) {.importc.}
-proc gtk_text_view_get_overwrite*(textView: GtkTextView): gboolean {.importc.}
-proc gtk_text_view_set_input_purpose*(textView: GtkTextView, purpose: GtkInputPurpose) {.importc.}
-proc gtk_text_view_get_input_purpose*(textView: GtkTextView): GtkInputPurpose {.importc.}
-proc gtk_text_view_set_extra_menu*(textView: GtkTextView, model: GMenuModel) {.importc.}
-proc gtk_text_view_get_extra_menu*(textView: GtkTextView): GMenuModel {.importc.}
-
-
 
 
 
