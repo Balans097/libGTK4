@@ -6,14 +6,23 @@
 ##          Прямые привязки к C API через FFI
 ## 
 ## 
-## Версия:   1.0
-## Дата:     2026-01-20
+## Версия:   1.1
+## Дата:     2026-02-05
 ## Автор:    Balans097 — vasil.minsk@yahoo.com
 ################################################################
 
 
+# 1.1 — исправления критических проблем (2026-02-05):
+#   - Исправлен createListStore: использует gtk_list_store_newv вместо небезопасного varargs
+#   - Исправлены g_timeout_add/g_idle_add: теперь используют правильный тип GSourceFunc с user_data
+#   - Исправлен getClipboardText: использует GAsyncReadyCallback вместо некорректного callback
+#   - Исправлены gtk_text_view_get_rtl/ltr_context: возвращают PangoContext* вместо gboolean
+#   - Исправлен gtk_notebook_set_scrollable: принимает gboolean вместо bool
+#   - Исправлен GtkInscription: удалён несуществующий gtk_inscription_get_markup, 
+#     исправлены типы для get/set_wrap_mode (PangoWrapMode) и get/set_attributes (PangoAttrList*)
+#   - Добавлены guards GTK_DISABLE_DEPRECATED для устаревших GTK3 API (TreeView, ListStore, 
+#     TreeStore, InfoBar, Statusbar, CellRenderer)
 # 1.0 — начальная реализация библиотеки (2026-01-20)
-
 
 
 import strutils
@@ -248,6 +257,8 @@ type
   GCallback* = pointer
   GDestroyNotify* = pointer
   GClosureNotify* = pointer
+  GSourceFunc* = proc(userData: gpointer): gboolean {.cdecl.}
+  GAsyncReadyCallback* = proc(sourceObject: pointer, res: pointer, userData: gpointer) {.cdecl.}
 
 # ============================================================================
 # ПЕРЕЧИСЛЕНИЯ (ENUMS)
@@ -476,6 +487,7 @@ type
   PangoAttrList* = distinct pointer
   PangoLayout* = distinct pointer
   PangoTabArray* = distinct pointer
+  PangoContext* = distinct pointer
 
 
   # Для виджета Entry
@@ -1453,10 +1465,10 @@ proc gtk_text_view_remove*(text_view: GtkTextView, child: GtkWidget) {.importc.}
 proc gtk_text_view_reset_im_context*(text_view: GtkTextView) {.importc.}
 
 # RTL (right-to-left) контекст меню
-proc gtk_text_view_get_rtl_context*(text_view: GtkTextView): gboolean {.importc.}
+proc gtk_text_view_get_rtl_context*(text_view: GtkTextView): PangoContext {.importc.}
 
 # LTR (left-to-right) контекст меню  
-proc gtk_text_view_get_ltr_context*(text_view: GtkTextView): gboolean {.importc.}
+proc gtk_text_view_get_ltr_context*(text_view: GtkTextView): PangoContext {.importc.}
 
 # Начать выделение через drag
 proc gtk_text_view_start_selection_drag*(text_view: GtkTextView, iter: ptr GtkTextIter,
@@ -1768,7 +1780,7 @@ proc gtk_notebook_set_tab_pos*(notebook: GtkNotebook, pos: GtkPositionType) {.im
 proc gtk_notebook_get_tab_pos*(notebook: GtkNotebook): GtkPositionType {.importc.}
 proc gtk_notebook_set_show_tabs*(notebook: GtkNotebook, showTabs: gboolean) {.importc.}
 proc gtk_notebook_get_show_tabs*(notebook: GtkNotebook): gboolean {.importc.}
-proc gtk_notebook_set_scrollable*(notebook: GtkNotebook, scrollable: bool) {.importc.}
+proc gtk_notebook_set_scrollable*(notebook: GtkNotebook, scrollable: gboolean) {.importc.}
 
 
 # ============================================================================
@@ -2108,29 +2120,33 @@ proc gtk_aspect_frame_get_child*(aspectFrame: GtkAspectFrame): GtkWidget {.impor
 
 # ============================================================================
 # INFO BAR
+# WARNING: InfoBar is deprecated in GTK4.
 # ============================================================================
 
-proc gtk_info_bar_new*(): GtkInfoBar {.importc.}
-proc gtk_info_bar_add_button*(infoBar: GtkInfoBar, buttonText: cstring, responseId: gint) {.importc.}
-proc gtk_info_bar_add_child*(infoBar: GtkInfoBar, widget: GtkWidget) {.importc.}
-proc gtk_info_bar_remove_child*(infoBar: GtkInfoBar, widget: GtkWidget) {.importc.}
-proc gtk_info_bar_set_message_type*(infoBar: GtkInfoBar, messageType: GtkMessageType) {.importc.}
-proc gtk_info_bar_get_message_type*(infoBar: GtkInfoBar): GtkMessageType {.importc.}
-proc gtk_info_bar_set_show_close_button*(infoBar: GtkInfoBar, setting: gboolean) {.importc.}
-proc gtk_info_bar_get_show_close_button*(infoBar: GtkInfoBar): gboolean {.importc.}
-proc gtk_info_bar_set_revealed*(infoBar: GtkInfoBar, revealed: gboolean) {.importc.}
-proc gtk_info_bar_get_revealed*(infoBar: GtkInfoBar): gboolean {.importc.}
+when not defined(GTK_DISABLE_DEPRECATED):
+  proc gtk_info_bar_new*(): GtkInfoBar {.importc.}
+  proc gtk_info_bar_add_button*(infoBar: GtkInfoBar, buttonText: cstring, responseId: gint) {.importc.}
+  proc gtk_info_bar_add_child*(infoBar: GtkInfoBar, widget: GtkWidget) {.importc.}
+  proc gtk_info_bar_remove_child*(infoBar: GtkInfoBar, widget: GtkWidget) {.importc.}
+  proc gtk_info_bar_set_message_type*(infoBar: GtkInfoBar, messageType: GtkMessageType) {.importc.}
+  proc gtk_info_bar_get_message_type*(infoBar: GtkInfoBar): GtkMessageType {.importc.}
+  proc gtk_info_bar_set_show_close_button*(infoBar: GtkInfoBar, setting: gboolean) {.importc.}
+  proc gtk_info_bar_get_show_close_button*(infoBar: GtkInfoBar): gboolean {.importc.}
+  proc gtk_info_bar_set_revealed*(infoBar: GtkInfoBar, revealed: gboolean) {.importc.}
+  proc gtk_info_bar_get_revealed*(infoBar: GtkInfoBar): gboolean {.importc.}
 
 # ============================================================================
 # STATUSBAR
+# WARNING: Statusbar is deprecated in GTK4.
 # ============================================================================
 
-proc gtk_statusbar_new*(): GtkStatusbar {.importc.}
-proc gtk_statusbar_get_context_id*(statusbar: GtkStatusbar, contextDescription: cstring): guint {.importc.}
-proc gtk_statusbar_push*(statusbar: GtkStatusbar, contextId: guint, text: cstring): guint {.importc.}
-proc gtk_statusbar_pop*(statusbar: GtkStatusbar, contextId: guint) {.importc.}
-proc gtk_statusbar_remove*(statusbar: GtkStatusbar, contextId: guint, messageId: guint) {.importc.}
-proc gtk_statusbar_remove_all*(statusbar: GtkStatusbar, contextId: guint) {.importc.}
+when not defined(GTK_DISABLE_DEPRECATED):
+  proc gtk_statusbar_new*(): GtkStatusbar {.importc.}
+  proc gtk_statusbar_get_context_id*(statusbar: GtkStatusbar, contextDescription: cstring): guint {.importc.}
+  proc gtk_statusbar_push*(statusbar: GtkStatusbar, contextId: guint, text: cstring): guint {.importc.}
+  proc gtk_statusbar_pop*(statusbar: GtkStatusbar, contextId: guint) {.importc.}
+  proc gtk_statusbar_remove*(statusbar: GtkStatusbar, contextId: guint, messageId: guint) {.importc.}
+  proc gtk_statusbar_remove_all*(statusbar: GtkStatusbar, contextId: guint) {.importc.}
 
 # ============================================================================
 # LEVEL BAR
@@ -2300,7 +2316,8 @@ proc gtk_gl_area_get_has_stencil_buffer*(area: GtkGLArea): gboolean {.importc.}
 
 proc gdk_display_get_clipboard*(display: pointer): GdkClipboard {.importc.}
 proc gdk_clipboard_set_text*(clipboard: GdkClipboard, text: cstring) {.importc.}
-proc gdk_clipboard_read_text_async*(clipboard: GdkClipboard, cancellable: pointer, callback: pointer, userData: gpointer) {.importc.}
+proc gdk_clipboard_read_text_async*(clipboard: GdkClipboard, cancellable: pointer, callback: GAsyncReadyCallback, userData: gpointer) {.importc.}
+proc gdk_clipboard_read_text_finish*(clipboard: GdkClipboard, res: pointer, error: ptr GError): cstring {.importc.}
 
 
 
@@ -2359,9 +2376,9 @@ proc g_strcmp0*(str1: cstring, str2: cstring): gint {.importc.}
 # IDLE AND TIMEOUT FUNCTIONS
 # ============================================================================
 
-proc g_timeout_add*(interval: guint, function: pointer, data: gpointer): guint {.importc.}
-proc g_timeout_add_seconds*(interval: guint, function: pointer, data: gpointer): guint {.importc.}
-proc g_idle_add*(function: pointer, data: gpointer): guint {.importc.}
+proc g_timeout_add*(interval: guint, function: GSourceFunc, data: gpointer): guint {.importc.}
+proc g_timeout_add_seconds*(interval: guint, function: GSourceFunc, data: gpointer): guint {.importc.}
+proc g_idle_add*(function: GSourceFunc, data: gpointer): guint {.importc.}
 proc g_source_remove*(tag: guint): gboolean {.importc.}
 
 # ============================================================================
@@ -2374,65 +2391,74 @@ proc g_main_loop_quit*(loop: pointer) {.importc.}
 
 # ============================================================================
 # TREE MODEL & STORE
+# WARNING: These APIs are deprecated in GTK4 and removed when GTK_DISABLE_DEPRECATED is defined.
+# Consider using GtkListView, GtkColumnView, or GtkTreeExpander instead.
 # ============================================================================
 
-proc gtk_list_store_new*(nColumns: gint): GtkListStore {.importc, varargs.}
-proc gtk_list_store_append*(listStore: GtkListStore, iter: ptr GtkTreeIter) {.importc.}
-proc gtk_list_store_prepend*(listStore: GtkListStore, iter: ptr GtkTreeIter) {.importc.}
-proc gtk_list_store_insert*(listStore: GtkListStore, iter: ptr GtkTreeIter, position: gint) {.importc.}
-proc gtk_list_store_remove*(listStore: GtkListStore, iter: ptr GtkTreeIter): gboolean {.importc.}
-proc gtk_list_store_clear*(listStore: GtkListStore) {.importc.}
-proc gtk_list_store_set*(listStore: GtkListStore, iter: ptr GtkTreeIter) {.importc, varargs.}
-
-proc gtk_tree_store_new*(nColumns: gint): GtkTreeStore {.importc, varargs.}
-proc gtk_tree_store_append*(treeStore: GtkTreeStore, iter: ptr GtkTreeIter, parent: ptr GtkTreeIter) {.importc.}
-proc gtk_tree_store_prepend*(treeStore: GtkTreeStore, iter: ptr GtkTreeIter, parent: ptr GtkTreeIter) {.importc.}
-proc gtk_tree_store_insert*(treeStore: GtkTreeStore, iter: ptr GtkTreeIter, parent: ptr GtkTreeIter, position: gint) {.importc.}
-proc gtk_tree_store_remove*(treeStore: GtkTreeStore, iter: ptr GtkTreeIter): gboolean {.importc.}
-proc gtk_tree_store_clear*(treeStore: GtkTreeStore) {.importc.}
-proc gtk_tree_store_set*(treeStore: GtkTreeStore, iter: ptr GtkTreeIter) {.importc, varargs.}
+when not defined(GTK_DISABLE_DEPRECATED):
+  proc gtk_list_store_new*(nColumns: gint): GtkListStore {.importc, varargs.}
+  proc gtk_list_store_newv*(nColumns: gint, types: ptr GType): GtkListStore {.importc.}
+  proc gtk_list_store_append*(listStore: GtkListStore, iter: ptr GtkTreeIter) {.importc.}
+  proc gtk_list_store_prepend*(listStore: GtkListStore, iter: ptr GtkTreeIter) {.importc.}
+  proc gtk_list_store_insert*(listStore: GtkListStore, iter: ptr GtkTreeIter, position: gint) {.importc.}
+  proc gtk_list_store_remove*(listStore: GtkListStore, iter: ptr GtkTreeIter): gboolean {.importc.}
+  proc gtk_list_store_clear*(listStore: GtkListStore) {.importc.}
+  proc gtk_list_store_set*(listStore: GtkListStore, iter: ptr GtkTreeIter) {.importc, varargs.}
+  proc gtk_tree_store_new*(nColumns: gint): GtkTreeStore {.importc, varargs.}
+  proc gtk_tree_store_append*(treeStore: GtkTreeStore, iter: ptr GtkTreeIter, parent: ptr GtkTreeIter) {.importc.}
+  proc gtk_tree_store_prepend*(treeStore: GtkTreeStore, iter: ptr GtkTreeIter, parent: ptr GtkTreeIter) {.importc.}
+  proc gtk_tree_store_insert*(treeStore: GtkTreeStore, iter: ptr GtkTreeIter, parent: ptr GtkTreeIter, position: gint) {.importc.}
+  proc gtk_tree_store_remove*(treeStore: GtkTreeStore, iter: ptr GtkTreeIter): gboolean {.importc.}
+  proc gtk_tree_store_clear*(treeStore: GtkTreeStore) {.importc.}
+  proc gtk_tree_store_set*(treeStore: GtkTreeStore, iter: ptr GtkTreeIter) {.importc, varargs.}
 
 # ============================================================================
 # TREE VIEW
+# WARNING: TreeView is deprecated in GTK4. Use GtkColumnView instead.
 # ============================================================================
 
-proc gtk_tree_view_new*(): GtkTreeView {.importc.}
-proc gtk_tree_view_new_with_model*(model: GtkTreeModel): GtkTreeView {.importc.}
-proc gtk_tree_view_get_model*(treeView: GtkTreeView): GtkTreeModel {.importc.}
-proc gtk_tree_view_set_model*(treeView: GtkTreeView, model: GtkTreeModel) {.importc.}
-proc gtk_tree_view_append_column*(treeView: GtkTreeView, column: GtkTreeViewColumn): gint {.importc.}
-proc gtk_tree_view_remove_column*(treeView: GtkTreeView, column: GtkTreeViewColumn): gint {.importc.}
-proc gtk_tree_view_insert_column*(treeView: GtkTreeView, column: GtkTreeViewColumn, position: gint): gint {.importc.}
-proc gtk_tree_view_get_selection*(treeView: GtkTreeView): GtkTreeSelection {.importc.}
-proc gtk_tree_view_set_headers_visible*(treeView: GtkTreeView, headersVisible: gboolean) {.importc.}
-proc gtk_tree_view_get_headers_visible*(treeView: GtkTreeView): gboolean {.importc.}
-proc gtk_tree_view_collapse_all*(treeView: GtkTreeView) {.importc.}
-proc gtk_tree_view_expand_all*(treeView: GtkTreeView) {.importc.}
+when not defined(GTK_DISABLE_DEPRECATED):
+  proc gtk_tree_view_new*(): GtkTreeView {.importc.}
+  proc gtk_tree_view_new_with_model*(model: GtkTreeModel): GtkTreeView {.importc.}
+  proc gtk_tree_view_get_model*(treeView: GtkTreeView): GtkTreeModel {.importc.}
+  proc gtk_tree_view_set_model*(treeView: GtkTreeView, model: GtkTreeModel) {.importc.}
+  proc gtk_tree_view_append_column*(treeView: GtkTreeView, column: GtkTreeViewColumn): gint {.importc.}
+  proc gtk_tree_view_remove_column*(treeView: GtkTreeView, column: GtkTreeViewColumn): gint {.importc.}
+  proc gtk_tree_view_insert_column*(treeView: GtkTreeView, column: GtkTreeViewColumn, position: gint): gint {.importc.}
+  proc gtk_tree_view_get_selection*(treeView: GtkTreeView): GtkTreeSelection {.importc.}
+  proc gtk_tree_view_set_headers_visible*(treeView: GtkTreeView, headersVisible: gboolean) {.importc.}
+  proc gtk_tree_view_get_headers_visible*(treeView: GtkTreeView): gboolean {.importc.}
+  proc gtk_tree_view_collapse_all*(treeView: GtkTreeView) {.importc.}
+  proc gtk_tree_view_expand_all*(treeView: GtkTreeView) {.importc.}
 
 # ============================================================================
 # TREE VIEW COLUMN
+# WARNING: TreeViewColumn is deprecated in GTK4.
 # ============================================================================
 
-proc gtk_tree_view_column_new*(): GtkTreeViewColumn {.importc.}
-proc gtk_tree_view_column_new_with_attributes*(title: cstring, cell: GtkCellRenderer): GtkTreeViewColumn {.importc, varargs.}
-proc gtk_tree_view_column_pack_start*(treeColumn: GtkTreeViewColumn, cell: GtkCellRenderer, expand: gboolean) {.importc.}
-proc gtk_tree_view_column_pack_end*(treeColumn: GtkTreeViewColumn, cell: GtkCellRenderer, expand: gboolean) {.importc.}
-proc gtk_tree_view_column_clear*(treeColumn: GtkTreeViewColumn) {.importc.}
-proc gtk_tree_view_column_add_attribute*(treeColumn: GtkTreeViewColumn, cellRenderer: GtkCellRenderer, attribute: cstring, column: gint) {.importc.}
-proc gtk_tree_view_column_set_title*(treeColumn: GtkTreeViewColumn, title: cstring) {.importc.}
-proc gtk_tree_view_column_get_title*(treeColumn: GtkTreeViewColumn): cstring {.importc.}
-proc gtk_tree_view_column_set_resizable*(treeColumn: GtkTreeViewColumn, resizable: gboolean) {.importc.}
-proc gtk_tree_view_column_get_resizable*(treeColumn: GtkTreeViewColumn): gboolean {.importc.}
-proc gtk_tree_view_column_set_visible*(treeColumn: GtkTreeViewColumn, visible: gboolean) {.importc.}
-proc gtk_tree_view_column_get_visible*(treeColumn: GtkTreeViewColumn): gboolean {.importc.}
+when not defined(GTK_DISABLE_DEPRECATED):
+  proc gtk_tree_view_column_new*(): GtkTreeViewColumn {.importc.}
+  proc gtk_tree_view_column_new_with_attributes*(title: cstring, cell: GtkCellRenderer): GtkTreeViewColumn {.importc, varargs.}
+  proc gtk_tree_view_column_pack_start*(treeColumn: GtkTreeViewColumn, cell: GtkCellRenderer, expand: gboolean) {.importc.}
+  proc gtk_tree_view_column_pack_end*(treeColumn: GtkTreeViewColumn, cell: GtkCellRenderer, expand: gboolean) {.importc.}
+  proc gtk_tree_view_column_clear*(treeColumn: GtkTreeViewColumn) {.importc.}
+  proc gtk_tree_view_column_add_attribute*(treeColumn: GtkTreeViewColumn, cellRenderer: GtkCellRenderer, attribute: cstring, column: gint) {.importc.}
+  proc gtk_tree_view_column_set_title*(treeColumn: GtkTreeViewColumn, title: cstring) {.importc.}
+  proc gtk_tree_view_column_get_title*(treeColumn: GtkTreeViewColumn): cstring {.importc.}
+  proc gtk_tree_view_column_set_resizable*(treeColumn: GtkTreeViewColumn, resizable: gboolean) {.importc.}
+  proc gtk_tree_view_column_get_resizable*(treeColumn: GtkTreeViewColumn): gboolean {.importc.}
+  proc gtk_tree_view_column_set_visible*(treeColumn: GtkTreeViewColumn, visible: gboolean) {.importc.}
+  proc gtk_tree_view_column_get_visible*(treeColumn: GtkTreeViewColumn): gboolean {.importc.}
 
 # ============================================================================
 # CELL RENDERER
+# WARNING: CellRenderer is deprecated in GTK4.
 # ============================================================================
 
-proc gtk_cell_renderer_text_new*(): GtkCellRendererText {.importc.}
-proc gtk_cell_renderer_toggle_new*(): GtkCellRendererToggle {.importc.}
-proc gtk_cell_renderer_pixbuf_new*(): GtkCellRendererPixbuf {.importc.}
+when not defined(GTK_DISABLE_DEPRECATED):
+  proc gtk_cell_renderer_text_new*(): GtkCellRendererText {.importc.}
+  proc gtk_cell_renderer_toggle_new*(): GtkCellRendererToggle {.importc.}
+  proc gtk_cell_renderer_pixbuf_new*(): GtkCellRendererPixbuf {.importc.}
 
 proc gtk_cell_renderer_toggle_set_active*(toggle: GtkCellRendererToggle, setting: gboolean) {.importc.}
 proc gtk_cell_renderer_toggle_get_active*(toggle: GtkCellRendererToggle): gboolean {.importc.}
@@ -3296,10 +3322,9 @@ type
 proc gtk_inscription_new*(text: cstring): GtkInscription {.importc.}
 proc gtk_inscription_get_text*(self: GtkInscription): cstring {.importc.}
 proc gtk_inscription_set_text*(self: GtkInscription, text: cstring) {.importc.}
-proc gtk_inscription_get_markup*(self: GtkInscription): cstring {.importc.}
 proc gtk_inscription_set_markup*(self: GtkInscription, markup: cstring) {.importc.}
-proc gtk_inscription_get_attributes*(self: GtkInscription): pointer {.importc.}
-proc gtk_inscription_set_attributes*(self: GtkInscription, attrs: pointer) {.importc.}
+proc gtk_inscription_get_attributes*(self: GtkInscription): PangoAttrList {.importc.}
+proc gtk_inscription_set_attributes*(self: GtkInscription, attrs: PangoAttrList) {.importc.}
 proc gtk_inscription_get_min_chars*(self: GtkInscription): guint {.importc.}
 proc gtk_inscription_set_min_chars*(self: GtkInscription, minChars: guint) {.importc.}
 proc gtk_inscription_get_nat_chars*(self: GtkInscription): guint {.importc.}
@@ -3314,8 +3339,8 @@ proc gtk_inscription_get_yalign*(self: GtkInscription): gfloat {.importc.}
 proc gtk_inscription_set_yalign*(self: GtkInscription, yalign: gfloat) {.importc.}
 proc gtk_inscription_get_text_overflow*(self: GtkInscription): gint {.importc.}
 proc gtk_inscription_set_text_overflow*(self: GtkInscription, overflow: gint) {.importc.}
-proc gtk_inscription_get_wrap_mode*(self: GtkInscription): GtkWrapMode {.importc.}
-proc gtk_inscription_set_wrap_mode*(self: GtkInscription, wrapMode: GtkWrapMode) {.importc.}
+proc gtk_inscription_get_wrap_mode*(self: GtkInscription): PangoWrapMode {.importc.}
+proc gtk_inscription_set_wrap_mode*(self: GtkInscription, wrapMode: PangoWrapMode) {.importc.}
 
 
 # ============================================================================
@@ -3978,24 +4003,21 @@ proc rgb*(r, g, b: int): GdkRGBA =
 # Таймеры и задержки
 # ----------------------------------------------------------------------------
 
-type
-  TimeoutProc* = proc(): bool {.cdecl.}
-
-proc addTimeout*(interval: int, callback: TimeoutProc, data: pointer = nil): guint =
+proc addTimeout*(interval: int, callback: GSourceFunc, data: pointer = nil): guint =
   ## Добавление таймера (интервал в миллисекундах)
-  result = g_timeout_add(interval.guint, cast[pointer](callback), data)
+  result = g_timeout_add(interval.guint, callback, data)
 
-proc addTimeoutSeconds*(interval: int, callback: TimeoutProc, data: pointer = nil): guint =
+proc addTimeoutSeconds*(interval: int, callback: GSourceFunc, data: pointer = nil): guint =
   ## Добавление таймера (интервал в секундах)
-  result = g_timeout_add_seconds(interval.guint, cast[pointer](callback), data)
+  result = g_timeout_add_seconds(interval.guint, callback, data)
 
 proc removeTimeout*(timeoutId: guint): bool =
   ## Удаление таймера
   result = g_source_remove(timeoutId) != 0
 
-proc addIdle*(callback: TimeoutProc, data: pointer = nil): guint =
+proc addIdle*(callback: GSourceFunc, data: pointer = nil): guint =
   ## Добавление idle callback (вызывается когда система не занята)
-  result = g_idle_add(cast[pointer](callback), data)
+  result = g_idle_add(callback, data)
 
 # ----------------------------------------------------------------------------
 # Работа с буфером обмена
@@ -4007,35 +4029,39 @@ proc setClipboardText*(text: string) =
   let clipboard = gdk_display_get_clipboard(display)
   gdk_clipboard_set_text(clipboard, text.cstring)
 
-# Callback для получения текста из буфера
-type ClipboardTextCallback* = proc(text: cstring, userData: pointer) {.cdecl.}
-
-proc getClipboardText*(callback: ClipboardTextCallback, userData: pointer = nil) =
+proc getClipboardText*(callback: GAsyncReadyCallback, userData: pointer = nil) =
   ## Получение текста из буфера обмена (асинхронно)
+  ## Callback получает (sourceObject: pointer, res: pointer, userData: gpointer)
+  ## Используйте gdk_clipboard_read_text_finish для получения текста из res
   let display = gdk_display_get_default()
   let clipboard = gdk_display_get_clipboard(display)
-  gdk_clipboard_read_text_async(clipboard, nil, cast[pointer](callback), userData)
+  gdk_clipboard_read_text_async(clipboard, nil, callback, userData)
 
 # ----------------------------------------------------------------------------
 # Утилиты для TreeView (совместимость с GTK3)
+# WARNING: These utilities are for deprecated GTK3 TreeView API
 # ----------------------------------------------------------------------------
 
-proc createListStore*(columnTypes: varargs[GType]): GtkListStore =
-  ## Создание ListStore
-  result = gtk_list_store_new(columnTypes.len.gint, columnTypes[0].unsafeAddr)
+when not defined(GTK_DISABLE_DEPRECATED):
+  proc createListStore*(columnTypes: varargs[GType]): GtkListStore =
+    ## Создание ListStore
+    var types = newSeq[GType](columnTypes.len)
+    for i, t in columnTypes:
+      types[i] = t
+    result = gtk_list_store_newv(columnTypes.len.gint, types[0].addr)
 
-proc createTreeView*(model: GtkTreeModel = nil): GtkTreeView =
-  ## Создание TreeView
-  if model != nil:
-    result = gtk_tree_view_new_with_model(model)
-  else:
-    result = gtk_tree_view_new()
+  proc createTreeView*(model: GtkTreeModel = nil): GtkTreeView =
+    ## Создание TreeView
+    if model != nil:
+      result = gtk_tree_view_new_with_model(model)
+    else:
+      result = gtk_tree_view_new()
 
-proc addColumn*(treeView: GtkTreeView, title: string, columnIndex: int): GtkTreeViewColumn =
-  ## Добавление текстовой колонки
-  let renderer = gtk_cell_renderer_text_new()
-  result = gtk_tree_view_column_new_with_attributes(title.cstring, renderer, "text", columnIndex.gint, nil)
-  discard gtk_tree_view_append_column(treeView, result)
+  proc addColumn*(treeView: GtkTreeView, title: string, columnIndex: int): GtkTreeViewColumn =
+    ## Добавление текстовой колонки
+    let renderer = gtk_cell_renderer_text_new()
+    result = gtk_tree_view_column_new_with_attributes(title.cstring, renderer, "text", columnIndex.gint, nil)
+    discard gtk_tree_view_append_column(treeView, result)
 
 proc appendRow*(listStore: GtkListStore): GtkTreeIter =
   ## Добавление строки в ListStore
