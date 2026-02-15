@@ -1691,89 +1691,416 @@ const
 
 ## Примеры использования
 
-### Минимальное приложение
+### Пример 1: Приложение Hello World
 
 ```nim
 import libGTK4
 
-proc activate(app: GtkApplication, user_data: gpointer) {.cdecl.} =
+proc activate(app: GtkApplication, userData: gpointer) {.cdecl.} =
   let window = gtk_application_window_new(app)
   gtk_window_set_title(window, "Hello GTK4")
   gtk_window_set_default_size(window, 400, 300)
   
-  let button = gtk_button_new_with_label("Нажми меня")
+  let button = gtk_button_new_with_label("Hello, World!")
   gtk_window_set_child(window, button)
+  
+  proc onClicked(btn: GtkButton, data: gpointer) {.cdecl.} =
+    echo "Hello, World!"
+  
+  discard g_signal_connect_data(button, "clicked", 
+                                cast[GCallback](onClicked), 
+                                nil, nil, 0)
   
   gtk_window_present(window)
 
 proc main() =
   let app = gtk_application_new("com.example.hello", G_APPLICATION_DEFAULT_FLAGS)
-  discard g_signal_connect_data(app, "activate", cast[GCallback](activate), nil, nil, 0)
-  discard g_application_run(app, 0, nil)
+  discard g_signal_connect_data(app, "activate", 
+                                cast[GCallback](activate), 
+                                nil, nil, 0)
+  let status = g_application_run(app, 0, nil)
   g_object_unref(app)
+  quit(status)
 
 main()
 ```
 
-### Приложение с контейнером
+### Пример 2: Текстовый редактор с диалогом файлов
+
+**Ключевые моменты:**
+- Использует `PANGO_WRAP_WORD` вместо `GTK_WRAP_WORD`
+- Типы ответов должны быть приведены к `gint`
+- Избегает захвата переменных в процедурах `{.cdecl.}` используя `g_object_set_data`/`g_object_get_data`
 
 ```nim
 import libGTK4
 
-proc activate(app: GtkApplication, user_data: gpointer) {.cdecl.} =
+proc activate(app: GtkApplication, userData: gpointer) {.cdecl.} =
+  # Создаем окно
   let window = gtk_application_window_new(app)
-  gtk_window_set_title(window, "Контейнеры GTK4")
-  gtk_window_set_default_size(window, 400, 300)
+  gtk_window_set_title(window, "Простой текстовый редактор")
+  gtk_window_set_default_size(window, 600, 400)
   
-  # Создаем вертикальный Box
-  let box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10)
-  gtk_window_set_child(window, box)
+  # Создаем заголовочную панель
+  let headerBar = gtk_header_bar_new()
+  let btnOpen = gtk_button_new_with_label("Открыть")
+  let btnSave = gtk_button_new_with_label("Сохранить")
+  gtk_header_bar_pack_start(headerBar, btnOpen)
+  gtk_header_bar_pack_end(headerBar, btnSave)
+  gtk_window_set_titlebar(window, headerBar)
   
-  # Добавляем виджеты
-  let label = gtk_label_new("Привет, GTK4!")
-  gtk_box_append(box, label)
+  # Создаем текстовое поле с прокруткой
+  let scrolled = gtk_scrolled_window_new()
+  let textView = gtk_text_view_new()
+  gtk_text_view_set_wrap_mode(textView, PANGO_WRAP_WORD)  # Используем PANGO_WRAP_WORD, не GTK_WRAP_WORD
+  gtk_scrolled_window_set_child(scrolled, textView)
+  gtk_window_set_child(window, scrolled)
   
-  let entry = gtk_entry_new()
-  gtk_entry_set_placeholder_text(entry, "Введите текст...")
-  gtk_box_append(box, entry)
+  # Обработчик кнопки открытия
+  proc onOpen(btn: GtkButton, data: gpointer) {.cdecl.} =
+    let window = cast[GtkWindow](data)
+    let textView = g_object_get_data(cast[GObject](btn), "textview")
+    let dialog = gtk_file_chooser_dialog_new(
+      "Открыть файл",
+      window,
+      GTK_FILE_CHOOSER_ACTION_OPEN,
+      nil
+    )
+    discard gtk_dialog_add_button(dialog, "Отмена", gint(GTK_RESPONSE_CANCEL))  # Приводим к gint
+    discard gtk_dialog_add_button(dialog, "Открыть", gint(GTK_RESPONSE_ACCEPT))
+    
+    proc onResponse(dlg: GtkDialog, response: gint, tv: gpointer) {.cdecl.} =
+      if response == gint(GTK_RESPONSE_ACCEPT):  # Приводим к gint для сравнения
+        let file = gtk_file_chooser_get_file(dlg)
+        if file != nil:
+          # Чтение содержимого файла (упрощенно)
+          let path = g_file_get_path(file)
+          echo "Открытие: ", path
+          g_free(path)
+          g_object_unref(file)
+      gtk_window_destroy(dlg)
+    
+    discard g_signal_connect_data(dialog, "response", 
+                                  cast[GCallback](onResponse), 
+                                  textView, nil, 0)
+    gtk_window_present(dialog)
   
-  let button = gtk_button_new_with_label("ОК")
-  gtk_box_append(box, button)
+  # Обработчик кнопки сохранения
+  proc onSave(btn: GtkButton, tv: gpointer) {.cdecl.} =
+    let textView = cast[GtkTextView](tv)
+    let buffer = gtk_text_view_get_buffer(textView)
+    var start, endIter: GtkTextIter
+    gtk_text_buffer_get_start_iter(buffer, addr start)
+    gtk_text_buffer_get_end_iter(buffer, addr endIter)
+    let text = gtk_text_buffer_get_text(buffer, addr start, addr endIter, 0)
+    echo "Сохранение текста: ", text
+  
+  # Сохраняем textView в данных кнопки, чтобы избежать захвата переменных
+  g_object_set_data(cast[GObject](btnOpen), "textview", textView)
+  
+  discard g_signal_connect_data(btnOpen, "clicked", 
+                                cast[GCallback](onOpen), 
+                                window, nil, 0)
+  discard g_signal_connect_data(btnSave, "clicked", 
+                                cast[GCallback](onSave), 
+                                textView, nil, 0)
   
   gtk_window_present(window)
 
 proc main() =
-  let app = gtk_application_new("com.example.containers", G_APPLICATION_DEFAULT_FLAGS)
-  discard g_signal_connect_data(app, "activate", cast[GCallback](activate), nil, nil, 0)
+  let app = gtk_application_new("com.example.editor", G_APPLICATION_DEFAULT_FLAGS)
+  discard g_signal_connect_data(app, "activate", 
+                                cast[GCallback](activate), 
+                                nil, nil, 0)
   discard g_application_run(app, 0, nil)
   g_object_unref(app)
 
 main()
 ```
 
-### Обработка событий
+### Пример 3: Калькулятор с поддержкой клавиатуры
+
+**Ключевые моменты:**
+- Использует `gtk_editable_get_text`/`gtk_editable_set_text` вместо устаревших функций `gtk_entry_*`
+- Реализует поддержку клавиатуры с помощью `GtkEventControllerKey`
+- Использует явное преобразование `cstring()` для избежания предупреждений компилятора
+- Обрабатывает как основную клавиатуру, так и цифровую панель
 
 ```nim
 import libGTK4
+import strutils
 
-proc onButtonClicked(button: GtkButton, user_data: gpointer) {.cdecl.} =
-  echo "Кнопка нажата!"
+var display: GtkEntry
+var currentValue: float = 0.0
+var pendingOp: string = ""
+var pendingValue: float = 0.0
+var newNumber: bool = true
 
-proc activate(app: GtkApplication, user_data: gpointer) {.cdecl.} =
-  let window = gtk_application_window_new(app)
-  gtk_window_set_title(window, "События")
+proc processNumber(num: string) =
+  let current = $gtk_editable_get_text(display)
+  if newNumber or current == "0":
+    gtk_editable_set_text(display, cstring(num))
+    newNumber = false
+  else:
+    let combined = current & num
+    gtk_editable_set_text(display, cstring(combined))
+
+proc processOperation(op: string) =
+  currentValue = parseFloat($gtk_editable_get_text(display))
+  pendingOp = op
+  pendingValue = currentValue
+  newNumber = true
+
+proc processEquals() =
+  let value = parseFloat($gtk_editable_get_text(display))
+  var result: float
+  case pendingOp:
+  of "+": result = pendingValue + value
+  of "-": result = pendingValue - value
+  of "*": result = pendingValue * value
+  of "/": result = if value != 0: pendingValue / value else: 0.0
+  else: result = value
   
-  let button = gtk_button_new_with_label("Нажми меня")
-  discard g_signal_connect_data(button, "clicked", 
-                                cast[GCallback](onButtonClicked), 
+  let resultText = $result
+  gtk_editable_set_text(display, cstring(resultText))
+  currentValue = result
+  pendingOp = ""
+  newNumber = true
+
+proc processClear() =
+  currentValue = 0.0
+  pendingValue = 0.0
+  pendingOp = ""
+  newNumber = true
+  gtk_editable_set_text(display, "0")
+
+proc onNumberClick(btn: GtkButton, data: gpointer) {.cdecl.} =
+  let label = $gtk_button_get_label(btn)
+  processNumber(label)
+
+proc onOpClick(btn: GtkButton, data: gpointer) {.cdecl.} =
+  let op = $gtk_button_get_label(btn)
+  processOperation(op)
+
+proc onEquals(btn: GtkButton, data: gpointer) {.cdecl.} =
+  processEquals()
+
+proc onClear(btn: GtkButton, data: gpointer) {.cdecl.} =
+  processClear()
+
+proc onEntryActivate(entry: GtkEntry, userData: gpointer) {.cdecl.} =
+  processEquals()
+
+proc onKeyPress(controller: pointer, keyval: guint, keycode: guint, 
+                state: pointer, userData: gpointer): gboolean {.cdecl.} =
+  case keyval:
+  of 48..57:  # 0-9 (основная клавиатура)
+    let num = $(chr(int(keyval)))
+    processNumber(num)
+    return 1
+  of 65456..65465:  # 0-9 (цифровая панель)
+    let digit = int(keyval - 65456)
+    let num = $digit
+    processNumber(num)
+    return 1
+  of 43, 65451:  # + (основная и цифровая панель)
+    processOperation("+")
+    return 1
+  of 45, 65453:  # - (основная и цифровая панель)
+    processOperation("-")
+    return 1
+  of 42, 65450:  # * (основная и цифровая панель)
+    processOperation("*")
+    return 1
+  of 47, 65455:  # / (основная и цифровая панель)
+    processOperation("/")
+    return 1
+  of 61:  # =
+    processEquals()
+    return 1
+  of 99, 67, 65307:  # c, C или Esc
+    processClear()
+    return 1
+  of 65288:  # Backspace
+    let current = $gtk_editable_get_text(display)
+    if current.len > 1:
+      let newText = current[0..^2]
+      gtk_editable_set_text(display, cstring(newText))
+    else:
+      gtk_editable_set_text(display, "0")
+      newNumber = true
+    return 1
+  else:
+    return 0
+
+proc activate(app: GtkApplication, userData: gpointer) {.cdecl.} =
+  let window = gtk_application_window_new(app)
+  gtk_window_set_title(window, "Калькулятор")
+  gtk_window_set_default_size(window, 300, 400)
+  
+  let mainBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5)
+  gtk_window_set_child(window, mainBox)
+  
+  # Дисплей
+  display = gtk_entry_new()
+  gtk_editable_set_text(display, "0")
+  gtk_editable_set_alignment(display, 1.0)  # Выравнивание по правому краю
+  gtk_editable_set_editable(display, 0)  # Только для чтения
+  gtk_widget_set_hexpand(display, 1)
+  gtk_box_append(mainBox, display)
+  
+  # Обработка клавиши Enter в Entry
+  discard g_signal_connect_data(display, "activate",
+                                cast[GCallback](onEntryActivate),
                                 nil, nil, 0)
   
-  gtk_window_set_child(window, button)
+  # Контроллер событий клавиатуры для Entry
+  let keyController = gtk_event_controller_key_new()
+  gtk_widget_add_controller(display, keyController)
+  discard g_signal_connect_data(keyController, "key-pressed",
+                                cast[GCallback](onKeyPress),
+                                nil, nil, 0)
+  
+  # Сетка кнопок
+  let grid = gtk_grid_new()
+  gtk_grid_set_row_spacing(grid, 5)
+  gtk_grid_set_column_spacing(grid, 5)
+  gtk_box_append(mainBox, grid)
+  
+  # Числовые кнопки
+  let numbers = ["7", "8", "9", "4", "5", "6", "1", "2", "3", "0"]
+  var row: gint = 0
+  var col: gint = 0
+  for num in numbers:
+    let btn = gtk_button_new_with_label(cstring(num))
+    gtk_grid_attach(grid, btn, col, row, 1, 1)
+    discard g_signal_connect_data(btn, "clicked", 
+                                  cast[GCallback](onNumberClick), 
+                                  nil, nil, 0)
+    col += 1
+    if col > 2:
+      col = 0
+      row += 1
+  
+  # Кнопки операций
+  let ops = ["+", "-", "*", "/"]
+  for i, op in ops:
+    let btn = gtk_button_new_with_label(cstring(op))
+    gtk_grid_attach(grid, btn, 3, gint(i), 1, 1)
+    discard g_signal_connect_data(btn, "clicked", 
+                                  cast[GCallback](onOpClick), 
+                                  nil, nil, 0)
+  
+  # Кнопки "=" и "C"
+  let btnEquals = gtk_button_new_with_label("=")
+  gtk_grid_attach(grid, btnEquals, 1, 3, 1, 1)
+  discard g_signal_connect_data(btnEquals, "clicked", 
+                                cast[GCallback](onEquals), 
+                                nil, nil, 0)
+  
+  let btnClear = gtk_button_new_with_label("C")
+  gtk_grid_attach(grid, btnClear, 2, 3, 1, 1)
+  discard g_signal_connect_data(btnClear, "clicked", 
+                                cast[GCallback](onClear), 
+                                nil, nil, 0)
+  
   gtk_window_present(window)
 
 proc main() =
-  let app = gtk_application_new("com.example.events", G_APPLICATION_DEFAULT_FLAGS)
-  discard g_signal_connect_data(app, "activate", cast[GCallback](activate), nil, nil, 0)
+  let app = gtk_application_new("com.example.calculator", G_APPLICATION_DEFAULT_FLAGS)
+  discard g_signal_connect_data(app, "activate", 
+                                cast[GCallback](activate), 
+                                nil, nil, 0)
+  discard g_application_run(app, 0, nil)
+  g_object_unref(app)
+
+main()
+```
+
+### Пример 4: Приложение для рисования с Cairo
+
+**Ключевые моменты:**
+- Функции Cairo объявляются вручную, так как они отсутствуют в libGTK4.nim
+- Использует `GtkEventControllerMotion` и `GtkGestureClick` для точного отслеживания мыши
+- Демонстрирует правильную обработку событий для приложений рисования
+
+```nim
+import libGTK4
+import math
+
+# Объявления функций Cairo
+proc cairo_set_source_rgb(cr: cairo_t, red: cdouble, green: cdouble, blue: cdouble) {.importc, cdecl.}
+proc cairo_paint(cr: cairo_t) {.importc, cdecl.}
+proc cairo_set_line_width(cr: cairo_t, width: cdouble) {.importc, cdecl.}
+proc cairo_move_to(cr: cairo_t, x: cdouble, y: cdouble) {.importc, cdecl.}
+proc cairo_line_to(cr: cairo_t, x: cdouble, y: cdouble) {.importc, cdecl.}
+proc cairo_stroke(cr: cairo_t) {.importc, cdecl.}
+
+var points: seq[tuple[x, y: float]] = @[]
+var isDrawing: bool = false
+
+proc drawCallback(area: GtkDrawingArea, cr: cairo_t, 
+                  width: gint, height: gint, data: gpointer) {.cdecl.} =
+  # Белый фон
+  cairo_set_source_rgb(cr, 1.0, 1.0, 1.0)
+  cairo_paint(cr)
+  
+  # Рисуем линии
+  if points.len > 0:
+    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0)
+    cairo_set_line_width(cr, 2.0)
+    cairo_move_to(cr, points[0].x, points[0].y)
+    for i in 1..<points.len:
+      cairo_line_to(cr, points[i].x, points[i].y)
+    cairo_stroke(cr)
+
+proc onPressed(gesture: GtkGesture, n_press: gint, x: gdouble, y: gdouble, area: gpointer) {.cdecl.} =
+  isDrawing = true
+  points = @[]
+  points.add((x, y))
+  discard gtk_widget_queue_draw(cast[GtkWidget](area))
+
+proc onReleased(gesture: GtkGesture, n_press: gint, x: gdouble, y: gdouble, area: gpointer) {.cdecl.} =
+  isDrawing = false
+
+proc onMotion(controller: pointer, x: gdouble, y: gdouble, area: gpointer) {.cdecl.} =
+  if isDrawing:
+    points.add((x, y))
+    discard gtk_widget_queue_draw(cast[GtkWidget](area))
+
+proc activate(app: GtkApplication, userData: gpointer) {.cdecl.} =
+  let window = gtk_application_window_new(app)
+  gtk_window_set_title(window, "Приложение для рисования")
+  gtk_window_set_default_size(window, 800, 600)
+  
+  let drawingArea = gtk_drawing_area_new()
+  gtk_drawing_area_set_draw_func(drawingArea, drawCallback, nil, nil)
+  gtk_window_set_child(window, drawingArea)
+  
+  # Добавляем жест клика для нажатия/отпускания
+  let clickGesture = gtk_gesture_click_new()
+  discard g_signal_connect_data(clickGesture, "pressed", 
+                                cast[GCallback](onPressed), 
+                                drawingArea, nil, 0)
+  discard g_signal_connect_data(clickGesture, "released", 
+                                cast[GCallback](onReleased), 
+                                drawingArea, nil, 0)
+  gtk_widget_add_controller(drawingArea, clickGesture)
+  
+  # Добавляем контроллер движения для рисования
+  let motionController = gtk_event_controller_motion_new()
+  discard g_signal_connect_data(motionController, "motion", 
+                                cast[GCallback](onMotion), 
+                                drawingArea, nil, 0)
+  gtk_widget_add_controller(drawingArea, motionController)
+  
+  gtk_window_present(window)
+
+proc main() =
+  let app = gtk_application_new("com.example.drawing", G_APPLICATION_DEFAULT_FLAGS)
+  discard g_signal_connect_data(app, "activate", 
+                                cast[GCallback](activate), 
+                                nil, nil, 0)
   discard g_application_run(app, 0, nil)
   g_object_unref(app)
 
@@ -1781,20 +2108,6 @@ main()
 ```
 
 ---
-
-## Дополнительные ресурсы
-
-- [Официальная документация GTK](https://docs.gtk.org/gtk4/)
-- [GTK4 Tutorial](https://www.gtk.org/docs/getting-started/)
-- [Nim язык программирования](https://nim-lang.org/)
-
----
-
-## Лицензия
-
-Библиотека распространяется в соответствии с лицензией GTK4.
-
-## Контакты
 
 **Автор:** Balans097  
 **Email:** vasil.minsk@yahoo.com

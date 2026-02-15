@@ -1238,8 +1238,9 @@ proc gtk_label_get_layout_offsets*(label: GtkLabel, x: ptr gint, y: ptr gint) {.
 # ============================================================================
 proc gtk_entry_new*(): GtkEntry {.importc.}
 proc gtk_entry_new_with_buffer*(buffer: GtkEntryBuffer): GtkEntry {.importc.}
-proc gtk_entry_set_text*(entry: GtkEntry, text: cstring) {.importc.}
-proc gtk_entry_get_text*(entry: GtkEntry): cstring {.importc.}
+# Deprecated in GTK 4. Use gtk_editable_get/set_text instead
+# proc gtk_entry_set_text*(entry: GtkEntry, text: cstring) {.importc.}
+# proc gtk_entry_get_text*(entry: GtkEntry): cstring {.importc.}
 proc gtk_entry_set_placeholder_text*(entry: GtkEntry, text: cstring) {.importc.}
 proc gtk_entry_get_placeholder_text*(entry: GtkEntry): cstring {.importc.}
 proc gtk_entry_set_visibility*(entry: GtkEntry, visible: gboolean) {.importc.}
@@ -6272,6 +6273,38 @@ proc gtk_inspector_is_recording*(widget: GtkWidget): gboolean
 proc gtk_inspector_handle_event*(event: pointer): gboolean
 
 {.pop.}
+
+
+
+
+
+
+
+
+
+
+
+# ============================================================================
+# Cairo functions declarations
+# ============================================================================
+
+proc cairo_set_source_rgb*(cr: cairo_t, red: cdouble, green: cdouble, blue: cdouble) {.importc, cdecl.}
+proc cairo_paint*(cr: cairo_t) {.importc, cdecl.}
+proc cairo_set_line_width*(cr: cairo_t, width: cdouble) {.importc, cdecl.}
+proc cairo_move_to*(cr: cairo_t, x: cdouble, y: cdouble) {.importc, cdecl.}
+proc cairo_line_to*(cr: cairo_t, x: cdouble, y: cdouble) {.importc, cdecl.}
+proc cairo_stroke*(cr: cairo_t) {.importc, cdecl.}
+
+
+
+
+
+
+
+
+
+
+
 # ----------------------------------------------------------------------------
 # Работа с настройками приложения
 # ----------------------------------------------------------------------------
@@ -6280,10 +6313,11 @@ proc getDefaultSettings*(): GtkSettings =
   ## Получение настроек по умолчанию
   result = gtk_settings_get_default()
 
+
 proc isDarkTheme*(): bool =
   ## Проверка, используется ли темная тема
   # Это упрощенная проверка через GtkSettings
-  let settings = getDefaultSettings()
+  # let settings = getDefaultSettings()
   # В реальном коде нужно проверить свойство prefer-dark-theme
   result = false # Заглушка
 

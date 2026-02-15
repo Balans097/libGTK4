@@ -4785,7 +4785,12 @@ proc main() =
 main()
 ```
 
-### Example 2: Text Editor
+### Example 2: Text Editor with File Dialog
+
+**Key Points:**
+- Uses `PANGO_WRAP_WORD` instead of `GTK_WRAP_WORD`
+- Response types must be cast to `gint`
+- Avoids variable capture in `{.cdecl.}` procedures using `g_object_set_data`/`g_object_get_data`
 
 ```nim
 import libGTK4
@@ -4807,23 +4812,25 @@ proc activate(app: GtkApplication, userData: gpointer) {.cdecl.} =
   # Create text view with scrolling
   let scrolled = gtk_scrolled_window_new()
   let textView = gtk_text_view_new()
-  gtk_text_view_set_wrap_mode(textView, GTK_WRAP_WORD)
+  gtk_text_view_set_wrap_mode(textView, PANGO_WRAP_WORD)  # Use PANGO_WRAP_WORD, not GTK_WRAP_WORD
   gtk_scrolled_window_set_child(scrolled, textView)
   gtk_window_set_child(window, scrolled)
   
   # Open button handler
   proc onOpen(btn: GtkButton, data: gpointer) {.cdecl.} =
+    let window = cast[GtkWindow](data)
+    let textView = g_object_get_data(cast[GObject](btn), "textview")
     let dialog = gtk_file_chooser_dialog_new(
       "Open File",
       window,
       GTK_FILE_CHOOSER_ACTION_OPEN,
       nil
     )
-    discard gtk_dialog_add_button(dialog, "Cancel", GTK_RESPONSE_CANCEL)
-    discard gtk_dialog_add_button(dialog, "Open", GTK_RESPONSE_ACCEPT)
+    discard gtk_dialog_add_button(dialog, "Cancel", gint(GTK_RESPONSE_CANCEL))  # Cast to gint
+    discard gtk_dialog_add_button(dialog, "Open", gint(GTK_RESPONSE_ACCEPT))
     
     proc onResponse(dlg: GtkDialog, response: gint, tv: gpointer) {.cdecl.} =
-      if response == GTK_RESPONSE_ACCEPT:
+      if response == gint(GTK_RESPONSE_ACCEPT):  # Cast to gint for comparison
         let file = gtk_file_chooser_get_file(dlg)
         if file != nil:
           # Read file content (simplified)
@@ -4848,9 +4855,12 @@ proc activate(app: GtkApplication, userData: gpointer) {.cdecl.} =
     let text = gtk_text_buffer_get_text(buffer, addr start, addr endIter, 0)
     echo "Saving text: ", text
   
+  # Store textView in button data to avoid variable capture
+  g_object_set_data(cast[GObject](btnOpen), "textview", textView)
+  
   discard g_signal_connect_data(btnOpen, "clicked", 
                                 cast[GCallback](onOpen), 
-                                nil, nil, 0)
+                                window, nil, 0)
   discard g_signal_connect_data(btnSave, "clicked", 
                                 cast[GCallback](onSave), 
                                 textView, nil, 0)
@@ -4868,7 +4878,13 @@ proc main() =
 main()
 ```
 
-### Example 3: Calculator
+### Example 3: Calculator with Keyboard Support
+
+**Key Points:**
+- Uses `gtk_editable_get_text`/`gtk_editable_set_text` instead of deprecated `gtk_entry_*` functions
+- Implements keyboard support with `GtkEventControllerKey`
+- Uses explicit `cstring()` conversion to avoid compiler warnings
+- Handles both main keyboard and NumPad
 
 ```nim
 import libGTK4
@@ -4878,27 +4894,25 @@ var display: GtkEntry
 var currentValue: float = 0.0
 var pendingOp: string = ""
 var pendingValue: float = 0.0
+var newNumber: bool = true
 
-proc updateDisplay(value: float) =
-  gtk_entry_set_text(display, $value)
-
-proc onNumberClick(btn: GtkButton, data: gpointer) {.cdecl.} =
-  let label = gtk_button_get_label(btn)
-  let current = $gtk_entry_get_text(display)
-  if current == "0" or pendingOp != "":
-    gtk_entry_set_text(display, label)
-    pendingOp = ""
+proc processNumber(num: string) =
+  let current = $gtk_editable_get_text(display)
+  if newNumber or current == "0":
+    gtk_editable_set_text(display, cstring(num))
+    newNumber = false
   else:
-    gtk_entry_set_text(display, current & $label)
+    let combined = current & num
+    gtk_editable_set_text(display, cstring(combined))
 
-proc onOpClick(btn: GtkButton, data: gpointer) {.cdecl.} =
-  let op = $gtk_button_get_label(btn)
-  currentValue = parseFloat($gtk_entry_get_text(display))
+proc processOperation(op: string) =
+  currentValue = parseFloat($gtk_editable_get_text(display))
   pendingOp = op
   pendingValue = currentValue
+  newNumber = true
 
-proc onEquals(btn: GtkButton, data: gpointer) {.cdecl.} =
-  let value = parseFloat($gtk_entry_get_text(display))
+proc processEquals() =
+  let value = parseFloat($gtk_editable_get_text(display))
   var result: float
   case pendingOp:
   of "+": result = pendingValue + value
@@ -4907,14 +4921,77 @@ proc onEquals(btn: GtkButton, data: gpointer) {.cdecl.} =
   of "/": result = if value != 0: pendingValue / value else: 0.0
   else: result = value
   
-  updateDisplay(result)
+  let resultText = $result
+  gtk_editable_set_text(display, cstring(resultText))
+  currentValue = result
   pendingOp = ""
+  newNumber = true
 
-proc onClear(btn: GtkButton, data: gpointer) {.cdecl.} =
+proc processClear() =
   currentValue = 0.0
   pendingValue = 0.0
   pendingOp = ""
-  updateDisplay(0.0)
+  newNumber = true
+  gtk_editable_set_text(display, "0")
+
+proc onNumberClick(btn: GtkButton, data: gpointer) {.cdecl.} =
+  let label = $gtk_button_get_label(btn)
+  processNumber(label)
+
+proc onOpClick(btn: GtkButton, data: gpointer) {.cdecl.} =
+  let op = $gtk_button_get_label(btn)
+  processOperation(op)
+
+proc onEquals(btn: GtkButton, data: gpointer) {.cdecl.} =
+  processEquals()
+
+proc onClear(btn: GtkButton, data: gpointer) {.cdecl.} =
+  processClear()
+
+proc onEntryActivate(entry: GtkEntry, userData: gpointer) {.cdecl.} =
+  processEquals()
+
+proc onKeyPress(controller: pointer, keyval: guint, keycode: guint, 
+                state: pointer, userData: gpointer): gboolean {.cdecl.} =
+  case keyval:
+  of 48..57:  # 0-9 (main keyboard)
+    let num = $(chr(int(keyval)))
+    processNumber(num)
+    return 1
+  of 65456..65465:  # 0-9 (numpad)
+    let digit = int(keyval - 65456)
+    let num = $digit
+    processNumber(num)
+    return 1
+  of 43, 65451:  # + (main and numpad)
+    processOperation("+")
+    return 1
+  of 45, 65453:  # - (main and numpad)
+    processOperation("-")
+    return 1
+  of 42, 65450:  # * (main and numpad)
+    processOperation("*")
+    return 1
+  of 47, 65455:  # / (main and numpad)
+    processOperation("/")
+    return 1
+  of 61:  # =
+    processEquals()
+    return 1
+  of 99, 67, 65307:  # c, C, or Esc
+    processClear()
+    return 1
+  of 65288:  # Backspace
+    let current = $gtk_editable_get_text(display)
+    if current.len > 1:
+      let newText = current[0..^2]
+      gtk_editable_set_text(display, cstring(newText))
+    else:
+      gtk_editable_set_text(display, "0")
+      newNumber = true
+    return 1
+  else:
+    return 0
 
 proc activate(app: GtkApplication, userData: gpointer) {.cdecl.} =
   let window = gtk_application_window_new(app)
@@ -4926,10 +5003,23 @@ proc activate(app: GtkApplication, userData: gpointer) {.cdecl.} =
   
   # Display
   display = gtk_entry_new()
-  gtk_entry_set_text(display, "0")
-  gtk_entry_set_alignment(display, 1.0)  # Right align
+  gtk_editable_set_text(display, "0")
+  gtk_editable_set_alignment(display, 1.0)  # Right align
+  gtk_editable_set_editable(display, 0)  # Read-only display
   gtk_widget_set_hexpand(display, 1)
   gtk_box_append(mainBox, display)
+  
+  # Handle Enter key in Entry
+  discard g_signal_connect_data(display, "activate",
+                                cast[GCallback](onEntryActivate),
+                                nil, nil, 0)
+  
+  # Keyboard event controller on Entry widget
+  let keyController = gtk_event_controller_key_new()
+  gtk_widget_add_controller(display, keyController)
+  discard g_signal_connect_data(keyController, "key-pressed",
+                                cast[GCallback](onKeyPress),
+                                nil, nil, 0)
   
   # Button grid
   let grid = gtk_grid_new()
@@ -4939,10 +5029,10 @@ proc activate(app: GtkApplication, userData: gpointer) {.cdecl.} =
   
   # Number buttons
   let numbers = ["7", "8", "9", "4", "5", "6", "1", "2", "3", "0"]
-  var row = 0
-  var col = 0
+  var row: gint = 0
+  var col: gint = 0
   for num in numbers:
-    let btn = gtk_button_new_with_label(num)
+    let btn = gtk_button_new_with_label(cstring(num))
     gtk_grid_attach(grid, btn, col, row, 1, 1)
     discard g_signal_connect_data(btn, "clicked", 
                                   cast[GCallback](onNumberClick), 
@@ -4955,8 +5045,8 @@ proc activate(app: GtkApplication, userData: gpointer) {.cdecl.} =
   # Operation buttons
   let ops = ["+", "-", "*", "/"]
   for i, op in ops:
-    let btn = gtk_button_new_with_label(op)
-    gtk_grid_attach(grid, btn, 3, i, 1, 1)
+    let btn = gtk_button_new_with_label(cstring(op))
+    gtk_grid_attach(grid, btn, 3, gint(i), 1, 1)
     discard g_signal_connect_data(btn, "clicked", 
                                   cast[GCallback](onOpClick), 
                                   nil, nil, 0)
@@ -4987,15 +5077,29 @@ proc main() =
 main()
 ```
 
-### Example 4: Drawing Application
+### Example 4: Drawing Application with Cairo
+
+**Key Points:**
+- Declares Cairo functions manually as they're not in libGTK4.nim
+- Uses `GtkEventControllerMotion` and `GtkGestureClick` for accurate mouse tracking
+- Demonstrates proper event handling for drawing applications
 
 ```nim
 import libGTK4
 import math
 
-var points: seq[tuple[x, y: float]] = @[]
+# Cairo functions declarations
+proc cairo_set_source_rgb(cr: cairo_t, red: cdouble, green: cdouble, blue: cdouble) {.importc, cdecl.}
+proc cairo_paint(cr: cairo_t) {.importc, cdecl.}
+proc cairo_set_line_width(cr: cairo_t, width: cdouble) {.importc, cdecl.}
+proc cairo_move_to(cr: cairo_t, x: cdouble, y: cdouble) {.importc, cdecl.}
+proc cairo_line_to(cr: cairo_t, x: cdouble, y: cdouble) {.importc, cdecl.}
+proc cairo_stroke(cr: cairo_t) {.importc, cdecl.}
 
-proc drawCallback(area: GtkDrawingArea, cr: ptr cairo_t, 
+var points: seq[tuple[x, y: float]] = @[]
+var isDrawing: bool = false
+
+proc drawCallback(area: GtkDrawingArea, cr: cairo_t, 
                   width: gint, height: gint, data: gpointer) {.cdecl.} =
   # White background
   cairo_set_source_rgb(cr, 1.0, 1.0, 1.0)
@@ -5010,12 +5114,19 @@ proc drawCallback(area: GtkDrawingArea, cr: ptr cairo_t,
       cairo_line_to(cr, points[i].x, points[i].y)
     cairo_stroke(cr)
 
-proc onDrag(gesture: GtkGesture, x: gdouble, y: gdouble, area: gpointer) {.cdecl.} =
-  points.add((x, y))
-  gtk_widget_queue_draw(cast[GtkWidget](area))
-
-proc onDragEnd(gesture: GtkGesture, x: gdouble, y: gdouble, data: gpointer) {.cdecl.} =
+proc onPressed(gesture: GtkGesture, n_press: gint, x: gdouble, y: gdouble, area: gpointer) {.cdecl.} =
+  isDrawing = true
   points = @[]
+  points.add((x, y))
+  discard gtk_widget_queue_draw(cast[GtkWidget](area))
+
+proc onReleased(gesture: GtkGesture, n_press: gint, x: gdouble, y: gdouble, area: gpointer) {.cdecl.} =
+  isDrawing = false
+
+proc onMotion(controller: pointer, x: gdouble, y: gdouble, area: gpointer) {.cdecl.} =
+  if isDrawing:
+    points.add((x, y))
+    discard gtk_widget_queue_draw(cast[GtkWidget](area))
 
 proc activate(app: GtkApplication, userData: gpointer) {.cdecl.} =
   let window = gtk_application_window_new(app)
@@ -5026,15 +5137,22 @@ proc activate(app: GtkApplication, userData: gpointer) {.cdecl.} =
   gtk_drawing_area_set_draw_func(drawingArea, drawCallback, nil, nil)
   gtk_window_set_child(window, drawingArea)
   
-  # Add drag gesture
-  let dragGesture = gtk_gesture_drag_new()
-  discard g_signal_connect_data(dragGesture, "drag-update", 
-                                cast[GCallback](onDrag), 
+  # Add click gesture for press/release
+  let clickGesture = gtk_gesture_click_new()
+  discard g_signal_connect_data(clickGesture, "pressed", 
+                                cast[GCallback](onPressed), 
                                 drawingArea, nil, 0)
-  discard g_signal_connect_data(dragGesture, "drag-end", 
-                                cast[GCallback](onDragEnd), 
-                                nil, nil, 0)
-  gtk_widget_add_controller(drawingArea, dragGesture)
+  discard g_signal_connect_data(clickGesture, "released", 
+                                cast[GCallback](onReleased), 
+                                drawingArea, nil, 0)
+  gtk_widget_add_controller(drawingArea, clickGesture)
+  
+  # Add motion controller for drawing
+  let motionController = gtk_event_controller_motion_new()
+  discard g_signal_connect_data(motionController, "motion", 
+                                cast[GCallback](onMotion), 
+                                drawingArea, nil, 0)
+  gtk_widget_add_controller(drawingArea, motionController)
   
   gtk_window_present(window)
 
