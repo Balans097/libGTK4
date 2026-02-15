@@ -6,26 +6,40 @@
 ##          Прямые привязки к C API через FFI
 ## 
 ## 
-## Версия:   1.1
-## Дата:     2026-02-05
+## Версия:   1.2
+## Дата:     2026-02-15
 ## Автор:    Balans097 — vasil.minsk@yahoo.com
 ################################################################
 
 
+# 1.2 — дополнение библиотеки расширенными функциями (2026-02-15);
+#       добавлено ~1780 дополнительных функций GTK4 API:
+#       – Inspector API (gtk_inspector_*)
+#       – Accessible API (gtk_accessible_*)
+#       – Action API (gtk_action_*)
+#       – Builder API (gtk_builder_*)
+#       – Constraint API (gtk_constraint_*)
+#       – вспомогательные функции Graph, Bitset, Roaring
+#       – GSK (GskRenderNode, GskTransform и др.)
+#       – GDK (события, дисплей, устройства)
 # 1.1 — исправления критических проблем (2026-02-05):
-#   - Исправлен createListStore: использует gtk_list_store_newv вместо небезопасного varargs
-#   - Исправлены g_timeout_add/g_idle_add: теперь используют правильный тип GSourceFunc с user_data
-#   - Исправлен getClipboardText: использует GAsyncReadyCallback вместо некорректного callback
-#   - Исправлены gtk_text_view_get_rtl/ltr_context: возвращают PangoContext* вместо gboolean
-#   - Исправлен gtk_notebook_set_scrollable: принимает gboolean вместо bool
-#   - Исправлен GtkInscription: удалён несуществующий gtk_inscription_get_markup, 
-#     исправлены типы для get/set_wrap_mode (PangoWrapMode) и get/set_attributes (PangoAttrList*)
-#   - Добавлены guards GTK_DISABLE_DEPRECATED для устаревших GTK3 API (TreeView, ListStore, 
-#     TreeStore, InfoBar, Statusbar, CellRenderer)
+#       – исправлен createListStore: использует gtk_list_store_newv вместо небезопасного varargs
+#       – исправлены g_timeout_add/g_idle_add: теперь используют правильный тип GSourceFunc с user_data
+#       – исправлен getClipboardText: использует GAsyncReadyCallback вместо некорректного callback
+#       – исправлены gtk_text_view_get_rtl/ltr_context: возвращают PangoContext* вместо gboolean
+#       – исправлен gtk_notebook_set_scrollable: принимает gboolean вместо bool
+#       – исправлен GtkInscription: удалён несуществующий gtk_inscription_get_markup, 
+#       – исправлены типы для get/set_wrap_mode (PangoWrapMode) и get/set_attributes (PangoAttrList*)
+#       – добавлены guards GTK_DISABLE_DEPRECATED для устаревших GTK3 API (TreeView, ListStore, 
+#         TreeStore, InfoBar, Statusbar, CellRenderer)
 # 1.0 — начальная реализация библиотеки (2026-01-20)
 
 
+
+
+
 import strutils
+
 
 
 
@@ -4218,6 +4232,2046 @@ template g_signal_connect_swapped*(instance, signal, callback, data: untyped): u
 
 
 
+
+# ============================================================================
+# ДОПОЛНИТЕЛЬНЫЕ ФУНКЦИИ GTK4 И ВСПОМОГАТЕЛЬНЫЕ API
+# ============================================================================
+
+
+# ============================================================================
+# GTK API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc gtk_inspector_a11y_get_type*(): pointer
+proc gtk_a11y_overlay_new*(): pointer
+proc gtk_inspector_action_editor_get_type*(): pointer
+proc gtk_inspector_action_editor_update*(self: pointer)
+
+{.pop.}
+
+# ============================================================================
+# ACTION API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc action_holder_changed*(holder: pointer)
+
+{.pop.}
+
+# ============================================================================
+# GTK API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc gtk_inspector_actions_get_type*(): pointer
+proc gtk_baseline_overlay_new*(): pointer
+proc gtk_inspector_clipboard_get_type*(): pointer
+proc gtk_inspector_css_editor_get_type*(): pointer
+proc gtk_inspector_css_node_tree_get_type*(): pointer
+proc gtk_inspector_css_node_tree_get_node*(cnt: pointer): pointer
+proc gtk_inspector_event_recording_get_type*(): GType
+proc gtk_inspector_event_recording_get_event*(recording: pointer): pointer
+proc gtk_inspector_event_recording_get_target_type*(recording: pointer): GType
+proc gtk_focus_overlay_new*(): pointer
+proc gtk_fps_overlay_new*(): pointer
+proc gtk_inspector_general_get_type*(): pointer
+
+{.pop.}
+
+# ============================================================================
+# GRAPH API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc graph_data_get_n_values*(data: pointer): guint
+proc graph_data_get_minimum*(data: pointer): pointer
+proc graph_data_get_maximum*(data: pointer): pointer
+
+{.pop.}
+
+# ============================================================================
+# GSK API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc gsk_pango_renderer_release*(crenderer: pointer)
+
+{.pop.}
+
+# ============================================================================
+# GTK API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc gtk_about_dialog_get_license_type*(about: pointer): pointer
+proc gtk_about_dialog_get_wrap_license*(about: pointer): pointer
+proc gtk_about_dialog_get_system_information*(about: pointer): pointer
+proc gtk_about_dialog_get_documenters*(about: pointer): pointer
+proc gtk_about_dialog_get_artists*(about: pointer): pointer
+proc gtk_about_dialog_get_translator_credits*(about: pointer): pointer
+proc gtk_accessible_attribute_set_ref*(self: pointer): pointer
+proc gtk_accessible_attribute_set_unref*(self: pointer)
+proc gtk_accessible_attribute_set_get_length*(self: pointer): gsize
+proc gtk_accessible_attribute_set_get_changed*(self: pointer): guint
+proc gtk_accessible_attribute_set_to_string*(self: pointer): cstring
+proc gtk_accessible_get_at_context*(self: pointer): pointer
+proc gtk_accessible_get_accessible_parent*(self: pointer): pointer
+proc gtk_accessible_get_first_accessible_child*(self: pointer): pointer
+proc gtk_accessible_get_next_accessible_sibling*(self: pointer): pointer
+proc gtk_accessible_get_accessible_id*(self: pointer): pointer
+proc gtk_accessible_get_accessible_role*(self: pointer): pointer
+proc gtk_accessible_list_get_type*(): pointer
+proc gtk_accessible_list_get_objects*(accessible_list: pointer): pointer
+proc gtk_accessible_list_new_from_list*(list: pointer): pointer
+proc gtk_accessible_hypertext_get_n_links*(self: pointer): pointer
+proc gtk_accessible_hyperlink_get_index*(self: pointer): pointer
+proc gtk_accessible_hyperlink_get_uri*(self: pointer): cstring
+proc gtk_accessible_role_is_range_subclass*(role: pointer): gboolean
+proc gtk_accessible_role_is_abstract*(role: pointer): gboolean
+proc gtk_accessible_should_present*(self: pointer): gboolean
+proc gtk_accessible_bounds_changed*(self: pointer)
+proc gtk_accessible_is_password_text*(accessible: pointer): gboolean
+proc gtk_accessible_text_update_caret_position*(self: pointer): pointer
+proc gtk_accessible_text_update_selection_bound*(self: pointer): pointer
+proc gtk_accessible_text_get_character_count*(self: pointer): pointer
+proc gtk_accessible_text_get_caret_position*(self: pointer): pointer
+proc gtk_accessible_value_error_quark*(): pointer
+proc gtk_accessible_value_alloc*(klass: pointer): pointer
+proc gtk_accessible_value_ref*(self: pointer): pointer
+proc gtk_accessible_value_unref*(self: pointer)
+proc gtk_accessible_value_to_string*(self: pointer): cstring
+proc gtk_accessible_value_get_default_for_state*(state: pointer): pointer
+proc gtk_accessible_value_get_default_for_property*(property: pointer): pointer
+proc gtk_accessible_value_get_default_for_relation*(relation: pointer): pointer
+proc gtk_undefined_accessible_value_new*(): pointer
+proc gtk_undefined_accessible_value_get*(value: pointer): pointer
+proc gtk_boolean_accessible_value_new*(value: gboolean): pointer
+proc gtk_boolean_accessible_value_get*(value: pointer): gboolean
+proc gtk_tristate_accessible_value_new*(value: pointer): pointer
+proc gtk_tristate_accessible_value_get*(value: pointer): pointer
+proc gtk_int_accessible_value_new*(value: pointer): pointer
+proc gtk_int_accessible_value_get*(value: pointer): pointer
+proc gtk_number_accessible_value_new*(value: pointer): pointer
+proc gtk_number_accessible_value_get*(value: pointer): pointer
+proc gtk_string_accessible_value_new*(value: cstring): pointer
+proc gtk_string_accessible_value_get*(value: pointer): cstring
+proc gtk_reference_accessible_value_new*(value: pointer): pointer
+proc gtk_reference_accessible_value_get*(value: pointer): pointer
+proc gtk_reference_list_accessible_value_new*(value: pointer): pointer
+proc gtk_reference_list_accessible_value_get*(value: pointer): pointer
+proc gtk_invalid_accessible_value_new*(value: pointer): pointer
+proc gtk_invalid_accessible_value_get*(value: pointer): pointer
+proc gtk_invalid_accessible_value_init_value*(value: pointer)
+proc gtk_autocomplete_accessible_value_new*(value: pointer): pointer
+proc gtk_autocomplete_accessible_value_get*(value: pointer): pointer
+proc gtk_autocomplete_accessible_value_init_value*(value: pointer)
+proc gtk_orientation_accessible_value_new*(value: pointer): pointer
+proc gtk_orientation_accessible_value_get*(value: pointer): pointer
+proc gtk_orientation_accessible_value_init_value*(value: pointer)
+proc gtk_sort_accessible_value_new*(value: pointer): pointer
+proc gtk_sort_accessible_value_get*(value: pointer): pointer
+proc gtk_sort_accessible_value_init_value*(value: pointer)
+proc gtk_accesskit_context_get_id*(self: pointer): pointer
+proc gtk_accesskit_context_update_tree*(self: pointer)
+proc gtk_accesskit_root_new*(root_widget: pointer): pointer
+proc gtk_accesskit_root_new_id*(self: pointer): pointer
+proc gtk_accesskit_root_remove_context*(self: pointer, id: pointer)
+proc gtk_accesskit_root_update_tree*(self: pointer)
+proc gtk_action_bar_get_revealed*(action_bar: pointer): pointer
+proc gtk_action_helper_get_type*(): GType
+proc gtk_action_helper_new*(widget: pointer): pointer
+proc gtk_action_helper_get_action_name*(helper: pointer): cstring
+proc gtk_action_helper_get_action_target_value*(helper: pointer): pointer
+proc gtk_action_helper_get_enabled*(helper: pointer): gboolean
+proc gtk_action_helper_get_active*(helper: pointer): gboolean
+proc gtk_action_helper_activate*(helper: pointer)
+proc gtk_action_helper_get_role*(helper: pointer): pointer
+proc gtk_action_muxer_get_type*(): GType
+proc gtk_action_muxer_new*(widget: GtkWidget): pointer
+proc gtk_action_muxer_get_parent*(muxer: pointer): pointer
+proc gtk_action_muxer_connect_class_actions*(muxer: pointer)
+proc gtk_normalise_detailed_action_name*(detailed_action_name: cstring): cstring
+proc gtk_action_observable_get_type*(): GType
+proc gtk_action_observer_get_type*(): GType
+proc gtk_adjustment_get_step_increment*(adjustment: pointer): pointer
+proc gtk_adjustment_get_page_increment*(adjustment: pointer): pointer
+proc gtk_adjustment_get_page_size*(adjustment: pointer): pointer
+proc gtk_adjustment_get_minimum_increment*(adjustment: pointer): pointer
+proc gtk_adjustment_get_bounded_upper*(self: pointer): pointer
+proc gtk_adjustment_get_animation_duration*(adjustment: pointer): guint
+proc gtk_adjustment_get_target_value*(adjustment: pointer): pointer
+proc gtk_adjustment_is_animating*(adjustment: pointer): gboolean
+proc gtk_allocated_bitmask_copy*(mask: pointer): pointer {.importc: "_gtk_allocated_bitmask_copy".}
+proc gtk_allocated_bitmask_free*(mask: pointer) {.importc: "_gtk_allocated_bitmask_free".}
+proc gtk_allocated_bitmask_to_string*(mask: pointer): cstring {.importc: "_gtk_allocated_bitmask_to_string".}
+proc gtk_application_accels_new*(): pointer
+proc gtk_application_accels_list_action_descriptions*(accels: pointer): pointer
+proc gtk_application_accels_get_shortcuts*(accels: pointer): pointer
+proc gtk_application_window_get_action_group*(window: pointer): pointer
+proc gtk_application_get_parent_muxer_for_window*(window: pointer): pointer
+proc gtk_application_get_action_muxer*(application: pointer): pointer
+proc gtk_application_get_application_accels*(application: pointer): pointer
+proc gtk_application_save*(application: pointer)
+proc gtk_application_forget*(application: pointer)
+proc gtk_application_impl_get_type*(): GType
+proc gtk_application_impl_dbus_get_type*(): GType
+proc gtk_application_impl_x11_get_type*(): GType
+proc gtk_application_impl_wayland_get_type*(): GType
+proc gtk_application_impl_quartz_get_type*(): GType
+proc gtk_application_impl_android_get_type*(): GType
+proc gtk_application_impl_win32_get_type*(): GType
+proc gtk_application_impl_shutdown*(impl: pointer)
+proc gtk_application_impl_get_restore_reason*(impl: pointer): pointer
+proc gtk_application_impl_clear_restore_reason*(impl: pointer)
+proc gtk_application_impl_forget_state*(impl: pointer)
+proc gtk_application_impl_retrieve_state*(impl: pointer): pointer
+proc gtk_application_window_get_show_menubar*(window: pointer): pointer
+proc gtk_application_window_get_id*(window: pointer): pointer
+proc gtk_application_window_get_help_overlay*(window: pointer): pointer
+proc gtk_at_context_get_accessible*(self: pointer): pointer
+proc gtk_at_context_get_accessible_role*(self: pointer): pointer
+proc gtk_at_context_get_display*(self: pointer): pointer
+proc gtk_at_context_realize*(self: pointer)
+proc gtk_at_context_unrealize*(self: pointer)
+proc gtk_at_context_is_realized*(self: pointer): gboolean
+proc gtk_at_context_update*(self: pointer)
+proc gtk_at_context_get_name*(self: pointer): cstring
+proc gtk_at_context_get_description*(self: pointer): cstring
+proc gtk_at_context_bounds_changed*(self: pointer)
+proc gtk_accessible_property_get_attribute_name*(property: pointer): cstring
+proc gtk_accessible_relation_get_attribute_name*(relation: pointer): cstring
+proc gtk_accessible_state_get_attribute_name*(state: pointer): cstring
+proc gtk_at_context_get_accessible_parent*(self: pointer): pointer
+proc gtk_at_context_get_next_accessible_sibling*(self: pointer): pointer
+proc gtk_at_context_update_caret_position*(self: pointer)
+proc gtk_at_context_update_selection_bound*(self: pointer)
+proc gtk_at_context_is_nested_button*(self: pointer): gboolean
+proc gtk_at_spi_context_get_context_path*(self: pointer): cstring
+proc gtk_at_spi_context_to_ref*(self: pointer): pointer
+proc gtk_at_spi_context_get_root*(self: pointer): pointer
+proc gtk_at_spi_context_get_parent_ref*(self: pointer): pointer
+proc gtk_at_spi_context_get_interfaces*(self: pointer): pointer
+proc gtk_at_spi_context_get_states*(self: pointer): pointer
+proc gtk_at_spi_context_get_index_in_parent*(self: pointer): pointer
+proc gtk_at_spi_context_get_child_count*(self: pointer): pointer
+proc gtk_at_spi_root_new*(bus_address: cstring): pointer
+proc gtk_at_spi_root_get_connection*(self: pointer): pointer
+proc gtk_at_spi_root_get_cache*(self: pointer): pointer
+proc gtk_at_spi_root_get_base_path*(self: pointer): cstring
+proc gtk_at_spi_root_to_ref*(self: pointer): pointer
+proc gtk_at_spi_root_has_event_listeners*(self: pointer): gboolean
+proc gtk_atspi_disconnect_selection_signals*(accessible: pointer)
+proc gtk_at_spi_socket_get_bus_name*(self: pointer): pointer
+proc gtk_at_spi_socket_get_object_path*(self: pointer): pointer
+proc gtk_at_spi_socket_to_ref*(self: pointer): pointer
+proc gtk_atspi_disconnect_text_signals*(accessible: pointer)
+proc gtk_atspi_role_for_context*(context: pointer): pointer
+proc gtk_at_spi_null_ref*(): pointer
+proc gtk_bin_layout_new*(): pointer
+proc gtk_bitmask_new*(): pointer {.importc: "_gtk_bitmask_new".}
+proc gtk_bitmask_copy*(mask: pointer): pointer {.importc: "_gtk_bitmask_copy".}
+proc gtk_bitmask_free*(mask: pointer): pointer {.importc: "_gtk_bitmask_free".}
+proc gtk_bitmask_to_string*(mask: pointer): pointer {.importc: "_gtk_bitmask_to_string".}
+proc gtk_bitmask_is_empty*(mask: pointer): pointer {.importc: "_gtk_bitmask_is_empty".}
+proc gtk_bitmask_from_bits*(): pointer {.importc: "_gtk_bitmask_from_bits".}
+proc gtk_allocated_bitmask_copy*(): pointer {.importc: "_gtk_allocated_bitmask_copy".}
+
+{.pop.}
+
+# ============================================================================
+# G API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc g_string_free*(): pointer
+
+{.pop.}
+
+# ============================================================================
+# GTK API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc gtk_allocated_bitmask_intersect*(): pointer {.importc: "_gtk_allocated_bitmask_intersect".}
+proc gtk_allocated_bitmask_union*(): pointer {.importc: "_gtk_allocated_bitmask_union".}
+proc gtk_allocated_bitmask_subtract*(): pointer {.importc: "_gtk_allocated_bitmask_subtract".}
+proc gtk_allocated_bitmask_get*(): pointer {.importc: "_gtk_allocated_bitmask_get".}
+proc gtk_allocated_bitmask_set*(): pointer {.importc: "_gtk_allocated_bitmask_set".}
+proc gtk_allocated_bitmask_invert_range*(): pointer {.importc: "_gtk_allocated_bitmask_invert_range".}
+proc gtk_bitmask_from_bits*(invert: pointer): pointer {.importc: "_gtk_bitmask_from_bits".}
+proc gtk_allocated_bitmask_equals*(): pointer {.importc: "_gtk_allocated_bitmask_equals".}
+proc gtk_allocated_bitmask_intersects*(): pointer {.importc: "_gtk_allocated_bitmask_intersects".}
+proc gtk_bitset_ref*(self: pointer): pointer
+proc gtk_bitset_unref*(self: pointer): pointer
+proc gtk_bitset_is_empty*(self: pointer): pointer
+proc gtk_bitset_get_size*(self: pointer): pointer
+proc gtk_bitset_get_minimum*(self: pointer): pointer
+proc gtk_bitset_get_maximum*(self: pointer): pointer
+proc gtk_bitset_new_empty*(): pointer
+proc gtk_bitset_copy*(self: pointer): pointer
+proc gtk_bitset_remove_all*(self: pointer): pointer
+proc gtk_bitset_iter_get_value*(iter: pointer): pointer
+proc gtk_bitset_iter_is_valid*(iter: pointer): pointer
+proc gtk_bookmark_list_get_filename*(self: pointer): pointer
+proc gtk_bookmark_list_get_attributes*(self: pointer): pointer
+proc gtk_bookmark_list_get_io_priority*(self: pointer): pointer
+proc gtk_bookmark_list_is_loading*(self: pointer): pointer
+proc gtk_bookmarks_manager_free*(manager: pointer) {.importc: "_gtk_bookmarks_manager_free".}
+proc gtk_bookmarks_manager_get_is_xdg_dir_builtin*(xdg_type: pointer): gboolean {.importc: "_gtk_bookmarks_manager_get_is_xdg_dir_builtin".}
+proc gtk_bool_filter_new*(expression: pointer): pointer
+proc gtk_bool_filter_get_expression*(self: pointer): pointer
+proc gtk_bool_filter_get_invert*(self: pointer): pointer
+proc gtk_border_free*(border: pointer): pointer
+proc gtk_box_layout_new*(orientation: pointer): pointer
+proc gtk_box_layout_get_homogeneous*(box_layout: pointer): pointer
+proc gtk_box_layout_get_spacing*(box_layout: pointer): pointer
+proc gtk_box_layout_get_baseline_position*(box_layout: pointer): pointer
+proc gtk_box_layout_get_baseline_child*(box_layout: pointer): pointer
+proc gtk_buildable_get_buildable_id*(buildable: pointer): pointer
+proc gtk_buildable_parse_context_pop*(context: pointer): pointer
+proc gtk_buildable_parse_context_get_element*(context: pointer): pointer
+proc gtk_builder_error_quark*(): pointer
+
+{.pop.}
+
+# ============================================================================
+# FREE API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc free_binding_expression_info*(info: pointer)
+
+{.pop.}
+
+# ============================================================================
+# GTK API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc gtk_builder_menu_end*(parser_data: pointer): cstring {.importc: "_gtk_builder_menu_end".}
+proc gtk_builder_cscope_new*(): pointer
+proc gtk_builtin_icon_new*(css_name: cstring): ptr GtkWidget
+proc gtk_button_get_gesture*(button: pointer): pointer
+proc gtk_button_get_action_helper*(button: pointer): pointer
+proc gtk_calendar_get_show_week_numbers*(self: pointer): pointer
+proc gtk_calendar_get_show_heading*(self: pointer): pointer
+proc gtk_calendar_get_show_day_names*(self: pointer): pointer
+proc gtk_calendar_get_day*(self: pointer): pointer
+proc gtk_calendar_get_month*(self: pointer): pointer
+proc gtk_calendar_get_year*(self: pointer): pointer
+proc gtk_calendar_get_date*(self: pointer): pointer
+proc gtk_center_box_get_shrink_center_last*(self: pointer): pointer
+proc gtk_center_layout_new*(): pointer
+proc gtk_center_layout_get_orientation*(self: pointer): pointer
+proc gtk_center_layout_get_baseline_position*(self: pointer): pointer
+proc gtk_center_layout_get_start_widget*(self: pointer): pointer
+proc gtk_center_layout_get_center_widget*(self: pointer): pointer
+proc gtk_center_layout_get_end_widget*(self: pointer): pointer
+proc gtk_center_layout_get_shrink_center_last*(self: pointer): pointer
+proc gtk_color_dialog_button_new*(dialog: pointer): pointer
+proc gtk_color_dialog_button_get_rgba*(self: pointer): pointer
+proc gtk_color_dialog_get_title*(self: pointer): pointer
+proc gtk_color_dialog_get_modal*(self: pointer): pointer
+proc gtk_color_dialog_get_with_alpha*(self: pointer): pointer
+proc gtk_color_editor_new*(): ptr GtkWidget
+proc gtk_color_picker_kwin_new*(): pointer
+proc gtk_color_picker_portal_new*(): pointer
+proc gtk_color_picker_new*(): pointer
+proc gtk_color_picker_quartz_new*(): pointer
+proc gtk_color_picker_shell_new*(): pointer
+proc gtk_color_picker_win32_new*(): pointer
+proc gtk_color_swatch_new*(): ptr GtkWidget
+proc gtk_color_swatch_get_selectable*(swatch: pointer): gboolean
+proc gtk_color_swatch_select*(swatch: pointer)
+proc gtk_color_swatch_activate*(swatch: pointer)
+proc gtk_color_swatch_customize*(swatch: pointer)
+proc gtk_column_view_cell_get_item*(self: pointer): pointer
+proc gtk_column_view_cell_get_child*(self: pointer): pointer
+proc gtk_column_view_cell_new*(): pointer
+proc gtk_column_view_cell_widget_remove*(self: pointer)
+proc gtk_column_view_cell_widget_get_next*(self: pointer): pointer
+proc gtk_column_view_cell_widget_get_prev*(self: pointer): pointer
+proc gtk_column_view_cell_widget_get_column*(self: pointer): pointer
+proc gtk_column_view_cell_widget_unset_column*(self: pointer)
+proc gtk_column_view_column_get_sorter*(self: pointer): pointer
+proc gtk_column_view_column_get_header_menu*(self: pointer): pointer
+proc gtk_column_view_column_get_id*(self: pointer): pointer
+proc gtk_column_view_column_get_first_cell*(self: pointer): pointer
+proc gtk_column_view_column_get_header*(self: pointer): ptr GtkWidget
+proc gtk_column_view_column_queue_resize*(self: pointer)
+proc gtk_column_view_column_notify_sort*(self: pointer)
+proc gtk_column_view_get_sorter*(self: pointer): pointer
+proc gtk_column_view_get_tab_behavior*(self: pointer): pointer
+proc gtk_column_view_get_row_factory*(self: pointer): pointer
+proc gtk_column_view_get_header_factory*(self: pointer): pointer
+proc gtk_column_view_is_inert*(self: pointer): gboolean
+proc gtk_column_view_get_list_view*(self: pointer): pointer
+proc gtk_column_view_get_focus_column*(self: pointer): pointer
+proc gtk_column_view_row_get_item*(self: pointer): pointer
+proc gtk_column_view_row_get_accessible_description*(self: pointer): pointer
+proc gtk_column_view_row_get_accessible_label*(self: pointer): pointer
+proc gtk_column_view_row_new*(): pointer
+proc gtk_column_view_sorter_get_primary_sort_column*(self: pointer): pointer
+proc gtk_column_view_sorter_get_primary_sort_order*(self: pointer): pointer
+proc gtk_column_view_sorter_get_n_sort_columns*(self: pointer): pointer
+proc gtk_column_view_sorter_new*(): pointer
+proc gtk_column_view_sorter_clear*(self: pointer)
+proc gtk_column_view_title_new*(column: pointer): ptr GtkWidget
+proc gtk_column_view_title_update_sort*(self: pointer)
+proc gtk_column_view_title_get_column*(self: pointer): pointer
+proc gtk_compose_table_new_with_file*(compose_file: cstring): pointer
+proc gtk_compose_table_get_x11_compose_file_dir*(): cstring
+proc gtk_constraint_variable_new_dummy*(name: cstring): pointer
+proc gtk_constraint_variable_new_objective*(name: cstring): pointer
+proc gtk_constraint_variable_new_slack*(name: cstring): pointer
+proc gtk_constraint_variable_ref*(variable: pointer): pointer
+proc gtk_constraint_variable_unref*(variable: pointer)
+proc gtk_constraint_variable_get_value*(variable: pointer): pointer
+proc gtk_constraint_variable_to_string*(variable: pointer): cstring
+proc gtk_constraint_variable_is_external*(variable: pointer): gboolean
+proc gtk_constraint_variable_is_pivotable*(variable: pointer): gboolean
+proc gtk_constraint_variable_is_restricted*(variable: pointer): gboolean
+proc gtk_constraint_variable_is_dummy*(variable: pointer): gboolean
+proc gtk_constraint_variable_pair_free*(pair: pointer)
+proc gtk_constraint_variable_set_new*(): pointer
+proc gtk_constraint_variable_set_free*(set: pointer)
+proc gtk_constraint_variable_set_is_empty*(set: pointer): gboolean
+proc gtk_constraint_variable_set_is_singleton*(set: pointer): gboolean
+proc gtk_constraint_variable_set_size*(set: pointer): pointer
+proc gtk_constraint_expression_new*(constant: pointer): pointer
+proc gtk_constraint_expression_new_from_variable*(variable: pointer): pointer
+proc gtk_constraint_expression_ref*(expression: pointer): pointer
+proc gtk_constraint_expression_unref*(expression: pointer)
+proc gtk_constraint_expression_clone*(expression: pointer): pointer
+proc gtk_constraint_expression_get_constant*(expression: pointer): pointer
+proc gtk_constraint_expression_is_constant*(expression: pointer): gboolean
+proc gtk_constraint_expression_to_string*(expression: pointer): cstring
+proc gtk_constraint_expression_get_pivotable_variable*(expression: pointer): pointer
+proc gtk_constraint_expression_builder_plus*(builder: pointer)
+proc gtk_constraint_expression_builder_minus*(builder: pointer)
+proc gtk_constraint_expression_builder_divide_by*(builder: pointer)
+proc gtk_constraint_expression_builder_multiply_by*(builder: pointer)
+proc gtk_constraint_guide_update*(guide: pointer): pointer
+proc gtk_constraint_guide_detach*(guide: pointer)
+proc gtk_constraint_is_constant*(constraint: pointer): pointer
+proc gtk_constraint_vfl_parser_error_quark*(): pointer
+proc gtk_constraint_layout_observe_constraints*(layout: pointer): pointer
+proc gtk_constraint_layout_observe_guides*(layout: pointer): pointer
+proc gtk_constraint_layout_get_solver*(layout: pointer): pointer
+proc gtk_constraint_detach*(constraint: pointer)
+proc gtk_constraint_solver_new*(): pointer
+proc gtk_constraint_solver_freeze*(solver: pointer)
+proc gtk_constraint_solver_thaw*(solver: pointer)
+proc gtk_constraint_solver_resolve*(solver: pointer)
+proc gtk_constraint_solver_begin_edit*(solver: pointer)
+proc gtk_constraint_solver_end_edit*(solver: pointer)
+proc gtk_constraint_solver_clear*(solver: pointer)
+proc gtk_constraint_solver_to_string*(solver: pointer): cstring
+proc gtk_constraint_solver_statistics*(solver: pointer): cstring
+proc gtk_constraint_vfl_parser_new*(): pointer
+proc gtk_constraint_vfl_parser_free*(parser: pointer)
+proc gtk_constraint_vfl_parser_get_error_offset*(parser: pointer): pointer
+proc gtk_constraint_vfl_parser_get_error_range*(parser: pointer): pointer
+proc gtk_css_animated_style_recompute*(style: pointer)
+proc gtk_css_animated_style_get_base_style*(style: pointer): pointer
+proc gtk_css_animated_style_get_parent_style*(style: pointer): pointer
+proc gtk_css_animated_style_get_provider*(style: pointer): pointer
+proc gtk_css_animation_get_name*(animation: pointer): cstring {.importc: "_gtk_css_animation_get_name".}
+proc gtk_css_animation_is_animation*(animation: pointer): gboolean {.importc: "_gtk_css_animation_is_animation".}
+proc gtk_css_array_value_new*(content: pointer): pointer {.importc: "_gtk_css_array_value_new".}
+proc gtk_css_bg_size_value_parse*(parser: pointer): pointer {.importc: "_gtk_css_bg_size_value_parse".}
+proc gtk_css_border_value_get_top*(value: pointer): pointer {.importc: "_gtk_css_border_value_get_top".}
+proc gtk_css_border_value_get_right*(value: pointer): pointer {.importc: "_gtk_css_border_value_get_right".}
+proc gtk_css_border_value_get_bottom*(value: pointer): pointer {.importc: "_gtk_css_border_value_get_bottom".}
+proc gtk_css_border_value_get_left*(value: pointer): pointer {.importc: "_gtk_css_border_value_get_left".}
+proc gtk_css_boxes_compute_padding_rect*(boxes: pointer): pointer
+proc gtk_css_boxes_get_border_rect*(): pointer
+proc gtk_css_boxes_get_padding_rect*(): pointer
+proc gtk_css_boxes_get_content_rect*(): pointer
+proc gtk_css_boxes_get_border_box*(): pointer
+proc gtk_css_boxes_get_padding_box*(): pointer
+proc gtk_css_boxes_get_content_box*(): pointer
+proc gtk_css_boxes_get_margin_rect*(boxes: pointer): pointer
+proc gtk_css_boxes_get_border_rect*(boxes: pointer): pointer
+proc gtk_css_boxes_get_padding_rect*(boxes: pointer): pointer
+proc gtk_css_boxes_get_content_rect*(boxes: pointer): pointer
+proc gtk_css_boxes_get_outline_rect*(boxes: pointer): pointer
+proc gtk_css_boxes_get_border_box*(boxes: pointer): pointer
+proc gtk_css_boxes_get_padding_box*(boxes: pointer): pointer
+proc gtk_css_boxes_get_content_box*(boxes: pointer): pointer
+proc gtk_css_boxes_get_outline_box*(boxes: pointer): pointer
+proc gtk_css_color_to_string*(color: pointer): cstring
+proc gtk_css_color_interpolation_method_can_parse*(parser: pointer): gboolean
+proc gtk_css_hue_interpolation_to_hue_interpolation*(interp: pointer): pointer
+proc gtk_css_color_value_can_parse*(parser: pointer): gboolean
+proc gtk_css_color_value_parse*(parser: pointer): pointer
+proc gtk_css_corner_value_parse*(parser: pointer): pointer {.importc: "_gtk_css_corner_value_parse".}
+proc gtk_css_dynamic_new*(timestamp: gint64): pointer
+proc gtk_css_ease_value_can_parse*(parser: pointer): gboolean {.importc: "_gtk_css_ease_value_can_parse".}
+proc gtk_css_ease_value_parse*(parser: pointer): pointer {.importc: "_gtk_css_ease_value_parse".}
+proc gtk_css_blend_mode_value_new*(blend_mode: pointer): pointer {.importc: "_gtk_css_blend_mode_value_new".}
+proc gtk_css_blend_mode_value_try_parse*(parser: pointer): pointer {.importc: "_gtk_css_blend_mode_value_try_parse".}
+proc gtk_css_blend_mode_value_get*(value: pointer): pointer {.importc: "_gtk_css_blend_mode_value_get".}
+proc gtk_css_border_style_value_new*(border_style: pointer): pointer {.importc: "_gtk_css_border_style_value_new".}
+proc gtk_css_border_style_value_try_parse*(parser: pointer): pointer {.importc: "_gtk_css_border_style_value_try_parse".}
+proc gtk_css_border_style_value_get*(value: pointer): pointer {.importc: "_gtk_css_border_style_value_get".}
+proc gtk_css_font_size_value_new*(size: pointer): pointer {.importc: "_gtk_css_font_size_value_new".}
+proc gtk_css_font_size_value_try_parse*(parser: pointer): pointer {.importc: "_gtk_css_font_size_value_try_parse".}
+proc gtk_css_font_size_value_get*(value: pointer): pointer {.importc: "_gtk_css_font_size_value_get".}
+proc gtk_css_font_style_value_new*(style: pointer): pointer {.importc: "_gtk_css_font_style_value_new".}
+proc gtk_css_font_style_value_try_parse*(parser: pointer): pointer {.importc: "_gtk_css_font_style_value_try_parse".}
+proc gtk_css_font_style_value_get*(value: pointer): pointer {.importc: "_gtk_css_font_style_value_get".}
+proc gtk_css_font_weight_value_try_parse*(parser: pointer): pointer
+proc gtk_css_font_weight_value_get*(value: pointer): pointer
+proc gtk_css_font_stretch_value_new*(stretch: pointer): pointer {.importc: "_gtk_css_font_stretch_value_new".}
+proc gtk_css_font_stretch_value_try_parse*(parser: pointer): pointer {.importc: "_gtk_css_font_stretch_value_try_parse".}
+proc gtk_css_font_stretch_value_get*(value: pointer): pointer {.importc: "_gtk_css_font_stretch_value_get".}
+proc gtk_css_text_decoration_line_value_new*(line: pointer): pointer {.importc: "_gtk_css_text_decoration_line_value_new".}
+proc gtk_css_text_decoration_line_value_get*(value: pointer): pointer {.importc: "_gtk_css_text_decoration_line_value_get".}
+proc gtk_css_text_decoration_style_value_new*(style: pointer): pointer {.importc: "_gtk_css_text_decoration_style_value_new".}
+proc gtk_css_text_decoration_style_value_try_parse*(parser: pointer): pointer {.importc: "_gtk_css_text_decoration_style_value_try_parse".}
+proc gtk_css_text_decoration_style_value_get*(value: pointer): pointer {.importc: "_gtk_css_text_decoration_style_value_get".}
+proc gtk_css_area_value_new*(area: pointer): pointer {.importc: "_gtk_css_area_value_new".}
+proc gtk_css_area_value_try_parse*(parser: pointer): pointer {.importc: "_gtk_css_area_value_try_parse".}
+proc gtk_css_area_value_get*(value: pointer): pointer {.importc: "_gtk_css_area_value_get".}
+proc gtk_css_direction_value_new*(direction: pointer): pointer {.importc: "_gtk_css_direction_value_new".}
+proc gtk_css_direction_value_try_parse*(parser: pointer): pointer {.importc: "_gtk_css_direction_value_try_parse".}
+proc gtk_css_direction_value_get*(value: pointer): pointer {.importc: "_gtk_css_direction_value_get".}
+proc gtk_css_play_state_value_new*(play_state: pointer): pointer {.importc: "_gtk_css_play_state_value_new".}
+proc gtk_css_play_state_value_try_parse*(parser: pointer): pointer {.importc: "_gtk_css_play_state_value_try_parse".}
+proc gtk_css_play_state_value_get*(value: pointer): pointer {.importc: "_gtk_css_play_state_value_get".}
+proc gtk_css_fill_mode_value_new*(fill_mode: pointer): pointer {.importc: "_gtk_css_fill_mode_value_new".}
+proc gtk_css_fill_mode_value_try_parse*(parser: pointer): pointer {.importc: "_gtk_css_fill_mode_value_try_parse".}
+proc gtk_css_fill_mode_value_get*(value: pointer): pointer {.importc: "_gtk_css_fill_mode_value_get".}
+proc gtk_css_icon_style_value_new*(icon_style: pointer): pointer {.importc: "_gtk_css_icon_style_value_new".}
+proc gtk_css_icon_style_value_try_parse*(parser: pointer): pointer {.importc: "_gtk_css_icon_style_value_try_parse".}
+proc gtk_css_icon_style_value_get*(value: pointer): pointer {.importc: "_gtk_css_icon_style_value_get".}
+proc gtk_css_font_kerning_value_new*(kerning: pointer): pointer {.importc: "_gtk_css_font_kerning_value_new".}
+proc gtk_css_font_kerning_value_try_parse*(parser: pointer): pointer {.importc: "_gtk_css_font_kerning_value_try_parse".}
+proc gtk_css_font_kerning_value_get*(value: pointer): pointer {.importc: "_gtk_css_font_kerning_value_get".}
+proc gtk_css_font_variant_position_value_new*(position: pointer): pointer {.importc: "_gtk_css_font_variant_position_value_new".}
+proc gtk_css_font_variant_position_value_try_parse*(parser: pointer): pointer {.importc: "_gtk_css_font_variant_position_value_try_parse".}
+proc gtk_css_font_variant_position_value_get*(value: pointer): pointer {.importc: "_gtk_css_font_variant_position_value_get".}
+proc gtk_css_font_variant_caps_value_new*(caps: pointer): pointer {.importc: "_gtk_css_font_variant_caps_value_new".}
+proc gtk_css_font_variant_caps_value_try_parse*(parser: pointer): pointer {.importc: "_gtk_css_font_variant_caps_value_try_parse".}
+proc gtk_css_font_variant_caps_value_get*(value: pointer): pointer {.importc: "_gtk_css_font_variant_caps_value_get".}
+proc gtk_css_font_variant_alternate_value_new*(alternates: pointer): pointer {.importc: "_gtk_css_font_variant_alternate_value_new".}
+proc gtk_css_font_variant_alternate_value_try_parse*(parser: pointer): pointer {.importc: "_gtk_css_font_variant_alternate_value_try_parse".}
+proc gtk_css_font_variant_alternate_value_get*(value: pointer): pointer {.importc: "_gtk_css_font_variant_alternate_value_get".}
+proc gtk_css_font_variant_ligature_value_new*(ligatures: pointer): pointer {.importc: "_gtk_css_font_variant_ligature_value_new".}
+proc gtk_css_font_variant_ligature_value_get*(value: pointer): pointer {.importc: "_gtk_css_font_variant_ligature_value_get".}
+proc gtk_css_font_variant_numeric_value_new*(numeric: pointer): pointer {.importc: "_gtk_css_font_variant_numeric_value_new".}
+proc gtk_css_font_variant_numeric_value_get*(value: pointer): pointer {.importc: "_gtk_css_font_variant_numeric_value_get".}
+proc gtk_css_font_variant_east_asian_value_new*(east_asian: pointer): pointer {.importc: "_gtk_css_font_variant_east_asian_value_new".}
+proc gtk_css_font_variant_east_asian_value_get*(value: pointer): pointer {.importc: "_gtk_css_font_variant_east_asian_value_get".}
+proc gtk_css_text_transform_value_new*(transform: pointer): pointer {.importc: "_gtk_css_text_transform_value_new".}
+proc gtk_css_text_transform_value_try_parse*(parser: pointer): pointer {.importc: "_gtk_css_text_transform_value_try_parse".}
+proc gtk_css_text_transform_value_get*(value: pointer): pointer {.importc: "_gtk_css_text_transform_value_get".}
+proc gtk_css_parser_error_quark*(): pointer
+proc gtk_css_parser_warning_quark*(): pointer
+proc gtk_css_filter_value_new_none*(): pointer
+proc gtk_css_filter_value_parse*(parser: pointer): pointer
+proc gtk_css_filter_value_is_none*(filter: pointer): gboolean
+proc gtk_css_font_features_value_new_default*(): pointer
+proc gtk_css_font_features_value_parse*(parser: pointer): pointer
+proc gtk_css_font_features_value_get_features*(value: pointer): cstring
+proc gtk_css_font_variations_value_new_default*(): pointer
+proc gtk_css_font_variations_value_parse*(parser: pointer): pointer
+proc gtk_css_font_variations_value_get_variations*(value: pointer): cstring
+proc gtk_css_image_invalid_new*(): pointer
+proc gtk_css_image_can_parse*(parser: pointer): gboolean {.importc: "_gtk_css_image_can_parse".}
+proc gtk_css_image_new_parse*(parser: pointer): pointer {.importc: "_gtk_css_image_new_parse".}
+proc gtk_css_image_to_string*(image: pointer): cstring
+proc gtk_css_image_value_new*(image: pointer): pointer {.importc: "_gtk_css_image_value_new".}
+proc gtk_css_image_value_get_image*(image: pointer): pointer {.importc: "_gtk_css_image_value_get_image".}
+proc gtk_css_inherit_value_new*(): pointer {.importc: "_gtk_css_inherit_value_new".}
+proc gtk_css_inherit_value_get*(): pointer {.importc: "_gtk_css_inherit_value_get".}
+proc gtk_css_initial_value_new*(): pointer {.importc: "_gtk_css_initial_value_new".}
+proc gtk_css_initial_value_get*(): pointer {.importc: "_gtk_css_initial_value_get".}
+proc gtk_css_keyframes_parse*(parser: pointer): pointer {.importc: "_gtk_css_keyframes_parse".}
+proc gtk_css_keyframes_ref*(keyframes: pointer): pointer {.importc: "_gtk_css_keyframes_ref".}
+proc gtk_css_keyframes_unref*(keyframes: pointer) {.importc: "_gtk_css_keyframes_unref".}
+proc gtk_css_keyframes_get_n_variables*(keyframes: pointer): guint {.importc: "_gtk_css_keyframes_get_n_variables".}
+proc gtk_css_line_height_value_get_default*(): pointer
+proc gtk_css_line_height_value_parse*(parser: pointer): pointer
+proc gtk_css_line_height_value_get*(value: pointer): pointer
+proc gtk_css_lookup_init*(lookup: pointer) {.importc: "_gtk_css_lookup_init".}
+proc gtk_css_lookup_destroy*(lookup: pointer) {.importc: "_gtk_css_lookup_destroy".}
+proc gtk_css_node_declaration_new*(): pointer
+proc gtk_css_node_declaration_ref*(decl: pointer): pointer
+proc gtk_css_node_declaration_unref*(decl: pointer)
+proc gtk_css_node_declaration_get_name*(decl: pointer): pointer
+proc gtk_css_node_declaration_get_id*(decl: pointer): pointer
+proc gtk_css_node_declaration_get_state*(decl: pointer): pointer
+proc gtk_css_node_declaration_clear_classes*(decl: pointer): gboolean
+proc gtk_css_node_declaration_hash*(elem: gconstpointer): guint
+proc gtk_css_node_declaration_to_string*(decl: pointer): cstring
+proc gtk_css_node_new*(): pointer
+proc gtk_css_node_get_classes*(cssnode: pointer): pointer
+proc gtk_css_node_invalidate_style_provider*(cssnode: pointer)
+proc gtk_css_node_validate*(cssnode: pointer)
+proc gtk_css_node_observe_children*(cssnode: pointer): pointer
+proc gtk_css_node_style_cache_new*(style: pointer): pointer
+proc gtk_css_node_style_cache_ref*(cache: pointer): pointer
+proc gtk_css_node_style_cache_unref*(cache: pointer)
+proc gtk_css_node_style_cache_get_style*(cache: pointer): pointer
+proc gtk_css_number_value_can_parse*(parser: pointer): gboolean
+proc gtk_css_palette_value_new_default*(): pointer
+proc gtk_css_palette_value_parse*(parser: pointer): pointer
+proc gtk_css_parser_ref*(self: pointer): pointer
+proc gtk_css_parser_unref*(self: pointer)
+proc gtk_css_parser_peek_token*(self: pointer): pointer
+proc gtk_css_parser_get_token*(self: pointer): pointer
+proc gtk_css_parser_consume_token*(self: pointer)
+proc gtk_css_parser_start_block*(self: pointer)
+proc gtk_css_parser_end_block_prelude*(self: pointer)
+proc gtk_css_parser_end_block*(self: pointer)
+proc gtk_css_parser_skip*(self: pointer)
+proc gtk_css_parser_skip_whitespace*(self: pointer)
+proc gtk_css_parser_has_url*(self: pointer): gboolean
+proc gtk_css_parser_has_number*(self: pointer): gboolean
+proc gtk_css_parser_has_integer*(self: pointer): gboolean
+proc gtk_css_parser_has_percentage*(self: pointer): gboolean
+proc gtk_css_parser_has_references*(parser: pointer): gboolean
+proc gtk_css_parser_parse_value_into_token_stream*(parser: pointer): pointer
+proc gtk_css_position_value_parse*(parser: pointer): pointer {.importc: "_gtk_css_position_value_parse".}
+proc gtk_css_position_value_try_parse*(parser: pointer): pointer {.importc: "_gtk_css_position_value_try_parse".}
+proc gtk_css_position_value_parse_spacing*(parser: pointer): pointer
+proc gtk_css_provider_to_string*(provider: pointer): pointer
+proc gtk_css_provider_set_keep_css_sections*()
+proc gtk_css_background_repeat_value_try_parse*(parser: pointer): pointer {.importc: "_gtk_css_background_repeat_value_try_parse".}
+proc gtk_css_background_repeat_value_get_x*(repeat: pointer): pointer {.importc: "_gtk_css_background_repeat_value_get_x".}
+proc gtk_css_background_repeat_value_get_y*(repeat: pointer): pointer {.importc: "_gtk_css_background_repeat_value_get_y".}
+proc gtk_css_border_repeat_value_try_parse*(parser: pointer): pointer {.importc: "_gtk_css_border_repeat_value_try_parse".}
+proc gtk_css_border_repeat_value_get_x*(repeat: pointer): pointer {.importc: "_gtk_css_border_repeat_value_get_x".}
+proc gtk_css_border_repeat_value_get_y*(repeat: pointer): pointer {.importc: "_gtk_css_border_repeat_value_get_y".}
+proc gtk_css_section_ref*(section: pointer): pointer
+proc gtk_css_section_unref*(section: pointer): pointer
+proc gtk_css_section_to_string*(section: pointer): pointer
+proc gtk_css_section_get_parent*(section: pointer): pointer
+proc gtk_css_section_get_file*(section: pointer): pointer
+proc gtk_css_section_get_bytes*(section: pointer): pointer
+proc gtk_css_section_get_start_location*(section: pointer): pointer
+proc gtk_css_section_get_end_location*(section: pointer): pointer
+proc gtk_css_selector_parse*(parser: pointer): pointer {.importc: "_gtk_css_selector_parse".}
+proc gtk_css_selector_free*(selector: pointer) {.importc: "_gtk_css_selector_free".}
+proc gtk_css_selector_to_string*(selector: pointer): cstring {.importc: "_gtk_css_selector_to_string".}
+proc gtk_css_selector_get_change*(selector: pointer): pointer {.importc: "_gtk_css_selector_get_change".}
+proc gtk_css_selector_tree_free*(tree: pointer) {.importc: "_gtk_css_selector_tree_free".}
+proc gtk_css_selector_tree_builder_build*(builder: pointer): pointer {.importc: "_gtk_css_selector_tree_builder_build".}
+proc gtk_css_selector_tree_builder_free*(builder: pointer) {.importc: "_gtk_css_selector_tree_builder_free".}
+proc gtk_css_shadow_value_new_none*(): pointer
+proc gtk_css_shadow_value_new_filter*(other: pointer): pointer
+proc gtk_css_shadow_value_parse_filter*(parser: pointer): pointer
+proc gtk_css_shadow_value_get_n_shadows*(value: pointer): guint
+proc gtk_css_shorthand_property_init_properties*() {.importc: "_gtk_css_shorthand_property_init_properties".}
+proc gtk_css_static_style_get_default*(): pointer
+proc gtk_css_static_style_get_change*(style: pointer): pointer
+proc gtk_css_ident_value_new*(ident: cstring): pointer {.importc: "_gtk_css_ident_value_new".}
+proc gtk_css_ident_value_new_take*(ident: cstring): pointer {.importc: "_gtk_css_ident_value_new_take".}
+proc gtk_css_ident_value_try_parse*(parser: pointer): pointer {.importc: "_gtk_css_ident_value_try_parse".}
+proc gtk_css_ident_value_get*(ident: pointer): cstring {.importc: "_gtk_css_ident_value_get".}
+proc gtk_css_string_value_new*(string: cstring): pointer {.importc: "_gtk_css_string_value_new".}
+proc gtk_css_string_value_new_take*(string: cstring): pointer {.importc: "_gtk_css_string_value_new_take".}
+proc gtk_css_string_value_parse*(parser: pointer): pointer {.importc: "_gtk_css_string_value_parse".}
+proc gtk_css_string_value_get*(string: pointer): cstring {.importc: "_gtk_css_string_value_get".}
+proc gtk_css_style_change_finish*(change: pointer)
+proc gtk_css_style_change_get_old_style*(change: pointer): pointer
+proc gtk_css_style_change_get_new_style*(change: pointer): pointer
+proc gtk_css_style_change_has_change*(change: pointer): gboolean
+proc gtk_css_style_change_print*(change: pointer, string: pointer)
+proc gtk_css_style_change_to_string*(change: pointer): cstring
+proc gtk_css_style_get_static_style*(style: pointer): pointer
+proc gtk_css_style_to_string*(style: pointer): cstring
+proc gtk_css_style_get_pango_text_transform*(style: pointer): pointer
+proc gtk_css_style_compute_font_features*(style: pointer): cstring
+proc gtk_css_style_get_pango_attributes*(style: pointer): pointer
+proc gtk_css_style_get_pango_font*(style: pointer): pointer
+proc gtk_css_style_list_custom_properties*(style: pointer): pointer
+proc gtk_css_values_unref*(values: pointer)
+proc gtk_css_style_property_init_properties*() {.importc: "_gtk_css_style_property_init_properties".}
+proc gtk_css_style_property_lookup_by_id*(id: guint): pointer {.importc: "_gtk_css_style_property_lookup_by_id".}
+proc gtk_css_style_property_is_inherit*(property: pointer): gboolean {.importc: "_gtk_css_style_property_is_inherit".}
+proc gtk_css_style_property_is_animated*(property: pointer): gboolean {.importc: "_gtk_css_style_property_is_animated".}
+proc gtk_css_style_property_get_affects*(property: pointer): pointer {.importc: "_gtk_css_style_property_get_affects".}
+proc gtk_css_style_property_affects_size*(property: pointer): gboolean {.importc: "_gtk_css_style_property_affects_size".}
+proc gtk_css_style_property_affects_font*(property: pointer): gboolean {.importc: "_gtk_css_style_property_affects_font".}
+proc gtk_css_style_property_get_id*(property: pointer): guint {.importc: "_gtk_css_style_property_get_id".}
+proc gtk_css_style_property_get_initial_value*(property: pointer): pointer {.importc: "_gtk_css_style_property_get_initial_value".}
+proc gtk_css_font_family_value_parse*(parser: pointer): pointer
+proc gtk_css_font_size_value_parse*(parser: pointer): pointer
+proc gtk_css_token_clear*(token: pointer)
+proc gtk_css_token_to_string*(token: pointer): cstring
+proc gtk_css_tokenizer_new*(bytes: pointer): pointer
+proc gtk_css_tokenizer_ref*(tokenizer: pointer): pointer
+proc gtk_css_tokenizer_unref*(tokenizer: pointer)
+proc gtk_css_tokenizer_get_bytes*(tokenizer: pointer): pointer
+proc gtk_css_tokenizer_save*(tokenizer: pointer)
+proc gtk_css_tokenizer_restore*(tokenizer: pointer)
+proc gtk_css_transform_value_new_none*(): pointer {.importc: "_gtk_css_transform_value_new_none".}
+proc gtk_css_transform_value_parse*(parser: pointer): pointer {.importc: "_gtk_css_transform_value_parse".}
+proc gtk_css_transform_value_get_transform*(transform: pointer): pointer
+proc gtk_css_transient_node_new*(parent: pointer): pointer
+proc gtk_css_transition_get_property*(transition: pointer): guint {.importc: "_gtk_css_transition_get_property".}
+proc gtk_css_transition_is_transition*(animation: pointer): gboolean {.importc: "_gtk_css_transition_is_transition".}
+proc gtk_css_unset_value_new*(): pointer {.importc: "_gtk_css_unset_value_new".}
+proc gtk_css_value_to_string*(value: pointer): cstring
+proc gtk_css_variable_set_new*(): pointer
+proc gtk_css_variable_set_ref*(self: pointer): pointer
+proc gtk_css_variable_set_unref*(self: pointer)
+proc gtk_css_variable_set_copy*(self: pointer): pointer
+proc gtk_css_variable_set_resolve_cycles*(self: pointer)
+proc gtk_css_variable_set_list_ids*(self: pointer): pointer
+proc gtk_css_variable_value_unref*(self: pointer)
+proc gtk_css_variable_value_to_string*(self: pointer): cstring
+proc gtk_css_variable_value_taint*(self: pointer)
+proc gtk_css_widget_node_new*(widget: GtkWidget): pointer
+proc gtk_css_widget_node_widget_destroyed*(node: pointer)
+proc gtk_css_widget_node_get_widget*(node: pointer): ptr GtkWidget
+proc gtk_cups_request_get_poll_state*(request: pointer): pointer
+proc gtk_cups_request_free*(request: pointer)
+proc gtk_cups_request_get_result*(request: pointer): pointer
+proc gtk_cups_request_is_done*(request: pointer): gboolean
+proc gtk_cups_result_is_error*(result: pointer): gboolean
+proc gtk_cups_result_get_response*(result: pointer): pointer
+proc gtk_cups_result_get_error_type*(result: pointer): pointer
+proc gtk_cups_result_get_error_status*(result: pointer): pointer
+proc gtk_cups_result_get_error_code*(result: pointer): pointer
+proc gtk_cups_result_get_error_string*(result: pointer): cstring
+proc gtk_cups_connection_test_get_state*(test: pointer): pointer
+proc gtk_cups_connection_test_free*(test: pointer)
+
+{.pop.}
+
+
+
+# ============================================================================
+# GTK API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc gtk_print_get_default_user_units*(): pointer {.importc: "_gtk_print_get_default_user_units".}
+proc gtk_print_load_custom_papers*(store: pointer)
+proc gtk_load_custom_papers*(): pointer {.importc: "_gtk_load_custom_papers".}
+proc gtk_data_viewer_new*(): ptr GtkWidget
+proc gtk_data_viewer_is_loading*(self: pointer): gboolean
+proc gtk_data_viewer_reset*(self: pointer)
+proc gtk_dialog_error_quark*(): pointer
+proc gtk_directory_list_get_file*(self: pointer): pointer
+proc gtk_directory_list_get_attributes*(self: pointer): pointer
+proc gtk_directory_list_get_io_priority*(self: pointer): pointer
+proc gtk_directory_list_is_loading*(self: pointer): pointer
+proc gtk_directory_list_get_error*(self: pointer): pointer
+proc gtk_directory_list_get_monitored*(self: pointer): pointer
+proc gtk_drag_icon_get_for_drag*(drag: pointer): pointer
+proc gtk_drag_icon_get_child*(self: pointer): pointer
+proc gtk_drag_icon_create_widget_for_value*(value: pointer): pointer
+proc gtk_drop_controller_motion_new*(): pointer
+proc gtk_drop_controller_motion_contains_pointer*(self: pointer): pointer
+proc gtk_drop_controller_motion_get_drop*(self: pointer): pointer
+proc gtk_drop_controller_motion_is_pointer*(self: pointer): pointer
+proc gtk_drop_down_get_header_factory*(self: pointer): pointer
+proc gtk_drop_down_get_search_match_mode*(self: pointer): pointer
+proc gtk_drop_end_event*(drop: pointer)
+proc gtk_drop_target_async_get_formats*(self: pointer): pointer
+proc gtk_drop_target_async_get_actions*(self: pointer): pointer
+proc gtk_editable_init_delegate*(editable: pointer): pointer
+proc gtk_editable_finish_delegate*(editable: pointer): pointer
+proc gtk_entry_get_overwrite_mode*(entry: pointer): pointer
+proc gtk_entry_completion_resize_popup*(completion: pointer) {.importc: "_gtk_entry_completion_resize_popup".}
+proc gtk_entry_completion_popdown*(completion: pointer) {.importc: "_gtk_entry_completion_popdown".}
+proc gtk_entry_completion_disconnect*(completion: pointer) {.importc: "_gtk_entry_completion_disconnect".}
+proc gtk_entry_get_key_controller*(entry: pointer): pointer
+proc gtk_ordering_from_cmpfunc*(cmpfunc_result: pointer): pointer
+proc gtk_event_controller_get_current_event*(controller: pointer): pointer
+proc gtk_event_controller_get_current_event_time*(controller: pointer): pointer
+proc gtk_event_controller_get_current_event_device*(controller: pointer): pointer
+proc gtk_event_controller_get_current_event_state*(controller: pointer): pointer
+proc gtk_event_controller_get_target*(controller: pointer): ptr GtkWidget
+proc gtk_expander_get_use_underline*(expander: pointer): pointer
+proc gtk_expander_get_use_markup*(expander: pointer): pointer
+proc gtk_expander_get_resize_toplevel*(expander: pointer): pointer
+proc gtk_expression_watch_ref*(watch: pointer): pointer
+proc gtk_expression_watch_unref*(watch: pointer): pointer
+proc gtk_expression_watch_unwatch*(watch: pointer): pointer
+proc gtk_value_get_expression*(value: pointer): pointer
+proc gtk_value_dup_expression*(value: pointer): pointer
+proc gtk_file_chooser_cell_new*(): pointer
+proc gtk_file_chooser_entry_get_action*(chooser_entry: pointer): pointer {.importc: "_gtk_file_chooser_entry_get_action".}
+proc gtk_file_chooser_entry_get_current_folder*(chooser_entry: pointer): pointer {.importc: "_gtk_file_chooser_entry_get_current_folder".}
+proc gtk_file_chooser_entry_get_file_part*(chooser_entry: pointer): cstring {.importc: "_gtk_file_chooser_entry_get_file_part".}
+proc gtk_file_chooser_entry_select_filename*(chooser_entry: pointer) {.importc: "_gtk_file_chooser_entry_select_filename".}
+proc gtk_file_chooser_native_win32_show*(self: pointer): gboolean
+proc gtk_file_chooser_native_win32_hide*(self: pointer)
+proc gtk_file_chooser_native_quartz_show*(self: pointer): gboolean
+proc gtk_file_chooser_native_quartz_hide*(self: pointer)
+proc gtk_file_chooser_native_android_show*(self: pointer): gboolean
+proc gtk_file_chooser_native_android_hide*(self: pointer)
+proc gtk_file_chooser_native_portal_show*(self: pointer): gboolean
+proc gtk_file_chooser_native_portal_hide*(self: pointer)
+proc gtk_file_chooser_select_all*(chooser: pointer)
+proc gtk_file_chooser_unselect_all*(chooser: pointer)
+proc gtk_file_chooser_install_properties*(klass: pointer) {.importc: "_gtk_file_chooser_install_properties".}
+proc gtk_file_chooser_delegate_iface_init*(iface: pointer) {.importc: "_gtk_file_chooser_delegate_iface_init".}
+proc gtk_file_chooser_label_for_file*(file: pointer): cstring {.importc: "_gtk_file_chooser_label_for_file".}
+proc gtk_file_info_consider_as_directory*(info: pointer): gboolean {.importc: "_gtk_file_info_consider_as_directory".}
+proc gtk_file_has_native_path*(file: pointer): gboolean {.importc: "_gtk_file_has_native_path".}
+proc gtk_file_consider_as_remote*(file: pointer): gboolean {.importc: "_gtk_file_consider_as_remote".}
+proc gtk_file_info_get_file*(info: pointer): pointer {.importc: "_gtk_file_info_get_file".}
+proc gtk_file_chooser_widget_should_respond*(chooser: pointer): gboolean
+proc gtk_file_chooser_widget_initial_focus*(chooser: pointer)
+proc gtk_file_chooser_widget_get_selected_files*(impl: pointer): pointer
+proc gtk_file_chooser_widget_get_selection_model*(chooser: pointer): pointer
+proc gtk_file_dialog_new*(): pointer
+proc gtk_file_dialog_get_title*(self: pointer): pointer
+proc gtk_file_dialog_get_modal*(self: pointer): pointer
+proc gtk_file_dialog_get_filters*(self: pointer): pointer
+proc gtk_file_dialog_get_default_filter*(self: pointer): pointer
+proc gtk_file_dialog_get_initial_folder*(self: pointer): pointer
+proc gtk_file_dialog_get_initial_name*(self: pointer): pointer
+proc gtk_file_dialog_get_initial_file*(self: pointer): pointer
+proc gtk_file_dialog_get_accept_label*(self: pointer): pointer
+proc gtk_file_filter_new*(): pointer
+proc gtk_file_filter_get_name*(filter: pointer): pointer
+proc gtk_file_filter_add_pixbuf_formats*(filter: pointer): pointer
+proc gtk_file_filter_get_attributes*(filter: pointer): pointer
+proc gtk_file_filter_to_gvariant*(filter: pointer): pointer
+proc gtk_file_filter_new_from_gvariant*(variant: pointer): pointer
+proc gtk_file_filter_get_as_patterns*(filter: pointer): pointer {.importc: "_gtk_file_filter_get_as_patterns".}
+proc gtk_file_filter_get_as_pattern_nsstrings*(filter: pointer): pointer {.importc: "_gtk_file_filter_get_as_pattern_nsstrings".}
+proc gtk_file_filter_store_types_in_list*(filter: pointer, list: pointer) {.importc: "_gtk_file_filter_store_types_in_list".}
+proc gtk_file_launcher_new*(file: pointer): pointer
+proc gtk_file_launcher_get_file*(self: pointer): pointer
+proc gtk_file_launcher_get_always_ask*(self: pointer): pointer
+proc gtk_file_launcher_get_writable*(self: pointer): pointer
+proc gtk_file_system_model_get_directory*(model: pointer): pointer {.importc: "_gtk_file_system_model_get_directory".}
+proc gtk_file_system_model_get_cancellable*(model: pointer): pointer {.importc: "_gtk_file_system_model_get_cancellable".}
+proc gtk_file_thumbnail_get_icon_size*(self: pointer): pointer {.importc: "_gtk_file_thumbnail_get_icon_size".}
+proc gtk_filter_get_strictness*(self: pointer): pointer
+proc gtk_filter_list_model_get_watch_items*(self: pointer): pointer
+proc gtk_fixed_layout_new*(): pointer
+proc gtk_fixed_layout_child_get_transform*(child: pointer): pointer
+proc gtk_flatten_list_model_new*(model: pointer): pointer
+proc gtk_flatten_list_model_get_model*(self: pointer): pointer
+proc gtk_flow_box_child_is_selected*(child: pointer): pointer
+proc gtk_flow_box_child_changed*(child: pointer): pointer
+proc gtk_flow_box_get_activate_on_single_click*(box: pointer): pointer
+proc gtk_flow_box_remove_all*(box: pointer): pointer
+proc gtk_flow_box_select_all*(box: pointer): pointer
+proc gtk_flow_box_unselect_all*(box: pointer): pointer
+proc gtk_flow_box_invalidate_filter*(box: pointer): pointer
+proc gtk_flow_box_invalidate_sort*(box: pointer): pointer
+proc gtk_flow_box_disable_move_cursor*(box: pointer)
+proc gtk_font_chooser_install_properties*(klass: pointer) {.importc: "_gtk_font_chooser_install_properties".}
+proc gtk_font_chooser_delegate_iface_init*(iface: pointer) {.importc: "_gtk_font_chooser_delegate_iface_init".}
+proc gtk_font_dialog_button_new*(dialog: pointer): pointer
+proc gtk_font_dialog_button_get_dialog*(self: pointer): pointer
+proc gtk_font_dialog_button_get_level*(self: pointer): pointer
+proc gtk_font_dialog_button_get_font_desc*(self: pointer): pointer
+proc gtk_font_dialog_button_get_font_features*(self: pointer): pointer
+proc gtk_font_dialog_button_get_language*(self: pointer): pointer
+proc gtk_font_dialog_button_get_use_font*(self: pointer): pointer
+proc gtk_font_dialog_button_get_use_size*(self: pointer): pointer
+proc gtk_font_dialog_new*(): pointer
+proc gtk_font_dialog_get_title*(self: pointer): pointer
+proc gtk_font_dialog_get_modal*(self: pointer): pointer
+proc gtk_font_dialog_get_language*(self: pointer): pointer
+proc gtk_font_dialog_get_font_map*(self: pointer): pointer
+proc gtk_font_dialog_get_filter*(self: pointer): pointer
+proc gtk_font_filter_new*(): pointer {.importc: "_gtk_font_filter_new".}
+proc gtk_font_filter_get_monospace*(self: pointer): gboolean {.importc: "_gtk_font_filter_get_monospace".}
+proc gtk_font_filter_get_language*(self: pointer): pointer {.importc: "_gtk_font_filter_get_language".}
+proc gtk_gesture_pan_new*(orientation: pointer): pointer
+proc gtk_gesture_pan_get_orientation*(gesture: pointer): pointer
+proc gtk_gesture_check*(gesture: pointer): pointer {.importc: "_gtk_gesture_check".}
+proc gtk_gesture_stylus_new*(): pointer
+proc gtk_gesture_stylus_get_stylus_only*(gesture: pointer): pointer
+proc gtk_gesture_stylus_get_device_tool*(gesture: pointer): pointer
+proc gtk_gl_area_get_allowed_apis*(area: pointer): pointer
+proc gtk_gl_area_get_api*(area: pointer): pointer
+proc gtk_gl_area_get_use_es*(area: pointer): gboolean
+proc gtk_gl_area_get_auto_render*(area: pointer): pointer
+proc gtk_gl_area_get_context*(area: pointer): pointer
+proc gtk_gl_area_get_error*(area: pointer): pointer
+proc gtk_graphics_offload_new*(child: GtkWidget): pointer
+proc gtk_graphics_offload_get_child*(self: pointer): pointer
+proc gtk_graphics_offload_get_enabled*(self: pointer): pointer
+proc gtk_graphics_offload_get_black_background*(self: pointer): pointer
+proc gtk_grid_layout_new*(): pointer
+proc gtk_grid_layout_get_row_homogeneous*(grid: pointer): pointer
+proc gtk_grid_layout_get_row_spacing*(grid: pointer): pointer
+proc gtk_grid_layout_get_column_homogeneous*(grid: pointer): pointer
+proc gtk_grid_layout_get_column_spacing*(grid: pointer): pointer
+proc gtk_grid_layout_get_baseline_row*(grid: pointer): pointer
+proc gtk_grid_layout_child_get_row*(child: pointer): pointer
+proc gtk_grid_layout_child_get_column*(child: pointer): pointer
+proc gtk_grid_layout_child_get_column_span*(child: pointer): pointer
+proc gtk_grid_layout_child_get_row_span*(child: pointer): pointer
+proc gtk_grid_view_get_tab_behavior*(self: pointer): pointer
+proc gtk_gst_paintable_new*(): pointer
+proc gtk_gst_sink_get_type*(): GType
+proc gtk_header_bar_get_use_native_controls*(bar: pointer): pointer
+proc gtk_header_bar_track_default_decoration*(bar: pointer): pointer {.importc: "_gtk_header_bar_track_default_decoration".}
+proc gtk_icon_cache_unref*(cache: pointer)
+proc gtk_icon_cache_validate*(info: pointer): gboolean
+proc gtk_icon_helper_clear*(self: pointer) {.importc: "_gtk_icon_helper_clear".}
+proc gtk_icon_helper_get_is_empty*(self: pointer): gboolean {.importc: "_gtk_icon_helper_get_is_empty".}
+proc gtk_icon_helper_get_storage_type*(self: pointer): pointer {.importc: "_gtk_icon_helper_get_storage_type".}
+proc gtk_icon_helper_get_pixel_size*(self: pointer): pointer {.importc: "_gtk_icon_helper_get_pixel_size".}
+proc gtk_icon_helper_get_use_fallback*(self: pointer): gboolean {.importc: "_gtk_icon_helper_get_use_fallback".}
+proc gtk_icon_helper_get_size*(self: pointer): pointer
+proc gtk_icon_helper_invalidate*(self: pointer)
+proc gtk_icon_paintable_get_file*(self: pointer): pointer
+proc gtk_icon_paintable_get_icon_name*(self: pointer): pointer
+proc gtk_icon_paintable_is_symbolic*(self: pointer): pointer
+proc gtk_icon_paintable_load_in_thread*(self: pointer)
+proc gtk_icon_theme_error_quark*(): pointer
+proc gtk_icon_theme_get_display*(self: pointer): pointer
+proc gtk_icon_theme_get_search_path*(self: pointer): pointer
+proc gtk_icon_theme_get_resource_path*(self: pointer): pointer
+proc gtk_icon_theme_get_theme_name*(self: pointer): pointer
+proc gtk_icon_theme_get_icon_names*(self: pointer): pointer
+proc gtk_icon_theme_get_serial*(self: pointer): pointer
+
+{.pop.}
+
+# ============================================================================
+# ICON API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc icon_cache_remove*(icon: pointer)
+proc icon_cache_mark_used_if_cached*(icon: pointer)
+
+{.pop.}
+
+# ============================================================================
+# GTK API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc gtk_image_definition_new_empty*(): pointer
+proc gtk_image_definition_new_icon_name*(icon_name: cstring): pointer
+proc gtk_image_definition_new_gicon*(gicon: pointer): pointer
+proc gtk_image_definition_new_paintable*(paintable: pointer): pointer
+proc gtk_image_definition_ref*(def: pointer): pointer
+proc gtk_image_definition_unref*(def: pointer)
+proc gtk_image_definition_get_storage_type*(def: pointer): pointer
+proc gtk_image_definition_get_scale*(def: pointer): pointer
+proc gtk_image_definition_get_icon_name*(def: pointer): cstring
+proc gtk_image_definition_get_gicon*(def: pointer): pointer
+proc gtk_image_definition_get_paintable*(def: pointer): pointer
+proc gtk_image_new_from_resource*(resource_path: cstring): pointer
+proc gtk_image_new_from_pixbuf*(pixbuf: pointer): ptr GtkWidget
+proc gtk_image_new_from_gicon*(icon: pointer): pointer
+proc gtk_image_clear*(image: pointer): pointer
+proc gtk_image_get_storage_type*(image: pointer): pointer
+proc gtk_image_get_gicon*(image: pointer): pointer
+proc gtk_image_get_icon_size*(image: pointer): pointer
+proc gtk_image_get_definition*(image: pointer): pointer
+proc gtk_im_context_focus_in*(context: pointer): pointer
+proc gtk_im_context_focus_out*(context: pointer): pointer
+proc gtk_im_context_reset*(context: pointer): pointer
+proc gtk_im_context_ime_register_type*(type_module: pointer)
+proc gtk_im_modules_init*(): pointer
+proc gtk_im_module_ensure_extension_point*()
+proc gtk_im_module_create*(context_id: cstring): pointer {.importc: "_gtk_im_module_create".}
+proc gtk_im_module_get_default_context_id*(display: pointer): cstring {.importc: "_gtk_im_module_get_default_context_id".}
+proc gtk_im_multicontext_get_context_id*(context: pointer): pointer
+proc gtk_inscription_get_layout*(self: pointer): pointer
+
+{.pop.}
+
+# ============================================================================
+# G API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc g_clear_pointer*(): pointer
+proc g_ascii_isspace*(s: pointer): pointer
+proc g_unichar_isspace*(str: pointer): pointer
+
+{.pop.}
+
+# ============================================================================
+# GTK API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc gtk_joined_menu_get_n_joined*(self: pointer): guint
+proc gtk_kinetic_scrolling_free*(kinetic: pointer)
+proc gtk_kinetic_scrolling_stop*(data: pointer)
+proc gtk_label_get_label*(self: pointer): pointer
+proc gtk_label_get_mnemonic_keyval*(self: pointer): pointer
+proc gtk_label_get_cursor_position*(label: pointer): pointer {.importc: "_gtk_label_get_cursor_position".}
+proc gtk_label_get_selection_bound*(label: pointer): pointer {.importc: "_gtk_label_get_selection_bound".}
+proc gtk_layout_child_get_layout_manager*(layout_child: pointer): pointer
+proc gtk_layout_child_get_child_widget*(layout_child: pointer): pointer
+proc gtk_layout_manager_get_request_mode*(manager: pointer): pointer
+proc gtk_layout_manager_get_widget*(manager: pointer): pointer
+proc gtk_layout_manager_layout_changed*(manager: pointer): pointer
+proc gtk_level_bar_get_mode*(self: pointer): pointer
+proc gtk_level_bar_get_inverted*(self: pointer): pointer
+proc gtk_list_base_get_orientation*(self: pointer): pointer
+proc gtk_list_base_get_manager*(self: pointer): pointer
+proc gtk_list_base_get_n_items*(self: pointer): guint
+proc gtk_list_base_get_model*(self: pointer): pointer
+proc gtk_list_base_get_anchor*(self: pointer): guint
+proc gtk_list_base_get_enable_rubberband*(self: pointer): gboolean
+proc gtk_list_base_get_tab_behavior*(self: pointer): pointer
+proc gtk_list_base_allocate*(self: pointer)
+proc gtk_list_box_row_get_header*(row: pointer): pointer
+proc gtk_list_box_row_changed*(row: pointer): pointer
+proc gtk_list_box_row_is_selected*(row: pointer): pointer
+proc gtk_list_box_row_get_selectable*(row: pointer): pointer
+proc gtk_list_box_row_get_activatable*(row: pointer): pointer
+proc gtk_list_box_remove_all*(box: pointer): pointer
+proc gtk_list_box_select_all*(box: pointer): pointer
+proc gtk_list_box_unselect_all*(box: pointer): pointer
+proc gtk_list_box_invalidate_filter*(box: pointer): pointer
+proc gtk_list_box_invalidate_sort*(box: pointer): pointer
+proc gtk_list_box_invalidate_headers*(box: pointer): pointer
+proc gtk_list_box_get_activate_on_single_click*(box: pointer): pointer
+proc gtk_list_box_drag_unhighlight_row*(box: pointer): pointer
+proc gtk_list_box_get_show_separators*(box: pointer): pointer
+proc gtk_list_box_get_tab_behavior*(box: pointer): pointer
+proc gtk_list_factory_widget_get_object*(self: pointer): gpointer
+proc gtk_list_factory_widget_get_factory*(self: pointer): pointer
+proc gtk_list_factory_widget_get_single_click_activate*(self: pointer): gboolean
+proc gtk_list_factory_widget_get_activatable*(self: pointer): gboolean
+proc gtk_list_factory_widget_get_selectable*(self: pointer): gboolean
+proc gtk_list_header_base_get_start*(self: pointer): guint
+proc gtk_list_header_base_get_end*(self: pointer): guint
+proc gtk_list_header_base_get_item*(self: pointer): gpointer
+proc gtk_list_header_get_item*(self: pointer): pointer
+proc gtk_list_header_get_child*(self: pointer): pointer
+proc gtk_list_header_new*(): pointer
+proc gtk_list_header_widget_new*(factory: pointer): ptr GtkWidget
+proc gtk_list_header_widget_get_factory*(self: pointer): pointer
+proc gtk_list_item_base_get_position*(self: pointer): guint
+proc gtk_list_item_base_get_item*(self: pointer): gpointer
+proc gtk_list_item_base_get_selected*(self: pointer): gboolean
+proc gtk_list_item_get_accessible_description*(self: pointer): pointer
+proc gtk_list_item_get_accessible_label*(self: pointer): pointer
+proc gtk_list_item_manager_get_root*(self: pointer): gpointer
+proc gtk_list_item_manager_get_first*(self: pointer): gpointer
+proc gtk_list_item_manager_get_last*(self: pointer): gpointer
+proc gtk_list_item_manager_gc_tiles*(self: pointer)
+proc gtk_list_item_manager_get_model*(self: pointer): pointer
+proc gtk_list_item_manager_get_has_sections*(self: pointer): gboolean
+proc gtk_list_item_tracker_new*(self: pointer): pointer
+proc gtk_list_item_new*(): pointer
+proc gtk_list_list_model_clear*(self: pointer)
+proc gtk_list_view_get_header_factory*(self: pointer): pointer
+proc gtk_list_view_get_tab_behavior*(self: pointer): pointer
+proc gtk_magnifier_new*(inspected: GtkWidget): ptr GtkWidget {.importc: "_gtk_magnifier_new".}
+proc gtk_magnifier_get_inspected*(magnifier: pointer): ptr GtkWidget {.importc: "_gtk_magnifier_get_inspected".}
+proc gtk_magnifier_get_magnification*(magnifier: pointer): pointer {.importc: "_gtk_magnifier_get_magnification".}
+proc gtk_magnifier_get_resize*(magnifier: pointer): gboolean {.importc: "_gtk_magnifier_get_resize".}
+proc gtk_disable_portals*(): pointer
+proc gtk_disable_portal_interfaces*(portal_interfaces: cstring): pointer
+proc gtk_map_list_model_get_model*(self: pointer): pointer
+proc gtk_map_list_model_has_map*(self: pointer): pointer
+proc gtk_media_file_new_for_input_stream*(stream: pointer): pointer
+proc gtk_media_file_extension_init*()
+proc gtk_media_file_get_extension*(): pointer
+proc gtk_media_stream_unprepared*(self: pointer)
+proc gtk_media_stream_stream_unprepared*(self: pointer): pointer
+proc gtk_media_stream_ended*(self: pointer)
+proc gtk_media_stream_stream_ended*(self: pointer): pointer
+proc gtk_media_stream_seek_success*(self: pointer): pointer
+proc gtk_media_stream_seek_failed*(self: pointer): pointer
+proc gtk_menu_button_get_label*(menu_button: pointer): pointer
+proc gtk_menu_button_get_can_shrink*(menu_button: pointer): pointer
+proc gtk_menu_tracker_item_get_action_name*(self: pointer): cstring
+proc gtk_menu_tracker_item_get_action_target*(self: pointer): pointer
+proc gtk_menu_tracker_item_get_special*(self: pointer): cstring
+proc gtk_menu_tracker_item_get_custom*(self: pointer): cstring
+proc gtk_menu_tracker_item_get_display_hint*(self: pointer): cstring
+proc gtk_menu_tracker_item_get_text_direction*(self: pointer): cstring
+proc gtk_menu_tracker_item_get_observable*(self: pointer): pointer {.importc: "_gtk_menu_tracker_item_get_observable".}
+proc gtk_menu_tracker_item_get_is_separator*(self: pointer): gboolean
+proc gtk_menu_tracker_item_get_label*(self: pointer): cstring
+proc gtk_menu_tracker_item_get_use_markup*(self: pointer): gboolean
+proc gtk_menu_tracker_item_get_icon*(self: pointer): pointer
+proc gtk_menu_tracker_item_get_verb_icon*(self: pointer): pointer
+proc gtk_menu_tracker_item_get_sensitive*(self: pointer): gboolean
+proc gtk_menu_tracker_item_get_role*(self: pointer): pointer
+proc gtk_menu_tracker_item_get_toggled*(self: pointer): gboolean
+proc gtk_menu_tracker_item_get_accel*(self: pointer): cstring
+proc gtk_menu_tracker_item_get_link_namespace*(self: pointer): cstring {.importc: "_gtk_menu_tracker_item_get_link_namespace".}
+proc gtk_menu_tracker_item_may_disappear*(self: pointer): gboolean
+proc gtk_menu_tracker_item_get_is_visible*(self: pointer): gboolean
+proc gtk_menu_tracker_item_get_should_request_show*(self: pointer): gboolean
+proc gtk_menu_tracker_item_activated*(self: pointer)
+proc gtk_menu_tracker_item_get_submenu_shown*(self: pointer): gboolean
+proc gtk_menu_tracker_free*(tracker: pointer)
+proc gtk_model_button_new*(): ptr GtkWidget
+proc gtk_get_module_path*(`type`: cstring): pointer {.importc: "_gtk_get_module_path".}
+proc gtk_mount_operation_get_type*(): pointer
+proc gtk_mount_operation_is_showing*(op: pointer): pointer
+proc gtk_mount_operation_get_parent*(op: pointer): pointer
+proc gtk_mount_operation_get_display*(op: pointer): pointer
+proc gtk_mount_operation_lookup_context_free*(context: pointer) {.importc: "_gtk_mount_operation_lookup_context_free".}
+proc gtk_any_filter_new*(): pointer
+proc gtk_every_filter_new*(): pointer
+proc gtk_native_realize*(self: pointer): pointer
+proc gtk_native_unrealize*(self: pointer): pointer
+proc gtk_native_get_for_surface*(surface: pointer): pointer
+proc gtk_native_queue_relayout*(native: pointer)
+proc gtk_notebook_next_page*(notebook: pointer): pointer
+proc gtk_notebook_prev_page*(notebook: pointer): pointer
+proc gtk_notebook_get_show_border*(notebook: pointer): pointer
+proc gtk_notebook_get_scrollable*(notebook: pointer): pointer
+proc gtk_notebook_popup_enable*(notebook: pointer): pointer
+proc gtk_notebook_popup_disable*(notebook: pointer): pointer
+proc gtk_openuri_portal_is_available*(): pointer
+proc gtk_openuri_portal_can_open*(uri: cstring): gboolean
+proc gtk_orientable_get_orientation*(orientable: pointer): pointer
+proc gtk_overlay_layout_new*(): pointer
+proc gtk_overlay_layout_child_get_measure*(child: pointer): pointer
+proc gtk_overlay_layout_child_get_clip_overlay*(child: pointer): pointer
+proc gtk_page_setup_get_paper_size*(setup: pointer): pointer
+proc gtk_page_setup_unix_dialog_get_page_setup*(dialog: pointer): pointer
+proc gtk_page_thumbnail_new*(): pointer
+proc gtk_page_thumbnail_get_page_num*(self: pointer): pointer
+proc gtk_paned_get_resize_start_child*(paned: pointer): pointer
+proc gtk_paned_get_shrink_start_child*(paned: pointer): pointer
+proc gtk_paned_get_resize_end_child*(paned: pointer): pointer
+proc gtk_paned_get_shrink_end_child*(paned: pointer): pointer
+proc gtk_paned_get_wide_handle*(paned: pointer): pointer
+proc gtk_pango_glyph_item_has_color_glyphs*(item: pointer): gboolean
+proc gtk_pango_layout_has_color_glyphs*(layout: pointer): gboolean
+proc gtk_paper_size_free*(size: pointer): pointer
+proc gtk_paper_size_get_width*(size: pointer, unit: pointer): pointer
+proc gtk_paper_size_get_height*(size: pointer, unit: pointer): pointer
+proc gtk_paper_size_is_custom*(size: pointer): pointer
+proc gtk_paper_size_is_ipp*(size: pointer): pointer
+proc gtk_password_entry_buffer_new*(): pointer
+proc gtk_password_entry_get_text_widget*(entry: pointer): pointer
+proc gtk_password_entry_toggle_peek*(entry: pointer)
+proc gtk_path_bar_up*(path_bar: pointer) {.importc: "_gtk_path_bar_up".}
+proc gtk_path_bar_down*(path_bar: pointer) {.importc: "_gtk_path_bar_down".}
+proc gtk_picture_new_for_paintable*(paintable: pointer): pointer
+proc gtk_picture_new_for_pixbuf*(pixbuf: pointer): ptr GtkWidget
+proc gtk_picture_new_for_resource*(resource_path: cstring): pointer
+proc gtk_picture_get_paintable*(self: pointer): pointer
+proc gtk_picture_get_keep_aspect_ratio*(self: pointer): gboolean
+proc gtk_picture_get_content_fit*(self: pointer): pointer
+proc gtk_picture_get_isolate_contents*(self: pointer): pointer
+proc gtk_picture_get_alternative_text*(self: pointer): pointer
+proc gtk_places_sidebar_new*(): ptr GtkWidget
+proc gtk_places_sidebar_get_open_flags*(sidebar: pointer): pointer
+proc gtk_places_sidebar_get_location*(sidebar: pointer): pointer
+proc gtk_places_sidebar_get_show_recent*(sidebar: pointer): gboolean
+proc gtk_places_sidebar_get_show_desktop*(sidebar: pointer): gboolean
+proc gtk_places_sidebar_get_show_enter_location*(sidebar: pointer): gboolean
+proc gtk_places_sidebar_get_shortcuts*(sidebar: pointer): pointer
+proc gtk_places_sidebar_get_show_trash*(sidebar: pointer): gboolean
+proc gtk_places_sidebar_get_show_other_locations*(sidebar: pointer): gboolean
+proc gtk_places_sidebar_get_show_starred_location*(sidebar: pointer): gboolean
+proc gtk_places_view_get_open_flags*(view: pointer): pointer
+proc gtk_places_view_get_search_query*(view: pointer): cstring
+proc gtk_places_view_get_loading*(view: pointer): gboolean
+proc gtk_places_view_new*(): ptr GtkWidget
+proc gtk_places_view_row_get_eject_button*(row: pointer): ptr GtkWidget
+proc gtk_places_view_row_get_mount*(row: pointer): pointer
+proc gtk_places_view_row_get_volume*(row: pointer): pointer
+proc gtk_places_view_row_get_file*(row: pointer): pointer
+proc gtk_places_view_row_get_is_network*(row: pointer): gboolean
+proc gtk_pointer_focus_ref*(focus: pointer): pointer
+proc gtk_pointer_focus_unref*(focus: pointer)
+proc gtk_pointer_focus_get_target*(focus: pointer): ptr GtkWidget
+proc gtk_pointer_focus_get_implicit_grab*(focus: pointer): ptr GtkWidget
+proc gtk_pointer_focus_get_effective_target*(focus: pointer): ptr GtkWidget
+proc gtk_pointer_focus_repick_target*(focus: pointer)
+
+{.pop.}
+
+
+# ============================================================================
+#  API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc popcnt*(): pointer {.importc: "__popcnt".}
+
+
+# ============================================================================
+# GTK API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc gtk_popover_bin_new*(): pointer
+proc gtk_popover_bin_get_child*(self: pointer): pointer
+proc gtk_popover_bin_get_menu_model*(self: pointer): pointer
+proc gtk_popover_bin_get_popover*(self: pointer): pointer
+proc gtk_popover_bin_popup*(self: pointer): pointer
+proc gtk_popover_bin_popdown*(self: pointer): pointer
+proc gtk_popover_bin_get_handle_input*(self: pointer): pointer
+proc gtk_popover_get_position*(popover: pointer): pointer
+proc gtk_popover_get_autohide*(popover: pointer): pointer
+proc gtk_popover_get_has_arrow*(popover: pointer): pointer
+proc gtk_popover_get_mnemonics_visible*(popover: pointer): pointer
+proc gtk_popover_get_cascade_popdown*(popover: pointer): pointer
+proc gtk_popover_present*(popover: pointer): pointer
+proc gtk_popover_menu_bar_new_from_model*(model: pointer): pointer
+proc gtk_popover_menu_bar_get_menu_model*(bar: pointer): pointer
+proc gtk_popover_menu_bar_select_first*(bar: pointer): pointer
+proc gtk_popover_menu_bar_get_viewable_menu_bars*(window: pointer): pointer
+proc gtk_popover_menu_get_flags*(popover: pointer): pointer
+proc gtk_popover_menu_close_submenus*(menu: pointer)
+proc gtk_popover_menu_new*(): ptr GtkWidget
+proc gtk_popover_menu_get_stack*(menu: pointer): ptr GtkWidget
+proc gtk_print_backend_error_quark*(): pointer
+proc gtk_print_backend_printer_list_is_done*(print_backend: pointer): pointer
+proc gtk_print_backend_load_modules*(): pointer
+proc gtk_print_backend_destroy*(print_backend: pointer): pointer
+proc gtk_print_backend_set_list_done*(backend: pointer): pointer
+proc gtk_printer_is_new*(printer: pointer): pointer
+proc gtk_print_backends_init*()
+
+{.pop.}
+
+# ============================================================================
+# SUPPORTS API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc supports_am_pm*(): gboolean
+
+{.pop.}
+
+# ============================================================================
+# GTK API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc gtk_print_setup_unref*(setup: pointer): pointer
+proc gtk_print_setup_get_print_settings*(setup: pointer): pointer
+proc gtk_print_setup_get_page_setup*(setup: pointer): pointer
+proc gtk_print_dialog_get_title*(self: pointer): pointer
+proc gtk_print_dialog_get_accept_label*(self: pointer): pointer
+proc gtk_print_dialog_get_modal*(self: pointer): pointer
+proc gtk_print_dialog_get_page_setup*(self: pointer): pointer
+proc gtk_print_dialog_get_print_settings*(self: pointer): pointer
+proc gtk_printer_cpdb_register_type*(module: pointer)
+proc gtk_printer_cups_register_type*(module: pointer)
+proc gtk_printer_get_name*(printer: pointer): pointer
+proc gtk_printer_get_state_message*(printer: pointer): pointer
+proc gtk_printer_get_description*(printer: pointer): pointer
+proc gtk_printer_get_location*(printer: pointer): pointer
+proc gtk_printer_get_icon_name*(printer: pointer): pointer
+proc gtk_printer_get_job_count*(printer: pointer): pointer
+proc gtk_printer_is_active*(printer: pointer): pointer
+proc gtk_printer_is_paused*(printer: pointer): pointer
+proc gtk_printer_is_accepting_jobs*(printer: pointer): pointer
+proc gtk_printer_is_virtual*(printer: pointer): pointer
+proc gtk_printer_is_default*(printer: pointer): pointer
+proc gtk_printer_accepts_pdf*(printer: pointer): pointer
+proc gtk_printer_accepts_ps*(printer: pointer): pointer
+proc gtk_printer_has_details*(printer: pointer): pointer
+proc gtk_printer_request_details*(printer: pointer): pointer
+proc gtk_printer_get_capabilities*(printer: pointer): pointer
+proc gtk_printer_option_clear_has_conflict*(option: pointer): pointer
+proc gtk_printer_option_get_activates_default*(option: pointer): pointer
+proc gtk_printer_option_set_clear_conflicts*(set: pointer): pointer
+proc gtk_printer_option_set_get_groups*(set: pointer): pointer
+proc gtk_printer_option_widget_has_external_label*(setting: pointer): pointer
+proc gtk_printer_get_custom_widgets*(printer: pointer): pointer {.importc: "_gtk_printer_get_custom_widgets".}
+proc gtk_printer_find*(name: cstring): pointer
+proc gtk_print_job_get_title*(job: pointer): pointer
+proc gtk_print_job_get_status*(job: pointer): pointer
+proc gtk_print_job_get_track_print_status*(job: pointer): pointer
+proc gtk_print_job_get_pages*(job: pointer): pointer
+proc gtk_print_job_get_page_set*(job: pointer): pointer
+proc gtk_print_job_get_num_copies*(job: pointer): pointer
+proc gtk_print_job_get_scale*(job: pointer): pointer
+proc gtk_print_job_get_n_up*(job: pointer): pointer
+proc gtk_print_job_get_n_up_layout*(job: pointer): pointer
+proc gtk_print_job_get_rotate*(job: pointer): pointer
+proc gtk_print_job_get_collate*(job: pointer): pointer
+proc gtk_print_job_get_reverse*(job: pointer): pointer
+proc gtk_print_error_quark*(): pointer
+proc gtk_print_operation_preview_end_preview*(preview: pointer): pointer
+proc gtk_print_context_translate_into_margin*(context: pointer) {.importc: "_gtk_print_context_translate_into_margin".}
+proc gtk_print_context_rotate_according_to_orientation*(context: pointer) {.importc: "_gtk_print_context_rotate_according_to_orientation".}
+proc gtk_print_context_reverse_according_to_orientation*(context: pointer) {.importc: "_gtk_print_context_reverse_according_to_orientation".}
+proc gtk_print_settings_get_printer*(settings: pointer): pointer
+proc gtk_print_settings_get_orientation*(settings: pointer): pointer
+proc gtk_print_settings_get_paper_size*(settings: pointer): pointer
+proc gtk_print_settings_get_use_color*(settings: pointer): pointer
+proc gtk_print_settings_get_collate*(settings: pointer): pointer
+proc gtk_print_settings_get_reverse*(settings: pointer): pointer
+proc gtk_print_settings_get_duplex*(settings: pointer): pointer
+proc gtk_print_settings_get_quality*(settings: pointer): pointer
+proc gtk_print_settings_get_n_copies*(settings: pointer): pointer
+proc gtk_print_settings_get_number_up*(settings: pointer): pointer
+proc gtk_print_settings_get_number_up_layout*(settings: pointer): pointer
+proc gtk_print_settings_get_resolution*(settings: pointer): pointer
+proc gtk_print_settings_get_resolution_x*(settings: pointer): pointer
+proc gtk_print_settings_get_resolution_y*(settings: pointer): pointer
+proc gtk_print_settings_get_printer_lpi*(settings: pointer): pointer
+proc gtk_print_settings_get_scale*(settings: pointer): pointer
+proc gtk_print_settings_get_print_pages*(settings: pointer): pointer
+proc gtk_print_settings_get_page_set*(settings: pointer): pointer
+proc gtk_print_settings_get_default_source*(settings: pointer): pointer
+proc gtk_print_settings_get_media_type*(settings: pointer): pointer
+proc gtk_print_settings_get_dither*(settings: pointer): pointer
+proc gtk_print_settings_get_finishings*(settings: pointer): pointer
+proc gtk_print_settings_get_output_bin*(settings: pointer): pointer
+proc gtk_print_unix_dialog_get_page_setup*(dialog: pointer): pointer
+proc gtk_print_unix_dialog_get_current_page*(dialog: pointer): pointer
+proc gtk_print_unix_dialog_get_settings*(dialog: pointer): pointer
+proc gtk_print_unix_dialog_get_selected_printer*(dialog: pointer): pointer
+proc gtk_print_unix_dialog_get_manual_capabilities*(dialog: pointer): pointer
+proc gtk_print_unix_dialog_get_support_selection*(dialog: pointer): pointer
+proc gtk_print_unix_dialog_get_has_selection*(dialog: pointer): pointer
+proc gtk_print_unix_dialog_get_embed_page_setup*(dialog: pointer): pointer
+proc gtk_print_unix_dialog_get_page_setup_set*(dialog: pointer): pointer
+proc gtk_print_convert_to_mm*(len: pointer, unit: pointer): pointer {.importc: "_gtk_print_convert_to_mm".}
+proc gtk_print_convert_from_mm*(len: pointer, unit: pointer): pointer {.importc: "_gtk_print_convert_from_mm".}
+proc gtk_print_win32_devnames_free*(devnames: pointer): pointer
+proc gtk_print_win32_devnames_to_win32*(devnames: pointer): pointer
+proc gtk_print_win32_devnames_to_win32_from_printer_name*(printer: cstring): pointer
+proc gtk_make_ci_glob_pattern*(pattern: cstring): cstring {.importc: "_gtk_make_ci_glob_pattern".}
+proc gtk_ensure_resources*() {.importc: "_gtk_ensure_resources".}
+proc gtk_main_sync*()
+proc gtk_window_group_get_current_grab*(window_group: pointer): ptr GtkWidget
+proc gtk_grab_add*(widget: GtkWidget)
+proc gtk_grab_remove*(widget: GtkWidget)
+proc gtk_main_do_event*(event: pointer): gboolean
+proc gtk_get_current_event_time*(): pointer
+proc gtk_get_slowdown*(): pointer {.importc: "_gtk_get_slowdown".}
+proc gtk_set_slowdown*(slowdown_factor: pointer) {.importc: "_gtk_set_slowdown".}
+proc gtk_get_display_debug_flags*(display: pointer): pointer
+proc gtk_get_any_display_debug_flag_set*(): gboolean
+proc gtk_elide_underscores*(original: cstring): cstring {.importc: "_gtk_elide_underscores".}
+
+{.pop.}
+
+# ============================================================================
+# SETLOCALE API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc setlocale_initialization*()
+
+{.pop.}
+
+# ============================================================================
+# GTK API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc gtk_load_dll_with_libgtk3_manifest*(dllname: pointer) {.importc: "_gtk_load_dll_with_libgtk3_manifest".}
+proc gtk_progress_bar_get_pulse_step*(pbar: pointer): pointer
+proc gtk_progress_bar_get_inverted*(pbar: pointer): pointer
+proc gtk_progress_bar_get_ellipsize*(pbar: pointer): pointer
+proc gtk_progress_tracker_finish*(tracker: pointer)
+proc gtk_progress_tracker_get_state*(tracker: pointer): pointer
+proc gtk_progress_tracker_get_iteration*(tracker: pointer): pointer
+proc gtk_progress_tracker_get_iteration_cycle*(tracker: pointer): guint64
+proc gtk_property_lookup_list_model_get_object*(self: pointer): gpointer
+proc gtk_query_get_type*(): GType
+proc gtk_range_get_adjustment*(range: pointer): pointer
+proc gtk_range_get_inverted*(range: pointer): pointer
+proc gtk_range_get_flippable*(range: pointer): pointer
+proc gtk_range_get_slider_size_fixed*(range: pointer): pointer
+proc gtk_range_get_value*(range: pointer): pointer
+proc gtk_range_get_show_fill_level*(range: pointer): pointer
+proc gtk_range_get_restrict_to_fill_level*(range: pointer): pointer
+proc gtk_range_get_fill_level*(range: pointer): pointer
+proc gtk_range_get_round_digits*(range: pointer): pointer
+proc gtk_range_get_has_origin*(range: pointer): gboolean {.importc: "_gtk_range_get_has_origin".}
+proc gtk_range_stop_autoscroll*(range: pointer)
+proc gtk_rb_tree_ref*(tree: pointer): pointer
+proc gtk_rb_tree_unref*(tree: pointer)
+proc gtk_rb_tree_get_root*(tree: pointer): gpointer
+proc gtk_rb_tree_get_first*(tree: pointer): gpointer
+proc gtk_rb_tree_get_last*(tree: pointer): gpointer
+proc gtk_rb_tree_node_get_previous*(node: gpointer): gpointer
+proc gtk_rb_tree_node_get_next*(node: gpointer): gpointer
+proc gtk_rb_tree_node_get_parent*(node: gpointer): gpointer
+proc gtk_rb_tree_node_get_left*(node: gpointer): gpointer
+proc gtk_rb_tree_node_get_right*(node: gpointer): gpointer
+proc gtk_rb_tree_node_get_tree*(node: gpointer): pointer
+proc gtk_rb_tree_node_mark_dirty*(node: gpointer)
+proc gtk_rb_tree_remove_all*(tree: pointer)
+proc gtk_recent_manager_error_quark*(): pointer
+proc gtk_recent_manager_get_items*(manager: pointer): pointer
+proc gtk_recent_info_ref*(info: pointer): pointer
+proc gtk_recent_info_unref*(info: pointer): pointer
+proc gtk_recent_info_get_uri*(info: pointer): pointer
+proc gtk_recent_info_get_display_name*(info: pointer): pointer
+proc gtk_recent_info_get_description*(info: pointer): pointer
+proc gtk_recent_info_get_mime_type*(info: pointer): pointer
+proc gtk_recent_info_get_added*(info: pointer): pointer
+proc gtk_recent_info_get_modified*(info: pointer): pointer
+proc gtk_recent_info_get_visited*(info: pointer): pointer
+proc gtk_recent_info_get_private_hint*(info: pointer): pointer
+proc gtk_recent_info_get_gicon*(info: pointer): pointer
+proc gtk_recent_info_get_age*(info: pointer): pointer
+proc gtk_recent_info_is_local*(info: pointer): pointer
+proc gtk_recent_info_exists*(info: pointer): pointer
+proc gtk_recent_manager_sync*() {.importc: "_gtk_recent_manager_sync".}
+proc gtk_render_node_paintable_get_render_node*(self: pointer): pointer
+proc gtk_root_get_display*(self: pointer): pointer
+proc gtk_root_get_focus*(self: pointer): pointer
+proc gtk_root_get_constraint_solver*(self: pointer): pointer
+proc gtk_root_start_layout*(self: pointer)
+proc gtk_root_stop_layout*(self: pointer)
+proc gtk_root_queue_restyle*(self: pointer)
+proc gtk_scale_button_get_plus_button*(button: pointer): pointer
+proc gtk_scale_button_get_minus_button*(button: pointer): pointer
+proc gtk_scale_button_get_popup*(button: pointer): pointer
+proc gtk_scale_button_get_active*(button: pointer): pointer
+proc gtk_scale_button_get_has_frame*(button: pointer): pointer
+proc gtk_scale_get_has_origin*(scale: pointer): pointer
+proc gtk_scale_get_layout*(scale: pointer): pointer
+proc gtk_scale_clear_marks*(scale: pointer): pointer
+proc gtk_scrollable_get_hscroll_policy*(scrollable: pointer): pointer
+proc gtk_scrollable_get_vscroll_policy*(scrollable: pointer): pointer
+proc gtk_scrolled_window_get_hadjustment*(scrolled_window: pointer): pointer
+proc gtk_scrolled_window_get_vadjustment*(scrolled_window: pointer): pointer
+proc gtk_scrolled_window_get_hscrollbar*(scrolled_window: pointer): pointer
+proc gtk_scrolled_window_get_vscrollbar*(scrolled_window: pointer): pointer
+proc gtk_scrolled_window_unset_placement*(scrolled_window: pointer): pointer
+proc gtk_scrolled_window_get_placement*(scrolled_window: pointer): pointer
+proc gtk_scrolled_window_get_min_content_width*(scrolled_window: pointer): pointer
+proc gtk_scrolled_window_get_min_content_height*(scrolled_window: pointer): pointer
+proc gtk_scrolled_window_get_kinetic_scrolling*(scrolled_window: pointer): pointer
+proc gtk_scrolled_window_get_overlay_scrolling*(scrolled_window: pointer): pointer
+proc gtk_scrolled_window_get_max_content_width*(scrolled_window: pointer): pointer
+proc gtk_scrolled_window_get_max_content_height*(scrolled_window: pointer): pointer
+proc gtk_scrolled_window_get_propagate_natural_width*(scrolled_window: pointer): pointer
+proc gtk_scrolled_window_get_propagate_natural_height*(scrolled_window: pointer): pointer
+proc gtk_scroll_info_new*(): pointer
+proc gtk_scroll_info_ref*(self: pointer): pointer
+proc gtk_scroll_info_unref*(self: pointer): pointer
+proc gtk_scroll_info_get_enable_horizontal*(self: pointer): pointer
+proc gtk_scroll_info_get_enable_vertical*(self: pointer): pointer
+proc gtk_search_bar_get_key_capture_widget*(bar: pointer): pointer
+proc gtk_search_engine_model_get_type*(): GType {.importc: "_gtk_search_engine_model_get_type".}
+proc gtk_search_engine_get_type*(): GType {.importc: "_gtk_search_engine_get_type".}
+proc gtk_search_engine_new*(): pointer {.importc: "_gtk_search_engine_new".}
+proc gtk_search_engine_start*(engine: pointer) {.importc: "_gtk_search_engine_start".}
+proc gtk_search_engine_stop*(engine: pointer) {.importc: "_gtk_search_engine_stop".}
+proc gtk_search_hit_free*(hit: pointer) {.importc: "_gtk_search_hit_free".}
+proc gtk_search_engine_quartz_get_type*(): GType {.importc: "_gtk_search_engine_quartz_get_type".}
+proc gtk_search_engine_tracker3_new*(): pointer
+proc gtk_search_entry_get_key_controller*(entry: pointer): pointer
+proc gtk_selection_filter_model_new*(model: pointer): pointer
+proc gtk_selection_filter_model_get_model*(self: pointer): pointer
+proc gtk_settings_get_font_options*(settings: pointer): pointer
+proc gtk_settings_get_enable_animations*(settings: pointer): gboolean
+proc gtk_settings_get_dnd_drag_threshold*(settings: pointer): pointer
+proc gtk_settings_get_font_size*(settings: pointer): pointer
+proc gtk_settings_get_font_size_is_absolute*(settings: pointer): gboolean
+proc gtk_shortcut_action_to_string*(self: pointer): pointer
+proc gtk_nothing_action_get*(): pointer
+proc gtk_mnemonic_action_get*(): pointer
+proc gtk_activate_action_get*(): pointer
+proc gtk_signal_action_new*(signal_name: cstring): pointer
+proc gtk_signal_action_get_signal_name*(self: pointer): pointer
+proc gtk_named_action_new*(name: cstring): pointer
+proc gtk_named_action_get_action_name*(self: pointer): pointer
+proc gtk_shortcut_controller_root*(controller: pointer)
+proc gtk_shortcut_controller_unroot*(controller: pointer)
+proc gtk_shortcut_controller_update_accels*(self: pointer)
+proc gtk_shortcut_manager_create_controllers*(widget: GtkWidget): pointer
+proc gtk_shortcut_trigger_to_string*(self: pointer): pointer
+proc gtk_shortcut_trigger_hash*(trigger: gconstpointer): pointer
+proc gtk_never_trigger_get*(): pointer
+proc gtk_keyval_trigger_get_modifiers*(self: pointer): pointer
+proc gtk_keyval_trigger_get_keyval*(self: pointer): pointer
+proc gtk_mnemonic_trigger_new*(keyval: guint): pointer
+proc gtk_mnemonic_trigger_get_keyval*(self: pointer): pointer
+proc gtk_alternative_trigger_get_first*(self: pointer): pointer
+proc gtk_alternative_trigger_get_second*(self: pointer): pointer
+proc gtk_sidebar_row_reveal*(self: pointer)
+proc gtk_size_request_cache_init*(cache: pointer) {.importc: "_gtk_size_request_cache_init".}
+proc gtk_size_request_cache_free*(cache: pointer) {.importc: "_gtk_size_request_cache_free".}
+proc gtk_size_request_cache_clear*(cache: pointer) {.importc: "_gtk_size_request_cache_clear".}
+proc gtk_slice_list_model_get_model*(self: pointer): pointer
+proc gtk_slice_list_model_get_offset*(self: pointer): pointer
+proc gtk_slice_list_model_get_size*(self: pointer): pointer
+proc gtk_snapshot_push_copy*(snapshot: pointer): pointer
+proc gtk_snapshot_gl_shader_pop_texture*(snapshot: pointer)
+proc gtk_snapshot_push_collect*(snapshot: pointer)
+proc gtk_snapshot_pop_collect*(snapshot: pointer): pointer
+proc gtk_sorter_get_order*(self: pointer): pointer
+proc gtk_sorter_get_keys*(self: pointer): pointer
+proc gtk_sort_keys_ref*(self: pointer): pointer
+proc gtk_sort_keys_unref*(self: pointer)
+proc gtk_sort_keys_new_equal*(): pointer
+proc gtk_sort_keys_get_key_size*(self: pointer): gsize
+proc gtk_sort_keys_get_key_align*(self: pointer): gsize
+proc gtk_sort_keys_get_key_compare_func*(self: pointer): pointer
+proc gtk_sort_keys_needs_clear_key*(self: pointer): gboolean
+proc gtk_sort_list_model_get_section_sorter*(self: pointer): pointer
+proc gtk_spin_button_get_activates_default*(spin_button: pointer): pointer
+proc gtk_spin_button_get_update_policy*(spin_button: pointer): pointer
+proc gtk_spin_button_get_numeric*(spin_button: pointer): pointer
+proc gtk_spin_button_get_wrap*(spin_button: pointer): pointer
+proc gtk_spin_button_get_snap_to_ticks*(spin_button: pointer): pointer
+proc gtk_spin_button_get_climb_rate*(spin_button: pointer): pointer
+proc gtk_spin_button_update*(spin_button: pointer): pointer
+proc gtk_spinner_get_spinning*(spinner: pointer): pointer
+proc gtk_stack_page_get_child*(self: pointer): pointer
+proc gtk_stack_page_get_visible*(self: pointer): pointer
+proc gtk_stack_page_get_needs_attention*(self: pointer): pointer
+proc gtk_stack_page_get_use_underline*(self: pointer): pointer
+proc gtk_stack_page_get_name*(self: pointer): pointer
+proc gtk_stack_page_get_title*(self: pointer): pointer
+proc gtk_stack_page_get_icon_name*(self: pointer): pointer
+proc gtk_stack_get_hhomogeneous*(stack: pointer): pointer
+proc gtk_stack_get_vhomogeneous*(stack: pointer): pointer
+proc gtk_stack_get_transition_running*(stack: pointer): pointer
+proc gtk_stack_get_interpolate_size*(stack: pointer): pointer
+proc gtk_stack_get_pages*(stack: pointer): pointer
+proc gtk_stack_sidebar_new*(): pointer
+proc gtk_stack_sidebar_get_stack*(self: pointer): pointer
+proc gtk_statusbar_get_message*(statusbar: pointer): pointer
+proc gtk_string_pair_get_id*(pair: pointer): cstring
+proc gtk_string_pair_get_string*(pair: pointer): cstring
+proc gtk_string_sorter_get_collation*(self: pointer): pointer
+proc gtk_style_animation_is_finished*(animation: pointer): gboolean {.importc: "_gtk_style_animation_is_finished".}
+proc gtk_style_animation_is_static*(animation: pointer): gboolean {.importc: "_gtk_style_animation_is_static".}
+proc gtk_style_animation_ref*(animation: pointer): pointer
+proc gtk_style_animation_unref*(animation: pointer): pointer
+proc gtk_style_cascade_new*(): pointer {.importc: "_gtk_style_cascade_new".}
+proc gtk_style_cascade_get_scale*(cascade: pointer): pointer {.importc: "_gtk_style_cascade_get_scale".}
+proc gtk_style_property_init_properties*() {.importc: "_gtk_style_property_init_properties".}
+proc gtk_style_property_lookup*(name: cstring): pointer {.importc: "_gtk_style_property_lookup".}
+proc gtk_style_property_get_name*(property: pointer): cstring {.importc: "_gtk_style_property_get_name".}
+proc gtk_style_provider_get_settings*(provider: pointer): pointer
+proc gtk_style_provider_get_scale*(provider: pointer): pointer
+proc gtk_style_provider_changed*(provider: pointer)
+proc gtk_svg_new*(): pointer
+proc gtk_svg_new_from_bytes*(bytes: pointer): pointer
+proc gtk_svg_new_from_resource*(path: cstring): pointer
+proc gtk_svg_serialize*(self: pointer): pointer
+proc gtk_svg_get_weight*(self: pointer): pointer
+proc gtk_svg_get_state*(self: pointer): pointer
+proc gtk_svg_get_n_states*(self: pointer): pointer
+proc gtk_svg_play*(self: pointer): pointer
+proc gtk_svg_pause*(self: pointer): pointer
+proc gtk_svg_get_features*(self: pointer): pointer
+proc gtk_svg_error_quark*(): pointer
+proc gtk_svg_error_get_element*(error: pointer): pointer
+proc gtk_svg_error_get_attribute*(error: pointer): pointer
+proc gtk_svg_error_get_start*(error: pointer): pointer
+proc gtk_svg_error_get_end*(error: pointer): pointer
+
+{.pop.}
+
+# ============================================================================
+# SVG API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc svg_value_ref*(value: pointer): pointer
+proc svg_value_unref*(value: pointer)
+proc svg_value_to_string*(self: pointer): cstring
+proc svg_number_new*(value: pointer): pointer
+proc svg_linecap_new*(value: pointer): pointer
+proc svg_linejoin_new*(value: pointer): pointer
+proc svg_fill_rule_new*(rule: pointer): pointer
+proc svg_paint_order_new*(order: pointer): pointer
+proc svg_paint_new_none*(): pointer
+proc svg_paint_new_symbolic*(symbolic: pointer): pointer
+proc svg_paint_new_rgba*(rgba: pointer): pointer
+proc svg_view_box_new*(box: pointer): pointer
+proc svg_path_new*(path: pointer): pointer
+proc svg_clip_new_none*(): pointer
+proc svg_clip_new_path*(string: cstring): pointer
+proc svg_transform_parse*(value: cstring): pointer
+proc svg_transform_get_n_transforms*(value: pointer): pointer
+proc svg_transform_new_none*(): pointer
+proc svg_transform_new_skew_x*(angle: pointer): pointer
+proc svg_transform_new_skew_y*(angle: pointer): pointer
+proc svg_transform_new_matrix*(params6: pointer): pointer
+proc svg_filter_parse*(value: cstring): pointer
+proc svg_shape_delete*(shape: pointer)
+
+{.pop.}
+
+# ============================================================================
+# GTK API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc gtk_svg_copy*(orig: pointer): pointer
+proc gtk_svg_clear_content*(self: pointer)
+proc gtk_svg_get_overflow*(self: pointer): pointer
+proc gtk_svg_get_run_mode*(self: pointer): pointer
+proc gtk_svg_get_next_update*(self: pointer): pointer
+proc gtk_test_register_all_types*(): pointer
+proc gtk_test_list_all_types*(n_types: guint): pointer
+proc gtk_test_widget_wait_for_draw*(widget: GtkWidget): pointer
+proc gtk_text_attributes_new*(): pointer
+proc gtk_text_attributes_copy*(src: pointer): pointer
+proc gtk_text_attributes_unref*(values: pointer)
+proc gtk_text_btree_ref*(tree: pointer) {.importc: "_gtk_text_btree_ref".}
+proc gtk_text_btree_unref*(tree: pointer) {.importc: "_gtk_text_btree_unref".}
+proc gtk_text_btree_get_chars_changed_stamp*(tree: pointer): guint {.importc: "_gtk_text_btree_get_chars_changed_stamp".}
+proc gtk_text_btree_get_segments_changed_stamp*(tree: pointer): guint {.importc: "_gtk_text_btree_get_segments_changed_stamp".}
+proc gtk_text_btree_segments_changed*(tree: pointer) {.importc: "_gtk_text_btree_segments_changed".}
+proc gtk_text_btree_unregister_child_anchor*(anchor: pointer) {.importc: "_gtk_text_btree_unregister_child_anchor".}
+proc gtk_text_btree_get_end_iter_line*(tree: pointer): pointer {.importc: "_gtk_text_btree_get_end_iter_line".}
+proc gtk_text_btree_get_tags*(iter: pointer): pointer {.importc: "_gtk_text_btree_get_tags".}
+proc gtk_text_btree_line_count*(tree: pointer): pointer {.importc: "_gtk_text_btree_line_count".}
+proc gtk_text_btree_char_count*(tree: pointer): pointer {.importc: "_gtk_text_btree_char_count".}
+proc gtk_text_btree_char_is_invisible*(iter: pointer): gboolean {.importc: "_gtk_text_btree_char_is_invisible".}
+proc gtk_text_line_get_number*(line: pointer): pointer {.importc: "_gtk_text_line_get_number".}
+proc gtk_text_line_next*(line: pointer): pointer {.importc: "_gtk_text_line_next".}
+proc gtk_text_line_next_excluding_last*(line: pointer): pointer {.importc: "_gtk_text_line_next_excluding_last".}
+proc gtk_text_line_previous*(line: pointer): pointer {.importc: "_gtk_text_line_previous".}
+proc gtk_text_line_char_count*(line: pointer): pointer {.importc: "_gtk_text_line_char_count".}
+proc gtk_text_line_byte_count*(line: pointer): pointer {.importc: "_gtk_text_line_byte_count".}
+proc gtk_text_line_char_index*(line: pointer): pointer {.importc: "_gtk_text_line_char_index".}
+proc gtk_text_btree_check*(tree: pointer) {.importc: "_gtk_text_btree_check".}
+proc gtk_text_btree_spew*(tree: pointer) {.importc: "_gtk_text_btree_spew".}
+proc gtk_text_buffer_get_selection_content*(buffer: pointer): pointer
+proc gtk_text_buffer_spew*(buffer: pointer): pointer {.importc: "_gtk_text_buffer_spew".}
+proc gtk_text_buffer_get_btree*(buffer: pointer): pointer {.importc: "_gtk_text_buffer_get_btree".}
+proc gtk_text_child_anchor_get_deleted*(anchor: pointer): pointer
+proc gtk_widget_segment_ref*(widget_segment: pointer) {.importc: "_gtk_widget_segment_ref".}
+proc gtk_widget_segment_unref*(widget_segment: pointer) {.importc: "_gtk_widget_segment_unref".}
+proc gtk_anchored_child_get_layout*(child: GtkWidget): pointer {.importc: "_gtk_anchored_child_get_layout".}
+proc gtk_text_child_anchor_get_replacement*(anchor: pointer): cstring
+proc gtk_text_encoding_get_names*(): pointer
+proc gtk_text_encoding_get_labels*(): pointer
+proc gtk_text_encoding_from_name*(name: cstring): cstring
+proc gtk_line_ending_get_names*(): pointer
+proc gtk_line_ending_get_labels*(): pointer
+proc gtk_line_ending_from_name*(name: cstring): cstring
+proc gtk_text_new*(): pointer
+proc gtk_text_new_with_buffer*(buffer: pointer): pointer
+proc gtk_text_get_visibility*(self: pointer): pointer
+proc gtk_text_get_invisible_char*(self: pointer): pointer
+proc gtk_text_unset_invisible_char*(self: pointer): pointer
+proc gtk_text_get_overwrite_mode*(self: pointer): pointer
+proc gtk_text_get_max_length*(self: pointer): pointer
+proc gtk_text_get_text_length*(self: pointer): pointer
+proc gtk_text_get_activates_default*(self: pointer): pointer
+proc gtk_text_get_placeholder_text*(self: pointer): pointer
+proc gtk_text_get_input_purpose*(self: pointer): pointer
+proc gtk_text_get_input_hints*(self: pointer): pointer
+proc gtk_text_get_attributes*(self: pointer): pointer
+proc gtk_text_get_tabs*(self: pointer): pointer
+proc gtk_text_grab_focus_without_selecting*(self: pointer): pointer
+proc gtk_text_get_extra_menu*(self: pointer): pointer
+proc gtk_text_get_enable_emoji_completion*(self: pointer): pointer
+proc gtk_text_get_propagate_text_width*(self: pointer): pointer
+proc gtk_text_get_truncate_multiline*(self: pointer): pointer
+proc gtk_text_handle_new*(parent: GtkWidget): pointer
+proc gtk_text_handle_present*(handle: pointer)
+proc gtk_text_handle_get_role*(handle: pointer): pointer
+proc gtk_text_handle_get_is_dragged*(handle: pointer): gboolean
+proc gtk_text_history_begin_user_action*(self: pointer)
+proc gtk_text_history_end_user_action*(self: pointer)
+proc gtk_text_history_begin_irreversible_action*(self: pointer)
+proc gtk_text_history_end_irreversible_action*(self: pointer)
+proc gtk_text_history_get_can_undo*(self: pointer): gboolean
+proc gtk_text_history_get_can_redo*(self: pointer): gboolean
+proc gtk_text_history_undo*(self: pointer)
+proc gtk_text_history_redo*(self: pointer)
+proc gtk_text_history_get_max_undo_levels*(self: pointer): guint
+proc gtk_text_history_get_enabled*(self: pointer): gboolean
+proc gtk_text_iter_free*(iter: pointer): pointer
+proc gtk_text_iter_get_child_anchor*(iter: pointer): pointer
+proc gtk_text_iter_get_language*(iter: pointer): pointer
+proc gtk_text_iter_forward_visible_line*(iter: pointer): pointer
+proc gtk_text_iter_backward_visible_line*(iter: pointer): pointer
+proc gtk_text_iter_get_text_line*(iter: pointer): pointer {.importc: "_gtk_text_iter_get_text_line".}
+proc gtk_text_iter_get_btree*(iter: pointer): pointer {.importc: "_gtk_text_iter_get_btree".}
+proc gtk_text_iter_forward_indexable_segment*(iter: pointer): gboolean {.importc: "_gtk_text_iter_forward_indexable_segment".}
+proc gtk_text_iter_backward_indexable_segment*(iter: pointer): gboolean {.importc: "_gtk_text_iter_backward_indexable_segment".}
+proc gtk_text_iter_get_segment_byte*(iter: pointer): pointer {.importc: "_gtk_text_iter_get_segment_byte".}
+proc gtk_text_iter_get_segment_char*(iter: pointer): pointer {.importc: "_gtk_text_iter_get_segment_char".}
+proc gtk_text_iter_check*(iter: pointer) {.importc: "_gtk_text_iter_check".}
+proc gtk_text_layout_new*(): pointer
+proc gtk_text_layout_default_style_changed*(layout: pointer)
+proc gtk_text_layout_get_cursor_visible*(layout: pointer): gboolean
+proc gtk_text_layout_wrap_loop_start*(layout: pointer)
+proc gtk_text_layout_wrap_loop_end*(layout: pointer)
+proc gtk_text_line_display_unref*(display: pointer)
+proc gtk_text_layout_invalidate_selection*(layout: pointer)
+proc gtk_text_layout_is_valid*(layout: pointer): gboolean
+proc gtk_text_layout_spew*(layout: pointer)
+proc gtk_text_line_display_cache_free*(cache: pointer)
+proc gtk_text_line_display_cache_delay_eviction*(cache: pointer)
+proc gtk_text_line_display_cache_invalidate*(cache: pointer)
+proc gtk_text_get_layout*(entry: pointer): pointer
+proc gtk_text_reset_im_context*(entry: pointer)
+proc gtk_toggle_segment_free*(seg: pointer) {.importc: "_gtk_toggle_segment_free".}
+proc gtk_text_tag_array_sort*(tags: pointer) {.importc: "_gtk_text_tag_array_sort".}
+proc gtk_text_tag_affects_size*(tag: pointer): gboolean {.importc: "_gtk_text_tag_affects_size".}
+proc gtk_text_tag_affects_nonsize_appearance*(tag: pointer): gboolean {.importc: "_gtk_text_tag_affects_nonsize_appearance".}
+proc gtk_text_tag_table_affects_visibility*(table: pointer): gboolean {.importc: "_gtk_text_tag_table_affects_visibility".}
+proc gtk_text_byte_begins_utf8_char*(byte: cstring): pointer
+proc gtk_text_view_child_get_window_type*(self: pointer): pointer
+proc gtk_text_view_reset_cursor_blink*(text_view: pointer): pointer
+proc gtk_text_view_get_text_node*(text_view: pointer): pointer
+proc gtk_text_view_get_selection_node*(text_view: pointer): pointer
+proc gtk_text_view_get_default_attributes*(text_view: pointer): pointer
+proc gtk_text_view_get_layout*(text_view: pointer): pointer
+proc gtk_tim_sort_finish*(self: pointer)
+proc gtk_tim_sort_get_progress*(self: pointer): gsize
+proc gtk_tooltip_get_type*(): pointer
+proc gtk_tooltip_hide*(widget: GtkWidget) {.importc: "_gtk_tooltip_hide".}
+proc gtk_tooltip_trigger_tooltip_query*(widget: GtkWidget)
+proc gtk_tooltip_maybe_allocate*(native: pointer)
+proc gtk_tooltip_unset_surface*(native: pointer)
+proc gtk_tooltip_window_new*(): ptr GtkWidget
+proc gtk_tooltip_window_present*(window: pointer)
+proc gtk_trash_monitor_get_type*(): GType {.importc: "_gtk_trash_monitor_get_type".}
+proc gtk_trash_monitor_get_has_trash*(monitor: pointer): gboolean {.importc: "_gtk_trash_monitor_get_has_trash".}
+proc gtk_tree_expander_new*(): pointer
+proc gtk_tree_expander_get_child*(self: pointer): pointer
+proc gtk_tree_expander_get_item*(self: pointer): pointer
+proc gtk_tree_expander_get_list_row*(self: pointer): pointer
+proc gtk_tree_expander_get_indent_for_depth*(self: pointer): pointer
+proc gtk_tree_expander_get_indent_for_icon*(self: pointer): pointer
+proc gtk_tree_expander_get_hide_expander*(self: pointer): pointer
+proc gtk_tree_list_model_get_model*(self: pointer): pointer
+proc gtk_tree_list_model_get_passthrough*(self: pointer): pointer
+proc gtk_tree_list_model_get_autoexpand*(self: pointer): pointer
+proc gtk_tree_list_row_get_item*(self: pointer): pointer
+proc gtk_tree_list_row_get_expanded*(self: pointer): pointer
+proc gtk_tree_list_row_is_expandable*(self: pointer): pointer
+proc gtk_tree_list_row_get_position*(self: pointer): pointer
+proc gtk_tree_list_row_get_depth*(self: pointer): pointer
+proc gtk_tree_list_row_get_children*(self: pointer): pointer
+proc gtk_tree_list_row_get_parent*(self: pointer): pointer
+proc gtk_tree_list_row_sorter_new*(sorter: pointer): pointer
+proc gtk_tree_list_row_sorter_get_sorter*(self: pointer): pointer
+proc gtk_uri_launcher_new*(uri: cstring): pointer
+proc gtk_uri_launcher_get_uri*(self: pointer): pointer
+proc gtk_video_get_graphics_offload*(self: pointer): pointer
+proc gtk_widget_unparent*(widget: GtkWidget): pointer
+proc gtk_widget_map*(widget: GtkWidget): pointer
+proc gtk_widget_unmap*(widget: GtkWidget): pointer
+proc gtk_widget_realize*(widget: GtkWidget): pointer
+proc gtk_widget_unrealize*(widget: GtkWidget): pointer
+proc gtk_widget_queue_draw*(widget: GtkWidget): pointer
+proc gtk_widget_queue_resize*(widget: GtkWidget): pointer
+proc gtk_widget_queue_allocate*(widget: GtkWidget): pointer
+proc gtk_widget_get_frame_clock*(widget: GtkWidget): pointer
+proc gtk_widget_get_request_mode*(widget: GtkWidget): pointer
+proc gtk_widget_get_layout_manager*(widget: GtkWidget): pointer
+proc gtk_widget_class_get_layout_manager_type*(widget_class: pointer): pointer
+proc gtk_widget_class_get_activate_signal*(widget_class: pointer): pointer
+proc gtk_widget_activate*(widget: GtkWidget): pointer
+proc gtk_widget_get_focusable*(widget: GtkWidget): pointer
+proc gtk_widget_has_focus*(widget: GtkWidget): pointer
+proc gtk_widget_is_focus*(widget: GtkWidget): pointer
+proc gtk_widget_has_visible_focus*(widget: GtkWidget): pointer
+proc gtk_widget_get_focus_on_click*(widget: GtkWidget): pointer
+proc gtk_widget_get_can_target*(widget: GtkWidget): pointer
+proc gtk_widget_has_default*(widget: GtkWidget): pointer
+proc gtk_widget_get_receives_default*(widget: GtkWidget): pointer
+proc gtk_widget_get_state_flags*(widget: GtkWidget): pointer
+proc gtk_widget_is_sensitive*(widget: GtkWidget): pointer
+proc gtk_widget_is_visible*(widget: GtkWidget): pointer
+proc gtk_widget_is_drawable*(widget: GtkWidget): pointer
+proc gtk_widget_get_realized*(widget: GtkWidget): pointer
+proc gtk_widget_get_mapped*(widget: GtkWidget): pointer
+proc gtk_widget_get_root*(widget: GtkWidget): pointer
+proc gtk_widget_get_native*(widget: GtkWidget): pointer
+proc gtk_widget_get_child_visible*(widget: GtkWidget): pointer
+proc gtk_widget_get_allocated_width*(widget: GtkWidget): pointer
+proc gtk_widget_get_allocated_height*(widget: GtkWidget): pointer
+proc gtk_widget_get_allocated_baseline*(widget: GtkWidget): pointer
+proc gtk_widget_get_width*(widget: GtkWidget): pointer
+proc gtk_widget_get_height*(widget: GtkWidget): pointer
+proc gtk_widget_get_baseline*(widget: GtkWidget): pointer
+proc gtk_widget_error_bell*(widget: GtkWidget): pointer
+proc gtk_widget_get_opacity*(widget: GtkWidget): pointer
+proc gtk_widget_get_overflow*(widget: GtkWidget): pointer
+proc gtk_widget_get_scale_factor*(widget: GtkWidget): pointer
+proc gtk_widget_get_settings*(widget: GtkWidget): pointer
+proc gtk_widget_get_hexpand_set*(widget: GtkWidget): pointer
+proc gtk_widget_get_vexpand_set*(widget: GtkWidget): pointer
+proc gtk_widget_get_direction*(widget: GtkWidget): pointer
+proc gtk_widget_set_default_direction*(dir: pointer): pointer
+proc gtk_widget_get_default_direction*(): pointer
+proc gtk_widget_get_cursor*(widget: GtkWidget): pointer
+proc gtk_widget_list_mnemonic_labels*(widget: GtkWidget): pointer
+proc gtk_widget_trigger_tooltip_query*(widget: GtkWidget): pointer
+proc gtk_widget_get_has_tooltip*(widget: GtkWidget): pointer
+proc gtk_requisition_free*(requisition: pointer): pointer
+proc gtk_widget_in_destruction*(widget: GtkWidget): pointer
+proc gtk_widget_class_get_css_name*(widget_class: pointer): pointer
+proc gtk_widget_init_template*(widget: GtkWidget): pointer
+proc gtk_widget_activate_default*(widget: GtkWidget): pointer
+proc gtk_widget_get_font_map*(widget: GtkWidget): pointer
+proc gtk_widget_observe_children*(widget: GtkWidget): pointer
+proc gtk_widget_observe_controllers*(widget: GtkWidget): pointer
+proc gtk_widget_get_focus_child*(widget: GtkWidget): pointer
+proc gtk_widget_should_layout*(widget: GtkWidget): pointer
+proc gtk_widget_get_css_classes*(widget: GtkWidget): pointer
+proc gtk_widget_class_get_accessible_role*(widget_class: pointer): pointer
+proc gtk_widget_get_limit_events*(widget: GtkWidget): pointer
+proc gtk_widget_paintable_new*(widget: GtkWidget): pointer
+proc gtk_widget_paintable_get_widget*(self: pointer): pointer
+proc gtk_widget_paintable_update_image*(self: pointer)
+proc gtk_widget_paintable_push_snapshot_count*(self: pointer)
+proc gtk_widget_paintable_pop_snapshot_count*(self: pointer)
+proc gtk_widget_root*(widget: GtkWidget)
+proc gtk_widget_unroot*(widget: GtkWidget)
+proc gtk_widget_get_css_node*(widget: GtkWidget): pointer
+proc gtk_widget_get_alloc_needed*(widget: GtkWidget): gboolean {.importc: "_gtk_widget_get_alloc_needed".}
+proc gtk_widget_needs_allocate*(widget: GtkWidget): gboolean
+proc gtk_widget_clear_resize_queued*(widget: GtkWidget)
+proc gtk_widget_ensure_allocate*(widget: GtkWidget)
+proc gtk_widget_scale_changed*(widget: GtkWidget) {.importc: "_gtk_widget_scale_changed".}
+proc gtk_widget_monitor_changed*(widget: GtkWidget)
+proc gtk_widget_get_surface*(widget: GtkWidget): pointer
+proc gtk_widget_has_grab*(widget: GtkWidget): gboolean
+proc gtk_widget_peek_style_context*(widget: GtkWidget): pointer {.importc: "_gtk_widget_peek_style_context".}
+proc gtk_widget_update_parent_muxer*(widget: GtkWidget) {.importc: "_gtk_widget_update_parent_muxer".}
+proc gtk_widget_has_tick_callback*(widget: GtkWidget): gboolean
+proc gtk_widget_has_size_request*(widget: GtkWidget): gboolean
+proc gtk_widget_reset_controllers*(widget: GtkWidget)
+proc gtk_widget_can_activate*(widget: GtkWidget): gboolean
+proc gtk_widget_grab_focus_child*(widget: GtkWidget): gboolean
+proc gtk_widget_grab_focus_self*(widget: GtkWidget): gboolean
+proc gtk_widget_realize_at_context*(widget: GtkWidget)
+proc gtk_widget_unrealize_at_context*(widget: GtkWidget)
+proc gtk_root_get_display*(): pointer
+proc gtk_window_controls_get_use_native_controls*(self: pointer): pointer
+proc gtk_window_get_destroy_with_parent*(window: pointer): pointer
+proc gtk_window_get_hide_on_close*(window: pointer): pointer
+proc gtk_window_get_mnemonics_visible*(window: pointer): pointer
+proc gtk_window_get_focus_visible*(window: pointer): pointer
+proc gtk_window_is_active*(window: pointer): pointer
+proc gtk_window_get_icon_name*(window: pointer): pointer
+proc gtk_window_get_default_icon_name*(): pointer
+proc gtk_window_set_auto_startup_notification*(setting: gboolean): pointer
+proc gtk_window_list_toplevels*(): pointer
+proc gtk_window_has_group*(window: pointer): pointer
+proc gtk_window_is_maximized*(window: pointer): pointer
+proc gtk_window_is_suspended*(window: pointer): pointer
+proc gtk_window_set_interactive_debugging*(enable: gboolean): pointer
+proc gtk_window_get_handle_menubar_accel*(window: pointer): pointer
+proc gtk_window_get_gravity*(window: pointer): pointer
+proc gtk_window_emit_close_request*(window: pointer): gboolean
+proc gtk_window_schedule_mnemonics_visible*(window: pointer) {.importc: "_gtk_window_schedule_mnemonics_visible".}
+proc gtk_window_notify_keys_changed*(window: pointer) {.importc: "_gtk_window_notify_keys_changed".}
+proc gtk_window_toggle_maximized*(window: pointer) {.importc: "_gtk_window_toggle_maximized".}
+proc gtk_highlight_overlay_new*(widget: GtkWidget): pointer
+proc gtk_highlight_overlay_get_widget*(self: pointer): ptr GtkWidget
+proc gtk_inspector_init*(): pointer
+proc gtk_inspector_register_extension*()
+proc gtk_inspector_overlay_queue_draw*(self: pointer)
+
+{.pop.}
+
+# ============================================================================
+# GET API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc get_language_name*(language: pointer): pointer
+proc get_language_name_for_tag*(tag: pointer): cstring
+
+{.pop.}
+
+# ============================================================================
+# GTK API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc gtk_layout_overlay_new*(): pointer
+proc gtk_inspector_logs_get_type*(): pointer
+proc gtk_inspector_magnifier_get_type*(): pointer
+proc gtk_inspector_measure_graph_new*(): pointer
+proc gtk_inspector_measure_graph_clear*(self: pointer)
+proc gtk_inspector_measure_graph_get_texture*(self: pointer): pointer
+proc gtk_inspector_menu_get_type*(): pointer
+proc gtk_inspector_misc_info_get_type*(): pointer
+proc gtk_inspector_node_wrapper_get_node*(self: pointer): pointer
+proc gtk_inspector_node_wrapper_get_draw_node*(self: pointer): pointer
+proc gtk_inspector_node_wrapper_get_profile_node*(self: pointer): pointer
+proc gtk_inspector_node_wrapper_get_profile*(self: pointer): pointer
+proc gtk_inspector_node_wrapper_get_role*(self: pointer): cstring
+proc gtk_inspector_node_wrapper_create_children_model*(self: pointer): pointer
+
+{.pop.}
+
+
+# ============================================================================
+# GTK API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc gtk_inspector_object_tree_get_type*(): pointer
+proc gtk_inspector_get_object_title*(`object`: GObject): cstring
+proc gtk_inspector_prop_editor_should_expand*(editor: pointer): gboolean
+proc gtk_inspector_prop_list_get_type*(): pointer
+proc gtk_inspector_recorder_get_type*(): pointer
+proc gtk_inspector_recorder_is_recording*(recorder: pointer): gboolean
+proc gtk_inspector_recording_get_type*(): pointer
+proc gtk_inspector_recording_get_timestamp*(recording: pointer): gint64
+proc gtk_inspector_render_recording_get_type*(): GType
+proc gtk_inspector_render_recording_get_node*(recording: pointer): pointer
+proc gtk_inspector_render_recording_get_profile_node*(recording: pointer): pointer
+proc gtk_inspector_render_recording_get_clip_region*(recording: pointer): pointer
+proc gtk_inspector_render_recording_get_area*(recording: pointer): pointer
+proc gtk_inspector_render_recording_get_surface*(recording: pointer): gpointer
+
+{.pop.}
+
+# ============================================================================
+# RESOURCE API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc resource_holder_get_count*(holder: pointer): pointer
+proc resource_holder_get_size*(holder: pointer): gsize
+
+{.pop.}
+
+# ============================================================================
+# GTK API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc gtk_inspector_resource_list_get_type*(): pointer
+
+{.pop.}
+
+
+
+# ============================================================================
+# BITSET API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc bitset_free*(bitset: pointer): pointer
+proc bitset_clear*(bitset: pointer): pointer
+proc bitset_fill*(bitset: pointer): pointer
+proc bitset_resize*(bitset: pointer, newarraysize: pointer, padwithzeroes: pointer): pointer
+proc bitset_grow*(bitset: pointer, newarraysize: pointer): pointer
+proc bitset_trim*(bitset: pointer): pointer
+proc bitset_shift_left*(bitset: pointer, s: pointer): pointer
+proc bitset_shift_right*(bitset: pointer, s: pointer): pointer
+proc bitset_count*(bitset: pointer): pointer
+proc bitset_empty*(bitset: pointer): pointer
+proc bitset_minimum*(bitset: pointer): pointer
+proc bitset_maximum*(bitset: pointer): pointer
+
+{.pop.}
+
+# ============================================================================
+# ROARING API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc roaring_bitmap_create_with_capacity*(): pointer
+proc roaring_bitmap_init_with_capacity*(r: pointer, cap: pointer): pointer
+proc roaring_bitmap_printf_describe*(r: pointer): pointer
+proc roaring_bitmap_printf*(r: pointer): pointer
+proc roaring_bitmap_free*(r: pointer): pointer
+proc roaring_bitmap_add*(r: pointer, x: pointer): pointer
+proc roaring_bitmap_add_checked*(r: pointer, x: pointer): pointer
+proc roaring_bitmap_remove*(r: pointer, x: pointer): pointer
+proc roaring_bitmap_remove_checked*(r: pointer, x: pointer): pointer
+proc roaring_bitmap_contains*(r: pointer, val: pointer): pointer
+proc roaring_bitmap_get_cardinality*(r: pointer): pointer
+proc roaring_bitmap_is_empty*(r: pointer): pointer
+proc roaring_bitmap_clear*(r: pointer): pointer
+proc roaring_bitmap_to_uint32_array*(r: pointer, ans: pointer): pointer
+proc roaring_bitmap_to_bitset*(r: pointer, bitset: pointer): pointer
+proc roaring_bitmap_remove_run_compression*(r: pointer): pointer
+proc roaring_bitmap_run_optimize*(r: pointer): pointer
+proc roaring_bitmap_shrink_to_fit*(r: pointer): pointer
+proc roaring_bitmap_serialize*(r: pointer, buf: cstring): pointer
+proc roaring_bitmap_size_in_bytes*(r: pointer): pointer
+proc roaring_bitmap_portable_size_in_bytes*(r: pointer): pointer
+proc roaring_bitmap_portable_serialize*(r: pointer, buf: cstring): pointer
+proc roaring_bitmap_frozen_size_in_bytes*(r: pointer): pointer
+proc roaring_bitmap_frozen_serialize*(r: pointer, buf: cstring): pointer
+proc roaring_bitmap_repair_after_lazy*(r1: pointer): pointer
+proc roaring_bitmap_rank*(r: pointer, x: pointer): pointer
+proc roaring_bitmap_get_index*(r: pointer, x: pointer): pointer
+proc roaring_bitmap_minimum*(r: pointer): pointer
+proc roaring_bitmap_maximum*(r: pointer): pointer
+proc roaring_iterator_create*(): pointer
+proc roaring_uint32_iterator_advance*(it: pointer): pointer
+proc roaring_uint32_iterator_advance*(): pointer
+proc roaring_uint32_iterator_previous*(it: pointer): pointer
+proc roaring_uint32_iterator_previous*(): pointer
+proc roaring_uint32_iterator_move_equalorlarger*(): pointer
+proc roaring_uint32_iterator_copy*(): pointer
+proc roaring_uint32_iterator_free*(it: pointer): pointer
+proc roaring_uint32_iterator_read*(): pointer
+proc roaring_init_memory_hook*(memory_hook: pointer): pointer
+proc roaring_malloc*(): pointer
+proc roaring_realloc*(): pointer
+proc roaring_calloc*(): pointer
+proc roaring_free*(): pointer
+proc roaring_aligned_malloc*(): pointer
+proc roaring_aligned_free*(): pointer
+
+{.pop.}
+
+# ============================================================================
+# ROARING64 API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc roaring64_bitmap_free*(r: pointer): pointer
+proc roaring64_bitmap_add*(r: pointer, val: pointer): pointer
+proc roaring64_bitmap_add_checked*(r: pointer, val: pointer): pointer
+proc roaring64_bitmap_remove*(r: pointer, val: pointer): pointer
+proc roaring64_bitmap_remove_checked*(r: pointer, val: pointer): pointer
+proc roaring64_bitmap_clear*(r: pointer): pointer
+proc roaring64_bitmap_contains*(r: pointer, val: pointer): pointer
+proc roaring64_bitmap_rank*(r: pointer, val: pointer): pointer
+proc roaring64_bitmap_get_cardinality*(r: pointer): pointer
+proc roaring64_bitmap_is_empty*(r: pointer): pointer
+proc roaring64_bitmap_minimum*(r: pointer): pointer
+proc roaring64_bitmap_maximum*(r: pointer): pointer
+proc roaring64_bitmap_run_optimize*(r: pointer): pointer
+proc roaring64_bitmap_shrink_to_fit*(r: pointer): pointer
+proc roaring64_bitmap_portable_size_in_bytes*(r: pointer): pointer
+proc roaring64_bitmap_frozen_size_in_bytes*(r: pointer): pointer
+proc roaring64_iterator_free*(it: pointer): pointer
+proc roaring64_iterator_has_value*(it: pointer): pointer
+proc roaring64_iterator_value*(it: pointer): pointer
+proc roaring64_iterator_advance*(it: pointer): pointer
+proc roaring64_iterator_previous*(it: pointer): pointer
+
+{.pop.}
+
+# ============================================================================
+# GTK API
+# ============================================================================
+
+{.push importc, cdecl.}
+proc gtk_inspector_size_groups_get_type*(): pointer
+proc gtk_inspector_start_recording_get_type*(): GType
+proc gtk_inspector_start_recording_new*(): pointer
+proc gtk_inspector_statistics_get_type*(): pointer
+proc gtk_inspector_strv_editor_get_type*(): pointer
+proc gtk_subsurface_overlay_new*(): pointer
+proc gtk_updates_overlay_new*(): pointer
+proc gtk_inspector_variant_editor_get_type*(): GType
+proc gtk_inspector_variant_editor_get_value*(editor: GtkWidget): pointer
+proc gtk_inspector_visual_get_type*(): pointer
+proc gtk_inspector_window_get_type*(): pointer
+proc gtk_inspector_window_select_widget_under_pointer*(iw: pointer)
+proc gtk_inspector_window_get_inspected_display*(iw: pointer): pointer
+proc gtk_inspector_window_pop_object*(iw: pointer)
+proc gtk_inspector_is_recording*(widget: GtkWidget): gboolean
+proc gtk_inspector_handle_event*(event: pointer): gboolean
+
+{.pop.}
 # ----------------------------------------------------------------------------
 # Работа с настройками приложения
 # ----------------------------------------------------------------------------

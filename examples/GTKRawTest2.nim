@@ -109,7 +109,7 @@ proc onActivate(app: GtkApplication, userData: pointer) {.cdecl.} =
   applyCss()
 
   # Создание главного окна
-  let window = createAppWindow(app, "Эталонное GTK4 приложение на Nim", 1000, 600)
+  let window = createAppWindow(app, "Эталонное GTK4-приложение на Nim", 1000, 600)
   
   # Главный контейнер
   let mainBox = createVBox()
