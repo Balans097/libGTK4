@@ -1917,6 +1917,7 @@ proc gtk_css_provider_new*(): GtkCssProvider {.importc.}
 proc gtk_css_provider_load_from_data*(cssProvider: GtkCssProvider, data: cstring, length: gssize) {.importc.}
 proc gtk_css_provider_load_from_file*(cssProvider: GtkCssProvider, file: GFile) {.importc.}
 proc gtk_css_provider_load_from_path*(cssProvider: GtkCssProvider, path: cstring) {.importc.}
+proc gtk_css_provider_load_from_string*(css_provider: GtkCssProvider, string: cstring) {.importc.}
 
 
 
@@ -1930,7 +1931,6 @@ proc gtk_style_context_add_provider*(context: GtkStyleContext, provider: pointer
 proc gtk_style_context_add_provider_for_display*(display: pointer, provider: pointer, priority: guint) {.importc.}
 
 proc gtk_widget_get_display*(widget: GtkWidget): GdkDisplay {.importc.}
-proc gtk_css_provider_load_from_string*(css_provider: GtkCssProvider, string: cstring) {.importc.}
 
 
 
