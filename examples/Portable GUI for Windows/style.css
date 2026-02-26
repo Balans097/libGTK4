@@ -1,0 +1,9 @@
+/* Global font */
+* {
+  font-size: 13pt;
+}
+
+/* Text entries */
+entry {
+  font-size: 1.2em;
+}

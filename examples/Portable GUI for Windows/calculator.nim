@@ -25,44 +25,56 @@ proc onAddClicked(widget: GtkWidget; userData: pointer): bool =
   return true
 
 # Handler for application activation
-proc onActivate(app: GtkApplication; userData: pointer) =
+proc onActivate(app: GtkApplication; userData: pointer) = 
+
   let window = gtk_application_window_new(app)
   gtk_window_set_title(window, "Addition Calculator")
   gtk_window_set_default_size(window, 400, 300)
-  
+
   let vbox = gtk_box_new(GtkOrientation.GTK_ORIENTATION_VERTICAL, 12)
   gtk_widget_set_margin_top(vbox, 24)
   gtk_widget_set_margin_bottom(vbox, 24)
   gtk_widget_set_margin_start(vbox, 24)
   gtk_widget_set_margin_end(vbox, 24)
-  
+
   let labelTitle = gtk_label_new("Enter two numbers to add")
   gtk_box_append(vbox, labelTitle)
-  
+
   entryA = gtk_entry_new()
   gtk_entry_set_placeholder_text(entryA, "First number")
   gtk_widget_set_hexpand(entryA, true)
   gtk_box_append(vbox, entryA)
-  
+
   entryB = gtk_entry_new()
   gtk_entry_set_placeholder_text(entryB, "Second number")
   gtk_widget_set_hexpand(entryB, true)
   gtk_box_append(vbox, entryB)
-  
+
   let addButton = gtk_button_new_with_label("Add")
   gtk_widget_set_margin_top(addButton, 12)
   gtk_box_append(vbox, addButton)
-  
+
   entryResult = gtk_entry_new()
   gtk_entry_set_placeholder_text(entryResult, "Result")
   gtk_editable_set_editable(entryResult, false)
   gtk_widget_set_margin_top(entryResult, 12)
   gtk_box_append(vbox, entryResult)
-  
+
   discard g_signal_connect(addButton, "clicked", onAddClicked, nil)
-  
+
   gtk_window_set_child(window, vbox)
-  gtk_widget_show(window)
+
+  # Correct the app style
+  let cssProvider = gtk_css_provider_new()
+  gtk_css_provider_load_from_path(cssProvider, "style.css")
+  gtk_style_context_add_provider_for_display(
+    gdk_display_get_default(),
+    cssProvider,
+    GTK_STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+  gtk_window_present(window)
+
+
 
 # Main function
 proc main =
