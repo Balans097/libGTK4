@@ -1865,6 +1865,8 @@ proc gtk_header_bar_get_show_title_buttons*(bar: GtkHeaderBar): gboolean {.impor
 proc gtk_header_bar_set_decoration_layout*(bar: GtkHeaderBar, layout: cstring) {.importc.}
 proc gtk_header_bar_get_decoration_layout*(bar: GtkHeaderBar): cstring {.importc.}
 
+
+
 # ============================================================================
 # MESSAGE DIALOG
 # ============================================================================
