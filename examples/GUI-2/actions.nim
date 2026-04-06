@@ -322,8 +322,7 @@ const actionDefs: array[13, ActionDef] = [
 
 proc registerActions*(app: GtkApplication) =
   for ad in actionDefs:
-    if ad.callback == nil:
-      continue
+    if ad.callback == nil: continue
     let action = g_simple_action_new(ad.name.cstring, nil)
     discard g_signal_connect(action, "activate",
       cast[GCallback](ad.callback), nil)
@@ -337,3 +336,13 @@ proc registerActions*(app: GtkApplication) =
       accelArr[1] = nil
       gtk_application_set_accels_for_action(
         app, detailedName.cstring, addr accelArr[0])
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,110 @@
+{
+  "menuBar": [
+    {
+      "id": "menu_file",
+      "label": "Файл",
+      "items": [
+        {
+          "id": "cmd_new",
+          "label": "Создать",
+          "shortcut": "Ctrl+N",
+          "action": "app.createNewDocument",
+          "enabled": true
+        },
+        {
+          "id": "cmd_open",
+          "label": "Открыть...",
+          "shortcut": "Ctrl+O",
+          "action": "app.openFileDialog",
+          "enabled": true
+        },
+        {
+          "id": "sep_1",
+          "type": "separator",
+          "enabled": false
+        },
+        {
+          "id": "cmd_save",
+          "label": "Сохранить",
+          "shortcut": "Ctrl+S",
+          "action": "app.saveCurrentDocument",
+          "enabled": false
+        },
+        {
+          "id": "submenu_export",
+          "label": "Экспорт",
+          "items": [
+            {
+              "id": "exp_pdf",
+              "label": "В PDF",
+              "shortcut": "Ctrl+Shift+E",
+              "action": "app.exportToPDF",
+              "enabled": true
+            },
+            {
+              "id": "exp_csv",
+              "label": "В CSV",
+              "shortcut": null,
+              "action": "app.exportToCSV",
+              "enabled": false
+            }
+          ]
+        },
+        {
+          "id": "cmd_quit",
+          "label": "Выход",
+          "shortcut": "Alt+F4",
+          "action": "app.quitApplication",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "menu_edit",
+      "label": "Правка",
+      "items": [
+        {
+          "id": "cmd_undo",
+          "label": "Отменить",
+          "shortcut": "Ctrl+Z",
+          "action": "app.undoAction",
+          "enabled": true
+        },
+        {
+          "id": "cmd_redo",
+          "label": "Повторить",
+          "shortcut": "Ctrl+Y",
+          "action": "app.redoAction",
+          "enabled": false
+        },
+        {
+          "id": "cmd_prefs",
+          "label": "Настройки...",
+          "shortcut": "Ctrl+,",
+          "action": "app.openSettings",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "menu_help",
+      "label": "Справка",
+      "items": [
+        {
+          "id": "cmd_docs",
+          "label": "Документация",
+          "shortcut": "F1",
+          "action": "app.openDocumentation",
+          "enabled": true
+        },
+        {
+          "id": "cmd_about",
+          "label": "О приложении",
+          "shortcut": null,
+          "action": "app.showAboutDialog",
+          "enabled": true
+        }
+      ]
+    }
+  ]
+}

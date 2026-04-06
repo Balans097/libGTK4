@@ -28,7 +28,7 @@ window {
   background-color: #e8e8e8;
   border-top: 1px solid #c0c0c0;
   padding: 2px 8px;
-  font-size: 0.85em;
+  font-size: 1.0em;
   color: #444444;
 }
 .editor {
@@ -56,7 +56,6 @@ proc buildMenuBar*(app: GtkApplication): GMenu =
 
   let itemNew  = g_menu_item_new("Создать",   "app.new")
   let itemOpen = g_menu_item_new("Открыть…",  "app.open")
-  let itemSave = g_menu_item_new("Сохранить", "app.save")
   g_menu_append_item(fileMenu, itemNew)
   g_menu_append_item(fileMenu, itemOpen)
   g_object_unref(cast[gpointer](itemNew))
@@ -64,6 +63,7 @@ proc buildMenuBar*(app: GtkApplication): GMenu =
 
   # Секция с Сохранить / Сохранить как (визуальный разделитель через section)
   let saveSection = g_menu_new()
+  let itemSave = g_menu_item_new("Сохранить", "app.save")
   g_menu_append_item(saveSection, itemSave)
   g_object_unref(cast[gpointer](itemSave))
   g_menu_append(saveSection, "Сохранить как…", "app.saveAs")
@@ -126,6 +126,8 @@ proc buildMenuBar*(app: GtkApplication): GMenu =
   result = menuBar
 
 
+
+
 # ============================================================================
 # Текстовый редактор
 # ============================================================================
@@ -174,7 +176,7 @@ proc buildStatusBar*(): GtkBox =
   gtk_widget_add_css_class(bar, "statusbar")
 
   let lbl = gtk_label_new("Готово.")
-  gtk_label_set_xalign(lbl, 0.0.cfloat)
+  gtk_label_set_xalign(lbl, 0.0.cfloat) # выравнивание текста
   gtk_widget_set_hexpand(lbl, TRUE)
   gtk_box_append(bar, lbl)
 
@@ -196,8 +198,9 @@ proc buildMainLayout*(): GtkBox =
   ## Собирает вертикальный GtkBox: редактор + строка состояния.
   let root = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0)
 
-  let editor    = buildEditor()
-  let statusBar = buildStatusBar()
+  let
+    editor    = buildEditor()
+    statusBar = buildStatusBar()
 
   gtk_box_append(root, cast[GtkWidget](editor))
   gtk_box_append(root, cast[GtkWidget](statusBar))
@@ -221,7 +224,7 @@ proc setupWindow*(app: GtkApplication) =
   g_object_unref(cast[gpointer](menu))
 
   # Окно
-  let win = createAppWindow(app, "GTK4 Demo — Без имени", 860, 560)
+  let win = createAppWindow(app, "GTK4 Demo — без имени", 860, 560)
   state.window = win
   state.docTitle = "Без имени"
   state.app = app
@@ -236,3 +239,14 @@ proc setupWindow*(app: GtkApplication) =
 
   gtk_window_present(win)
   setStatus("Готово. Добро пожаловать в GTK4 Demo.")
+
+
+
+
+
+
+
+
+
+
+
