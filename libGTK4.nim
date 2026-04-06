@@ -329,17 +329,17 @@ type
     GTK_BUTTONS_OK_CANCEL = 5
   
   GtkResponseType* {.size: sizeof(cint).} = enum
-    GTK_RESPONSE_NONE = -1
-    GTK_RESPONSE_REJECT = -2
-    GTK_RESPONSE_ACCEPT = -3
-    GTK_RESPONSE_DELETE_EVENT = -4
-    GTK_RESPONSE_OK = -5
-    GTK_RESPONSE_CANCEL = -6
-    GTK_RESPONSE_CLOSE = -7
-    GTK_RESPONSE_YES = -8
-    GTK_RESPONSE_NO = -9
-    GTK_RESPONSE_APPLY = -10
     GTK_RESPONSE_HELP = -11
+    GTK_RESPONSE_APPLY = -10
+    GTK_RESPONSE_NO = -9
+    GTK_RESPONSE_YES = -8
+    GTK_RESPONSE_CLOSE = -7
+    GTK_RESPONSE_CANCEL = -6
+    GTK_RESPONSE_OK = -5
+    GTK_RESPONSE_DELETE_EVENT = -4
+    GTK_RESPONSE_ACCEPT = -3
+    GTK_RESPONSE_REJECT = -2
+    GTK_RESPONSE_NONE = -1
   
   GtkSelectionMode* {.size: sizeof(cint).} = enum
     GTK_SELECTION_NONE = 0
@@ -908,17 +908,44 @@ proc gtk_actionable_get_action_target_value*(actionable: pointer): GVariant {.im
 
 
 # ============================================================================
-# MENU
+# MENU (GIO — GMenu, GMenuItem)
 # ============================================================================
 
 proc g_menu_new*(): GMenu {.importc.}
 proc g_menu_append*(menu: GMenu, label: cstring, detailedAction: cstring) {.importc.}
 proc g_menu_prepend*(menu: GMenu, label: cstring, detailedAction: cstring) {.importc.}
 proc g_menu_insert*(menu: GMenu, position: gint, label: cstring, detailedAction: cstring) {.importc.}
+proc g_menu_append_item*(menu: GMenu, item: GMenuItem) {.importc.}
+proc g_menu_prepend_item*(menu: GMenu, item: GMenuItem) {.importc.}
+proc g_menu_insert_item*(menu: GMenu, position: gint, item: GMenuItem) {.importc.}
 proc g_menu_append_section*(menu: GMenu, label: cstring, section: GMenuModel) {.importc.}
+proc g_menu_prepend_section*(menu: GMenu, label: cstring, section: GMenuModel) {.importc.}
+proc g_menu_insert_section*(menu: GMenu, position: gint, label: cstring, section: GMenuModel) {.importc.}
 proc g_menu_append_submenu*(menu: GMenu, label: cstring, submenu: GMenuModel) {.importc.}
+proc g_menu_prepend_submenu*(menu: GMenu, label: cstring, submenu: GMenuModel) {.importc.}
+proc g_menu_insert_submenu*(menu: GMenu, position: gint, label: cstring, submenu: GMenuModel) {.importc.}
 proc g_menu_remove*(menu: GMenu, position: gint) {.importc.}
 proc g_menu_remove_all*(menu: GMenu) {.importc.}
+proc g_menu_model_get_n_items*(model: GMenuModel): gint {.importc.}
+proc g_menu_model_is_mutable*(model: GMenuModel): gboolean {.importc.}
+proc g_menu_model_items_changed*(model: GMenuModel, position: gint, removed: gint, added: gint) {.importc.}
+proc g_menu_model_get_item_attribute_value*(model: GMenuModel, itemIndex: gint, attribute: cstring, expectedType: GVariantType): GVariant {.importc.}
+proc g_menu_model_get_item_link*(model: GMenuModel, itemIndex: gint, link: cstring): GMenuModel {.importc.}
+proc g_menu_item_new*(label: cstring, detailedAction: cstring): GMenuItem {.importc.}
+proc g_menu_item_new_section*(label: cstring, section: GMenuModel): GMenuItem {.importc.}
+proc g_menu_item_new_submenu*(label: cstring, submenu: GMenuModel): GMenuItem {.importc.}
+proc g_menu_item_new_from_model*(model: GMenuModel, itemIndex: gint): GMenuItem {.importc.}
+proc g_menu_item_set_label*(menuItem: GMenuItem, label: cstring) {.importc.}
+proc g_menu_item_get_label*(menuItem: GMenuItem): cstring {.importc.}
+proc g_menu_item_set_icon*(menuItem: GMenuItem, icon: pointer) {.importc.}
+proc g_menu_item_set_action_and_target_value*(menuItem: GMenuItem, action: cstring, targetValue: GVariant) {.importc.}
+proc g_menu_item_set_detailed_action*(menuItem: GMenuItem, detailedAction: cstring) {.importc.}
+proc g_menu_item_set_section*(menuItem: GMenuItem, section: GMenuModel) {.importc.}
+proc g_menu_item_set_submenu*(menuItem: GMenuItem, submenu: GMenuModel) {.importc.}
+proc g_menu_item_get_attribute_value*(menuItem: GMenuItem, attribute: cstring, expectedType: GVariantType): GVariant {.importc.}
+proc g_menu_item_get_link*(menuItem: GMenuItem, link: cstring): GMenuModel {.importc.}
+proc g_menu_item_set_attribute_value*(menuItem: GMenuItem, attribute: cstring, value: GVariant) {.importc.}
+proc g_menu_item_set_link*(menuItem: GMenuItem, link: cstring, model: GMenuModel) {.importc.}
 
 
 # ============================================================================
@@ -1564,12 +1591,7 @@ proc gtk_text_buffer_remove_tag*(buffer: GtkTextBuffer, tag: GtkTextTag, start: 
 proc gtk_text_buffer_apply_tag_by_name*(buffer: GtkTextBuffer, name: cstring, start: ptr GtkTextIter, `end`: ptr GtkTextIter) {.importc.}
 proc gtk_text_buffer_remove_tag_by_name*(buffer: GtkTextBuffer, name: cstring, start: ptr GtkTextIter, `end`: ptr GtkTextIter) {.importc.}
 proc gtk_text_buffer_remove_all_tags*(buffer: GtkTextBuffer, start: ptr GtkTextIter, `end`: ptr GtkTextIter) {.importc.}
-proc gtk_text_buffer_create_tag*(buffer: GtkTextBuffer, tag_name: cstring): GtkTextTag {.importc, varargs.}
 proc gtk_text_buffer_get_tag_table*(buffer: GtkTextBuffer): GtkTextTagTable {.importc.}
-
-# Вставка с тегами
-proc gtk_text_buffer_insert_with_tags*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, text: cstring, len: gint) {.importc, varargs.}
-proc gtk_text_buffer_insert_with_tags_by_name*(buffer: GtkTextBuffer, iter: ptr GtkTextIter, text: cstring, len: gint) {.importc, varargs.}
 
 # Якоря для дочерних виджетов
 proc gtk_text_buffer_create_child_anchor*(buffer: GtkTextBuffer, iter: ptr GtkTextIter): GtkTextChildAnchor {.importc.}
@@ -2702,18 +2724,6 @@ proc gtk_popover_menu_set_menu_model*(popover: GtkPopoverMenu, model: GMenuModel
 proc gtk_popover_menu_get_menu_model*(popover: GtkPopoverMenu): GMenuModel {.importc.}
 proc gtk_popover_menu_add_child*(popover: GtkPopoverMenu, child: GtkWidget, id: cstring): gboolean {.importc.}
 proc gtk_popover_menu_remove_child*(popover: GtkPopoverMenu, child: GtkWidget): gboolean {.importc.}
-proc g_menu_item_new*(label: cstring, detailedAction: cstring): GMenuItem {.importc.}
-proc g_menu_item_new_section*(label: cstring, section: GMenuModel): GMenuItem {.importc.}
-proc g_menu_item_new_submenu*(label: cstring, submenu: GMenuModel): GMenuItem {.importc.}
-proc g_menu_item_set_label*(menuItem: GMenuItem, label: cstring) {.importc.}
-proc g_menu_item_set_action_and_target_value*(menuItem: GMenuItem, action: cstring, targetValue: GVariant) {.importc.}
-proc g_menu_item_set_detailed_action*(menuItem: GMenuItem, detailedAction: cstring) {.importc.}
-proc g_menu_item_set_section*(menuItem: GMenuItem, section: GMenuModel) {.importc.}
-proc g_menu_item_set_submenu*(menuItem: GMenuItem, submenu: GMenuModel) {.importc.}
-proc g_menu_item_get_attribute_value*(menuItem: GMenuItem, attribute: cstring, expectedType: GVariantType): GVariant {.importc.}
-proc g_menu_item_get_link*(menuItem: GMenuItem, link: cstring): GMenuModel {.importc.}
-proc g_menu_item_set_attribute_value*(menuItem: GMenuItem, attribute: cstring, value: GVariant) {.importc.}
-proc g_menu_item_set_link*(menuItem: GMenuItem, link: cstring, model: GMenuModel) {.importc.}
 
 
 # ============================================================================
@@ -4236,37 +4246,23 @@ template g_signal_connect_swapped*(instance, signal, callback, data: untyped): u
 
 
 
+
 # ============================================================================
 # ДОПОЛНИТЕЛЬНЫЕ ФУНКЦИИ GTK4 И ВСПОМОГАТЕЛЬНЫЕ API
 # ============================================================================
 
-
-# ============================================================================
-# GTK API
-# ============================================================================
-
 {.push importc, cdecl.}
+
 proc gtk_inspector_a11y_get_type*(): pointer
 proc gtk_a11y_overlay_new*(): pointer
 proc gtk_inspector_action_editor_get_type*(): pointer
 proc gtk_inspector_action_editor_update*(self: pointer)
 
-{.pop.}
-
-# ============================================================================
+# --------------------------------------------------------------------------
 # ACTION API
-# ============================================================================
+# --------------------------------------------------------------------------
 
-{.push importc, cdecl.}
 proc action_holder_changed*(holder: pointer)
-
-{.pop.}
-
-# ============================================================================
-# GTK API
-# ============================================================================
-
-{.push importc, cdecl.}
 proc gtk_inspector_actions_get_type*(): pointer
 proc gtk_baseline_overlay_new*(): pointer
 proc gtk_inspector_clipboard_get_type*(): pointer
@@ -4280,33 +4276,19 @@ proc gtk_focus_overlay_new*(): pointer
 proc gtk_fps_overlay_new*(): pointer
 proc gtk_inspector_general_get_type*(): pointer
 
-{.pop.}
-
-# ============================================================================
+# --------------------------------------------------------------------------
 # GRAPH API
-# ============================================================================
+# --------------------------------------------------------------------------
 
-{.push importc, cdecl.}
 proc graph_data_get_n_values*(data: pointer): guint
 proc graph_data_get_minimum*(data: pointer): pointer
 proc graph_data_get_maximum*(data: pointer): pointer
 
-{.pop.}
-
-# ============================================================================
+# --------------------------------------------------------------------------
 # GSK API
-# ============================================================================
+# --------------------------------------------------------------------------
 
-{.push importc, cdecl.}
 proc gsk_pango_renderer_release*(crenderer: pointer)
-
-{.pop.}
-
-# ============================================================================
-# GTK API
-# ============================================================================
-
-{.push importc, cdecl.}
 proc gtk_about_dialog_get_license_type*(about: pointer): pointer
 proc gtk_about_dialog_get_wrap_license*(about: pointer): pointer
 proc gtk_about_dialog_get_system_information*(about: pointer): pointer
@@ -4429,8 +4411,9 @@ proc gtk_application_impl_get_restore_reason*(impl: pointer): pointer
 proc gtk_application_impl_clear_restore_reason*(impl: pointer)
 proc gtk_application_impl_forget_state*(impl: pointer)
 proc gtk_application_impl_retrieve_state*(impl: pointer): pointer
-proc gtk_application_window_get_show_menubar*(window: pointer): pointer
-proc gtk_application_window_get_id*(window: pointer): pointer
+proc gtk_application_window_get_show_menubar*(window: pointer): gboolean
+proc gtk_application_window_set_show_menubar*(window: pointer, showMenubar: gboolean)
+proc gtk_application_window_get_id*(window: pointer): guint
 proc gtk_application_window_get_help_overlay*(window: pointer): pointer
 proc gtk_at_context_get_accessible*(self: pointer): pointer
 proc gtk_at_context_get_accessible_role*(self: pointer): pointer
@@ -4477,25 +4460,25 @@ proc gtk_bitmask_copy*(mask: pointer): pointer {.importc: "_gtk_bitmask_copy".}
 proc gtk_bitmask_free*(mask: pointer): pointer {.importc: "_gtk_bitmask_free".}
 proc gtk_bitmask_to_string*(mask: pointer): pointer {.importc: "_gtk_bitmask_to_string".}
 proc gtk_bitmask_is_empty*(mask: pointer): pointer {.importc: "_gtk_bitmask_is_empty".}
-proc gtk_bitmask_from_bits*(): pointer {.importc: "_gtk_bitmask_from_bits".}
-proc gtk_allocated_bitmask_copy*(): pointer {.importc: "_gtk_allocated_bitmask_copy".}
 
-{.pop.}
-
-# ============================================================================
+# --------------------------------------------------------------------------
 # G API
-# ============================================================================
+# --------------------------------------------------------------------------
 
-{.push importc, cdecl.}
-proc g_string_free*(): pointer
+proc g_string_free*(string: pointer, freeSegment: gboolean): cstring
+proc g_string_new*(init: cstring): pointer
+proc g_string_append*(str: pointer, val: cstring): pointer
+proc g_string_append_len*(str: pointer, val: cstring, len: gssize): pointer
+proc g_string_append_c*(str: pointer, c: char): pointer
+proc g_string_prepend*(str: pointer, val: cstring): pointer
+proc g_string_insert*(str: pointer, pos: gssize, val: cstring): pointer
+proc g_string_truncate*(str: pointer, len: gsize): pointer
+proc g_string_set_size*(str: pointer, len: gsize): pointer
 
-{.pop.}
+# --------------------------------------------------------------------------
+# BITMASK / BITSET API
+# --------------------------------------------------------------------------
 
-# ============================================================================
-# GTK API
-# ============================================================================
-
-{.push importc, cdecl.}
 proc gtk_allocated_bitmask_intersect*(): pointer {.importc: "_gtk_allocated_bitmask_intersect".}
 proc gtk_allocated_bitmask_union*(): pointer {.importc: "_gtk_allocated_bitmask_union".}
 proc gtk_allocated_bitmask_subtract*(): pointer {.importc: "_gtk_allocated_bitmask_subtract".}
@@ -4536,22 +4519,11 @@ proc gtk_buildable_parse_context_pop*(context: pointer): pointer
 proc gtk_buildable_parse_context_get_element*(context: pointer): pointer
 proc gtk_builder_error_quark*(): pointer
 
-{.pop.}
-
-# ============================================================================
+# --------------------------------------------------------------------------
 # FREE API
-# ============================================================================
+# --------------------------------------------------------------------------
 
-{.push importc, cdecl.}
 proc free_binding_expression_info*(info: pointer)
-
-{.pop.}
-
-# ============================================================================
-# GTK API
-# ============================================================================
-
-{.push importc, cdecl.}
 proc gtk_builder_menu_end*(parser_data: pointer): cstring {.importc: "_gtk_builder_menu_end".}
 proc gtk_builder_cscope_new*(): pointer
 proc gtk_builtin_icon_new*(css_name: cstring): ptr GtkWidget
@@ -4689,12 +4661,6 @@ proc gtk_css_border_value_get_right*(value: pointer): pointer {.importc: "_gtk_c
 proc gtk_css_border_value_get_bottom*(value: pointer): pointer {.importc: "_gtk_css_border_value_get_bottom".}
 proc gtk_css_border_value_get_left*(value: pointer): pointer {.importc: "_gtk_css_border_value_get_left".}
 proc gtk_css_boxes_compute_padding_rect*(boxes: pointer): pointer
-proc gtk_css_boxes_get_border_rect*(): pointer
-proc gtk_css_boxes_get_padding_rect*(): pointer
-proc gtk_css_boxes_get_content_rect*(): pointer
-proc gtk_css_boxes_get_border_box*(): pointer
-proc gtk_css_boxes_get_padding_box*(): pointer
-proc gtk_css_boxes_get_content_box*(): pointer
 proc gtk_css_boxes_get_margin_rect*(boxes: pointer): pointer
 proc gtk_css_boxes_get_border_rect*(boxes: pointer): pointer
 proc gtk_css_boxes_get_padding_rect*(boxes: pointer): pointer
@@ -4944,16 +4910,6 @@ proc gtk_cups_result_get_error_code*(result: pointer): pointer
 proc gtk_cups_result_get_error_string*(result: pointer): cstring
 proc gtk_cups_connection_test_get_state*(test: pointer): pointer
 proc gtk_cups_connection_test_free*(test: pointer)
-
-{.pop.}
-
-
-
-# ============================================================================
-# GTK API
-# ============================================================================
-
-{.push importc, cdecl.}
 proc gtk_print_get_default_user_units*(): pointer {.importc: "_gtk_print_get_default_user_units".}
 proc gtk_print_load_custom_papers*(store: pointer)
 proc gtk_load_custom_papers*(): pointer {.importc: "_gtk_load_custom_papers".}
@@ -5137,23 +5093,12 @@ proc gtk_icon_theme_get_theme_name*(self: pointer): pointer
 proc gtk_icon_theme_get_icon_names*(self: pointer): pointer
 proc gtk_icon_theme_get_serial*(self: pointer): pointer
 
-{.pop.}
-
-# ============================================================================
+# --------------------------------------------------------------------------
 # ICON API
-# ============================================================================
+# --------------------------------------------------------------------------
 
-{.push importc, cdecl.}
 proc icon_cache_remove*(icon: pointer)
 proc icon_cache_mark_used_if_cached*(icon: pointer)
-
-{.pop.}
-
-# ============================================================================
-# GTK API
-# ============================================================================
-
-{.push importc, cdecl.}
 proc gtk_image_definition_new_empty*(): pointer
 proc gtk_image_definition_new_icon_name*(icon_name: cstring): pointer
 proc gtk_image_definition_new_gicon*(gicon: pointer): pointer
@@ -5184,24 +5129,13 @@ proc gtk_im_module_get_default_context_id*(display: pointer): cstring {.importc:
 proc gtk_im_multicontext_get_context_id*(context: pointer): pointer
 proc gtk_inscription_get_layout*(self: pointer): pointer
 
-{.pop.}
-
-# ============================================================================
+# --------------------------------------------------------------------------
 # G API
-# ============================================================================
+# --------------------------------------------------------------------------
 
-{.push importc, cdecl.}
 proc g_clear_pointer*(): pointer
 proc g_ascii_isspace*(s: pointer): pointer
 proc g_unichar_isspace*(str: pointer): pointer
-
-{.pop.}
-
-# ============================================================================
-# GTK API
-# ============================================================================
-
-{.push importc, cdecl.}
 proc gtk_joined_menu_get_n_joined*(self: pointer): guint
 proc gtk_kinetic_scrolling_free*(kinetic: pointer)
 proc gtk_kinetic_scrolling_stop*(data: pointer)
@@ -5389,23 +5323,7 @@ proc gtk_pointer_focus_get_target*(focus: pointer): ptr GtkWidget
 proc gtk_pointer_focus_get_implicit_grab*(focus: pointer): ptr GtkWidget
 proc gtk_pointer_focus_get_effective_target*(focus: pointer): ptr GtkWidget
 proc gtk_pointer_focus_repick_target*(focus: pointer)
-
-{.pop.}
-
-
-# ============================================================================
-#  API
-# ============================================================================
-
-{.push importc, cdecl.}
 proc popcnt*(): pointer {.importc: "__popcnt".}
-
-
-# ============================================================================
-# GTK API
-# ============================================================================
-
-{.push importc, cdecl.}
 proc gtk_popover_bin_new*(): pointer
 proc gtk_popover_bin_get_child*(self: pointer): pointer
 proc gtk_popover_bin_get_menu_model*(self: pointer): pointer
@@ -5435,22 +5353,11 @@ proc gtk_print_backend_set_list_done*(backend: pointer): pointer
 proc gtk_printer_is_new*(printer: pointer): pointer
 proc gtk_print_backends_init*()
 
-{.pop.}
-
-# ============================================================================
+# --------------------------------------------------------------------------
 # SUPPORTS API
-# ============================================================================
+# --------------------------------------------------------------------------
 
-{.push importc, cdecl.}
 proc supports_am_pm*(): gboolean
-
-{.pop.}
-
-# ============================================================================
-# GTK API
-# ============================================================================
-
-{.push importc, cdecl.}
 proc gtk_print_setup_unref*(setup: pointer): pointer
 proc gtk_print_setup_get_print_settings*(setup: pointer): pointer
 proc gtk_print_setup_get_page_setup*(setup: pointer): pointer
@@ -5552,22 +5459,11 @@ proc gtk_get_display_debug_flags*(display: pointer): pointer
 proc gtk_get_any_display_debug_flag_set*(): gboolean
 proc gtk_elide_underscores*(original: cstring): cstring {.importc: "_gtk_elide_underscores".}
 
-{.pop.}
-
-# ============================================================================
+# --------------------------------------------------------------------------
 # SETLOCALE API
-# ============================================================================
+# --------------------------------------------------------------------------
 
-{.push importc, cdecl.}
 proc setlocale_initialization*()
-
-{.pop.}
-
-# ============================================================================
-# GTK API
-# ============================================================================
-
-{.push importc, cdecl.}
 proc gtk_load_dll_with_libgtk3_manifest*(dllname: pointer) {.importc: "_gtk_load_dll_with_libgtk3_manifest".}
 proc gtk_progress_bar_get_pulse_step*(pbar: pointer): pointer
 proc gtk_progress_bar_get_inverted*(pbar: pointer): pointer
@@ -5768,13 +5664,10 @@ proc gtk_svg_error_get_attribute*(error: pointer): pointer
 proc gtk_svg_error_get_start*(error: pointer): pointer
 proc gtk_svg_error_get_end*(error: pointer): pointer
 
-{.pop.}
-
-# ============================================================================
+# --------------------------------------------------------------------------
 # SVG API
-# ============================================================================
+# --------------------------------------------------------------------------
 
-{.push importc, cdecl.}
 proc svg_value_ref*(value: pointer): pointer
 proc svg_value_unref*(value: pointer)
 proc svg_value_to_string*(self: pointer): cstring
@@ -5798,14 +5691,6 @@ proc svg_transform_new_skew_y*(angle: pointer): pointer
 proc svg_transform_new_matrix*(params6: pointer): pointer
 proc svg_filter_parse*(value: cstring): pointer
 proc svg_shape_delete*(shape: pointer)
-
-{.pop.}
-
-# ============================================================================
-# GTK API
-# ============================================================================
-
-{.push importc, cdecl.}
 proc gtk_svg_copy*(orig: pointer): pointer
 proc gtk_svg_clear_content*(self: pointer)
 proc gtk_svg_get_overflow*(self: pointer): pointer
@@ -6045,7 +5930,6 @@ proc gtk_widget_grab_focus_child*(widget: GtkWidget): gboolean
 proc gtk_widget_grab_focus_self*(widget: GtkWidget): gboolean
 proc gtk_widget_realize_at_context*(widget: GtkWidget)
 proc gtk_widget_unrealize_at_context*(widget: GtkWidget)
-proc gtk_root_get_display*(): pointer
 proc gtk_window_controls_get_use_native_controls*(self: pointer): pointer
 proc gtk_window_get_destroy_with_parent*(window: pointer): pointer
 proc gtk_window_get_hide_on_close*(window: pointer): pointer
@@ -6072,23 +5956,12 @@ proc gtk_inspector_init*(): pointer
 proc gtk_inspector_register_extension*()
 proc gtk_inspector_overlay_queue_draw*(self: pointer)
 
-{.pop.}
-
-# ============================================================================
+# --------------------------------------------------------------------------
 # GET API
-# ============================================================================
+# --------------------------------------------------------------------------
 
-{.push importc, cdecl.}
 proc get_language_name*(language: pointer): pointer
 proc get_language_name_for_tag*(tag: pointer): cstring
-
-{.pop.}
-
-# ============================================================================
-# GTK API
-# ============================================================================
-
-{.push importc, cdecl.}
 proc gtk_layout_overlay_new*(): pointer
 proc gtk_inspector_logs_get_type*(): pointer
 proc gtk_inspector_magnifier_get_type*(): pointer
@@ -6103,15 +5976,6 @@ proc gtk_inspector_node_wrapper_get_profile_node*(self: pointer): pointer
 proc gtk_inspector_node_wrapper_get_profile*(self: pointer): pointer
 proc gtk_inspector_node_wrapper_get_role*(self: pointer): cstring
 proc gtk_inspector_node_wrapper_create_children_model*(self: pointer): pointer
-
-{.pop.}
-
-
-# ============================================================================
-# GTK API
-# ============================================================================
-
-{.push importc, cdecl.}
 proc gtk_inspector_object_tree_get_type*(): pointer
 proc gtk_inspector_get_object_title*(`object`: GObject): cstring
 proc gtk_inspector_prop_editor_should_expand*(editor: pointer): gboolean
@@ -6127,34 +5991,18 @@ proc gtk_inspector_render_recording_get_clip_region*(recording: pointer): pointe
 proc gtk_inspector_render_recording_get_area*(recording: pointer): pointer
 proc gtk_inspector_render_recording_get_surface*(recording: pointer): gpointer
 
-{.pop.}
-
-# ============================================================================
+# --------------------------------------------------------------------------
 # RESOURCE API
-# ============================================================================
+# --------------------------------------------------------------------------
 
-{.push importc, cdecl.}
 proc resource_holder_get_count*(holder: pointer): pointer
 proc resource_holder_get_size*(holder: pointer): gsize
-
-{.pop.}
-
-# ============================================================================
-# GTK API
-# ============================================================================
-
-{.push importc, cdecl.}
 proc gtk_inspector_resource_list_get_type*(): pointer
 
-{.pop.}
-
-
-
-# ============================================================================
+# --------------------------------------------------------------------------
 # BITSET API
-# ============================================================================
+# --------------------------------------------------------------------------
 
-{.push importc, cdecl.}
 proc bitset_free*(bitset: pointer): pointer
 proc bitset_clear*(bitset: pointer): pointer
 proc bitset_fill*(bitset: pointer): pointer
@@ -6168,13 +6016,10 @@ proc bitset_empty*(bitset: pointer): pointer
 proc bitset_minimum*(bitset: pointer): pointer
 proc bitset_maximum*(bitset: pointer): pointer
 
-{.pop.}
-
-# ============================================================================
+# --------------------------------------------------------------------------
 # ROARING API
-# ============================================================================
+# --------------------------------------------------------------------------
 
-{.push importc, cdecl.}
 proc roaring_bitmap_create_with_capacity*(): pointer
 proc roaring_bitmap_init_with_capacity*(r: pointer, cap: pointer): pointer
 proc roaring_bitmap_printf_describe*(r: pointer): pointer
@@ -6206,9 +6051,7 @@ proc roaring_bitmap_minimum*(r: pointer): pointer
 proc roaring_bitmap_maximum*(r: pointer): pointer
 proc roaring_iterator_create*(): pointer
 proc roaring_uint32_iterator_advance*(it: pointer): pointer
-proc roaring_uint32_iterator_advance*(): pointer
 proc roaring_uint32_iterator_previous*(it: pointer): pointer
-proc roaring_uint32_iterator_previous*(): pointer
 proc roaring_uint32_iterator_move_equalorlarger*(): pointer
 proc roaring_uint32_iterator_copy*(): pointer
 proc roaring_uint32_iterator_free*(it: pointer): pointer
@@ -6221,13 +6064,10 @@ proc roaring_free*(): pointer
 proc roaring_aligned_malloc*(): pointer
 proc roaring_aligned_free*(): pointer
 
-{.pop.}
-
-# ============================================================================
+# --------------------------------------------------------------------------
 # ROARING64 API
-# ============================================================================
+# --------------------------------------------------------------------------
 
-{.push importc, cdecl.}
 proc roaring64_bitmap_free*(r: pointer): pointer
 proc roaring64_bitmap_add*(r: pointer, val: pointer): pointer
 proc roaring64_bitmap_add_checked*(r: pointer, val: pointer): pointer
@@ -6249,14 +6089,6 @@ proc roaring64_iterator_has_value*(it: pointer): pointer
 proc roaring64_iterator_value*(it: pointer): pointer
 proc roaring64_iterator_advance*(it: pointer): pointer
 proc roaring64_iterator_previous*(it: pointer): pointer
-
-{.pop.}
-
-# ============================================================================
-# GTK API
-# ============================================================================
-
-{.push importc, cdecl.}
 proc gtk_inspector_size_groups_get_type*(): pointer
 proc gtk_inspector_start_recording_get_type*(): GType
 proc gtk_inspector_start_recording_new*(): pointer
