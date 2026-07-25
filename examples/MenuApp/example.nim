@@ -2,7 +2,7 @@
 ##  example.nim — пример GTK4-приложения с меню из menu.json
 ##
 ##  Сборка:
-##    nim c -r example.nim
+##    nim c -d:release --app:gui example.nim
 ##
 ##  Требования:
 ##    – libGTK4.nim и menuBuilder.nim в той же папке
