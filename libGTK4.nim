@@ -6,39 +6,17 @@
 ##          Прямые привязки к C API через FFI
 ## 
 ## 
-## Версия:   1.2
-## Дата:     2026-02-15
+## Версия:   1.3
+## Дата:     2026-07-25
 ## Автор:    Balans097 — vasil.minsk@yahoo.com
+## Платформы: Linux, Windows
 ################################################################
 
 
-# 1.2 — дополнение библиотеки расширенными функциями (2026-02-15);
-#       добавлено ~1780 дополнительных функций GTK4 API:
-#       – Inspector API (gtk_inspector_*)
-#       – Accessible API (gtk_accessible_*)
-#       – Action API (gtk_action_*)
-#       – Builder API (gtk_builder_*)
-#       – Constraint API (gtk_constraint_*)
-#       – вспомогательные функции Graph, Bitset, Roaring
-#       – GSK (GskRenderNode, GskTransform и др.)
-#       – GDK (события, дисплей, устройства)
-# 1.1 — исправления критических проблем (2026-02-05):
-#       – исправлен createListStore: использует gtk_list_store_newv вместо небезопасного varargs
-#       – исправлены g_timeout_add/g_idle_add: теперь используют правильный тип GSourceFunc с user_data
-#       – исправлен getClipboardText: использует GAsyncReadyCallback вместо некорректного callback
-#       – исправлены gtk_text_view_get_rtl/ltr_context: возвращают PangoContext* вместо gboolean
-#       – исправлен gtk_notebook_set_scrollable: принимает gboolean вместо bool
-#       – исправлен GtkInscription: удалён несуществующий gtk_inscription_get_markup, 
-#       – исправлены типы для get/set_wrap_mode (PangoWrapMode) и get/set_attributes (PangoAttrList*)
-#       – добавлены guards GTK_DISABLE_DEPRECATED для устаревших GTK3 API (TreeView, ListStore, 
-#         TreeStore, InfoBar, Statusbar, CellRenderer)
-# 1.0 — начальная реализация библиотеки (2026-01-20)
-
-
-
-
-
 import strutils
+
+
+
 
 
 
@@ -118,7 +96,6 @@ type
   GtkButton* = pointer
   GtkToggleButton* = pointer
   GtkCheckButton* = pointer
-  GtkRadioButton* = pointer  ## ВНИМАНИЕ: класса GtkRadioButton нет в GTK4 (убран, замена — GtkCheckButton + gtk_check_button_set_group). Тип оставлен как алиас на pointer только во избежание поломки кода, если где-то ещё используется его имя.
   GtkLinkButton* = pointer
   GtkMenuButton* = pointer
   GtkLockButton* = pointer
@@ -685,8 +662,6 @@ proc gtk_application_get_menu_by_id*(application: GtkApplication, id: cstring): 
 # Ингибирование (предотвращение завершения/сна)
 proc gtk_application_inhibit*(application: GtkApplication, window: GtkWindow, flags: GtkApplicationInhibitFlags, reason: cstring): cuint {.importc.}
 proc gtk_application_uninhibit*(application: GtkApplication, cookie: cuint) {.importc.}
-# ИСПРАВЛЕНО: gtk_application_prefers_app_menu и gtk_application_is_inhibited
-# не существуют в публичном API GTK4 (символы отсутствуют в libgtk-4.so) — удалены.
 
 
 
@@ -705,8 +680,6 @@ proc g_application_release*(application: GApplication) {.importc.}
 proc g_application_activate*(application: GApplication) {.importc.}
 proc g_application_open*(application: GApplication, files: pointer, nFiles: gint, hint: cstring) {.importc.}
 proc g_application_register*(application: GApplication, cancellable: pointer, error: pointer): gboolean {.importc.}
-# ИСПРАВЛЕНО: g_application_unregister удалён — такой функции нет в GIO,
-# у GApplication есть только register(), обратной операции не предусмотрено.
 
 # Получение информации
 proc g_application_get_application_id*(application: GApplication): cstring {.importc.}
@@ -718,12 +691,10 @@ proc g_application_set_inactivity_timeout*(application: GApplication, inactivity
 proc g_application_get_is_registered*(application: GApplication): gboolean {.importc.}
 proc g_application_get_is_remote*(application: GApplication): gboolean {.importc.}
 
-# ИСПРАВЛЕНО: g_application_add_action / remove_action / lookup_action не существуют —
-# таких функций нет в GIO. GApplication реализует интерфейс GActionMap,
-# поэтому нужно использовать g_action_map_add_action / g_action_map_remove_action /
-# g_action_map_lookup_action (объявлены ниже, в разделе ACTIONS), передавая
-# GApplication напрямую как GActionMap (это валидно, т.к. GApplication реализует
-# этот интерфейс).
+# Управление действиями приложения (GApplication реализует интерфейс GActionMap):
+# используйте g_action_map_add_action / g_action_map_remove_action /
+# g_action_map_lookup_action (раздел ACTIONS ниже), передавая GApplication
+# напрямую как GActionMap.
 
 # Управление опциями командной строки
 proc g_application_add_main_option_entries*(application: GApplication, entries: pointer) {.importc.}  # GOptionEntry[]
@@ -783,11 +754,10 @@ proc g_signal_handlers_disconnect_matched*(instance: gpointer, mask: GSignalMatc
                                            signalId: cuint, detail: GQuark, closure: pointer,
                                            `func`: gpointer, data: gpointer): cuint {.importc.}
 
-# ИСПРАВЛЕНО: g_signal_handlers_block_by_func / unblock_by_func / disconnect_by_func /
-# disconnect_by_data в реальном GLib — это макросы поверх g_signal_handlers_*_matched
-# (символов с такими именами нет в libgobject-2.0.so). Реализованы как обёртки
-# поверх уже объявленных *_matched процедур, как это делает сам GLib.
-# Используем уже существующий enum GSignalMatchType (объявлен выше).
+# g_signal_handlers_block_by_func / unblock_by_func / disconnect_by_func /
+# disconnect_by_data в GLib реализованы как макросы поверх
+# g_signal_handlers_*_matched — здесь они реализованы явными обёртками
+# поверх этих же процедур, как это делает сам GLib.
 
 proc g_signal_handlers_block_by_func*(instance: gpointer, `func`: gpointer, data: gpointer): cuint {.inline.} =
   g_signal_handlers_block_matched(instance, cast[GSignalMatchType](ord(G_SIGNAL_MATCH_FUNC) or ord(G_SIGNAL_MATCH_DATA)),
@@ -953,9 +923,8 @@ proc g_menu_item_new_section*(label: cstring, section: GMenuModel): GMenuItem {.
 proc g_menu_item_new_submenu*(label: cstring, submenu: GMenuModel): GMenuItem {.importc.}
 proc g_menu_item_new_from_model*(model: GMenuModel, itemIndex: gint): GMenuItem {.importc.}
 proc g_menu_item_set_label*(menuItem: GMenuItem, label: cstring) {.importc.}
-# ИСПРАВЛЕНО: g_menu_item_get_label не существует — у GMenuItem нет геттеров
-# для большинства атрибутов, значение "label" нужно читать через
-# g_menu_item_get_attribute_value(menuItem, "label", G_VARIANT_TYPE_STRING).
+# У GMenuItem нет геттеров для большинства атрибутов — значение "label"
+# читается через g_menu_item_get_attribute_value(menuItem, "label", G_VARIANT_TYPE_STRING).
 proc g_menu_item_set_icon*(menuItem: GMenuItem, icon: pointer) {.importc.}
 proc g_menu_item_set_action_and_target_value*(menuItem: GMenuItem, action: cstring, targetValue: GVariant) {.importc.}
 proc g_menu_item_set_detailed_action*(menuItem: GMenuItem, detailedAction: cstring) {.importc.}
@@ -1001,8 +970,7 @@ proc gtk_window_unminimize*(window: GtkWindow) {.importc.}
 proc gtk_window_present*(window: GtkWindow) {.importc.}
 proc gtk_window_set_default_icon_name*(name: cstring) {.importc.}
 proc gtk_window_set_icon_name*(window: GtkWindow, name: cstring) {.importc.}
-# ИСПРАВЛЕНО: gtk_window_set_icon_paintable удалён — в GTK4 такой функции нет.
-# Иконка окна в GTK4 задаётся только по имени из темы (gtk_window_set_icon_name),
+# Иконка окна в GTK4 задаётся только по имени из темы (gtk_window_set_icon_name);
 # на Wayland/X11 иконку обычно определяет .desktop-файл приложения.
 # Полноэкранный режим
 proc gtk_window_is_fullscreen*(window: GtkWindow): gboolean {.importc.}
@@ -1141,12 +1109,10 @@ proc gtk_button_get_icon_name*(button: GtkButton): cstring {.importc.}
 # Управление возможностью сжатия кнопки меньше естественного размера
 proc gtk_button_set_can_shrink*(button: GtkButton, can_shrink: gboolean) {.importc.}
 proc gtk_button_get_can_shrink*(button: GtkButton): gboolean {.importc.}
-# ИСПРАВЛЕНО: gtk_button_set_action_name/get_action_name не существуют как
-# отдельные символы — GtkButton реализует интерфейс GtkActionable, поэтому
-# нужно использовать gtk_actionable_set_action_name/get_action_name/
-# set_action_target_value/get_action_target_value, которые уже объявлены выше
-# в разделе ACTIONS (строки ~918-921) — работают с любым Actionable-виджетом,
-# включая GtkButton.
+# GtkButton реализует интерфейс GtkActionable — управление именем и целью
+# действия происходит через gtk_actionable_set_action_name/get_action_name/
+# set_action_target_value/get_action_target_value (раздел ACTIONS выше),
+# применимо к любому Actionable-виджету, включая GtkButton.
 proc gtk_actionable_set_detailed_action_name*(actionable: GtkWidget, detailedActionName: cstring) {.importc.}
 
 
@@ -1317,11 +1283,9 @@ proc gtk_entry_unset_invisible_char*(entry: GtkEntry) {.importc.}
 proc gtk_entry_set_activates_default*(entry: GtkEntry, setting: gboolean) {.importc.}
 proc gtk_entry_get_activates_default*(entry: GtkEntry): gboolean {.importc.}
 
-# Ширина в символах
-# ИСПРАВЛЕНО: gtk_entry_*_width_chars не существуют как отдельные символы GtkEntry —
-# ширина в символах определяется интерфейсом GtkEditable, который GtkEntry реализует.
-# Сами функции gtk_editable_get/set_width_chars и get/set_max_width_chars уже
-# объявлены ниже, в разделе GtkEditable interface.
+# Ширина в символах определяется интерфейсом GtkEditable, который GtkEntry
+# реализует — см. gtk_editable_get/set_width_chars и get/set_max_width_chars
+# в разделе GtkEditable interface ниже.
 
 # Атрибуты (Pango)
 proc gtk_entry_set_attributes*(entry: GtkEntry, attrs: PangoAttrList) {.importc.}
@@ -1537,9 +1501,8 @@ proc gtk_text_view_get_rtl_context*(text_view: GtkTextView): PangoContext {.impo
 # LTR (left-to-right) контекст меню  
 proc gtk_text_view_get_ltr_context*(text_view: GtkTextView): PangoContext {.importc.}
 
-# ИСПРАВЛЕНО: gtk_text_view_start_selection_drag удалена — это внутренняя
-# (приватная) функция GTK4, не экспортируется из libgtk-4.so и не входит
-# в публичный API. Выделение текста управляется через жесты/контроллеры ввода.
+# Выделение текста в GtkTextView управляется через жесты/контроллеры ввода
+# (GtkGestureDrag и т.п.), а не через отдельную процедуру запуска выделения.
 
 # Размещение курсора на экране
 proc gtk_text_view_place_cursor_onscreen*(text_view: GtkTextView): gboolean {.importc.}
@@ -1750,8 +1713,7 @@ proc gtk_spin_button_set_digits*(spinButton: GtkSpinButton, digits: guint) {.imp
 proc gtk_spin_button_get_digits*(spinButton: GtkSpinButton): guint {.importc.}
 proc gtk_spin_button_set_value*(spinButton: GtkSpinButton, value: gdouble) {.importc.}
 proc gtk_spin_button_get_value*(spinButton: GtkSpinButton): gdouble {.importc.}
-# ИСПРАВЛЕНО: gtk_spin_button_set_value_as_int не существует — сеттера для
-# целочисленного значения нет, только gtk_spin_button_set_value(gdouble) выше.
+# Сеттера для целочисленного значения нет — только gtk_spin_button_set_value(gdouble) выше.
 proc gtk_spin_button_get_value_as_int*(spinButton: GtkSpinButton): gint {.importc.}
 proc gtk_spin_button_set_range*(spinButton: GtkSpinButton, min: gdouble, max: gdouble) {.importc.}
 proc gtk_spin_button_get_range*(spinButton: GtkSpinButton, min: ptr gdouble, max: ptr gdouble) {.importc.}
@@ -1942,8 +1904,6 @@ proc gtk_file_chooser_dialog_new*(title: cstring, parent: GtkWindow, action: Gtk
 proc gtk_file_chooser_set_current_name*(chooser: GtkFileChooser, name: cstring) {.importc.}
 proc gtk_file_chooser_get_file*(chooser: GtkFileChooser): GFile {.importc.}
 proc gtk_file_chooser_set_file*(chooser: GtkFileChooser, file: GFile, error: ptr GError): gboolean {.importc.}
-# ИСПРАВЛЕНО: gtk_file_chooser_select_file — функция из GTK3 (для мультивыбора),
-# в GTK4 отсутствует; используйте gtk_file_chooser_set_file выше.
 proc gtk_file_chooser_set_current_folder*(chooser: GtkFileChooser, file: GFile, error: ptr GError): gboolean {.importc.}
 proc gtk_file_chooser_get_current_folder*(chooser: GtkFileChooser): GFile {.importc.}
 
@@ -2081,8 +2041,8 @@ proc gtk_popover_set_child*(popover: GtkPopover, child: GtkWidget) {.importc.}
 proc gtk_popover_get_child*(popover: GtkPopover): GtkWidget {.importc.}
 proc gtk_popover_popup*(popover: GtkPopover) {.importc.}
 proc gtk_popover_popdown*(popover: GtkPopover) {.importc.}
-# ИСПРАВЛЕНО: gtk_popover_set_parent не существует — в GTK4 у GtkPopover нет
-# отдельного сеттера родителя, используется общий gtk_widget_set_parent(popover, parent).
+# У GtkPopover нет отдельного сеттера родителя — используется общий
+# gtk_widget_set_parent(popover, parent).
 proc gtk_widget_get_ancestor*(widget: GtkWidget, widget_type: GType): GtkWidget  {.importc.}
 proc gtk_popover_get_type*(): GType {.importc.}
 
@@ -2400,11 +2360,7 @@ proc gdk_pixbuf_scale_simple*(src: GdkPixbuf, destWidth: gint, destHeight: gint,
 proc gdk_pixbuf_savev*(pixbuf: GdkPixbuf, filename: cstring, `type`: cstring, optionKeys: ptr cstring, optionValues: ptr cstring, error: ptr GError): gboolean {.importc.}
 proc g_memory_input_stream_new_from_bytes*(bytes: GBytes): pointer {.importc.}
 proc gdk_pixbuf_new_from_stream*(stream: pointer, cancellable: pointer, error: ptr GError): GdkPixbuf {.importc.}
-# ИСПРАВЛЕНО: gtk_window_set_default_icon_list удалён — функция существовала
-# только в GTK3, в GTK4 убрана (используйте gtk_window_set_default_icon_name).
-# Дополнительно: параметр был объявлен как openArray[GdkPixbuf], что в принципе
-# некорректно для importc-процедуры — openArray не имеет предсказуемого C ABI
-# (это не указатель+длина, а Nim-специфичная структура).
+# Для установки иконки окна по умолчанию используйте gtk_window_set_default_icon_name.
 
 # Для загрузки изображений из памяти
 proc gdk_pixbuf_loader_new*(): pointer {.importc.}
@@ -2574,16 +2530,6 @@ proc gtk_tree_model_iter_parent*(treeModel: GtkTreeModel, iter: ptr GtkTreeIter,
 proc gtk_tree_model_get_iter_first*(treeModel: GtkTreeModel, iter: ptr GtkTreeIter): gboolean {.importc.}
 proc gtk_tree_model_get_string_from_iter*(treeModel: GtkTreeModel, iter: ptr GtkTreeIter): cstring {.importc.}
 
-# ============================================================================
-# RADIO BUTTON
-# ============================================================================
-# ИСПРАВЛЕНО: весь блок GtkRadioButton удалён. Класса GtkRadioButton не
-# существует в GTK4 — он был убран вместе с остальными устаревшими GTK3
-# виджетами. Официальная замена — GtkCheckButton с группировкой через
-# gtk_check_button_set_group (уже объявлен выше, в разделе CheckButton):
-#   let a = gtk_check_button_new_with_label("Вариант A")
-#   let b = gtk_check_button_new_with_label("Вариант B")
-#   gtk_check_button_set_group(b, a)  # b присоединяется к группе a
 
 # ============================================================================
 # SCALE BUTTON & VOLUME BUTTON
@@ -2804,10 +2750,9 @@ type
   GtkDropTarget* = pointer
   GtkDragSource* = pointer
 proc gtk_gesture_click_new*(): GtkGestureClick {.importc.}
-# ИСПРАВЛЕНО: gtk_gesture_click_set_button/get_button не существуют как
-# отдельные символы — управление кнопкой мыши принадлежит родительскому
-# классу GtkGestureSingle, от которого наследуется GtkGestureClick.
-# Сами gtk_gesture_single_set_button/get_button уже объявлены ниже.
+# Управление кнопкой мыши принадлежит родительскому классу GtkGestureSingle,
+# от которого наследуется GtkGestureClick — см. gtk_gesture_single_set_button/
+# get_button ниже.
 proc gtk_gesture_drag_new*(): GtkGestureDrag {.importc.}
 proc gtk_gesture_drag_get_start_point*(gesture: GtkGestureDrag, x: ptr gdouble, y: ptr gdouble): gboolean {.importc.}
 proc gtk_gesture_drag_get_offset*(gesture: GtkGestureDrag, x: ptr gdouble, y: ptr gdouble): gboolean {.importc.}
