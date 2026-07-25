@@ -20,7 +20,7 @@ A full-featured wrapper for the GTK4 library in the Nim programming language
 
 ## Documentation
 
-For complete API reference, see [API Reference](docs/libGTK4_API_Documentation_EN.md) (English) or [API Reference RU](docs/gtk4_core_reference_ru.md) (Russian).
+For complete API reference, see [API Reference](docs/gtk4_core_reference_en.md) (English) or [API Reference RU](docs/gtk4_core_reference_ru.md) (Russian).
 
 ## Examples
 
