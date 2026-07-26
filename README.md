@@ -48,10 +48,10 @@ The reference is organized by widget category, each available in English and Rus
 | Text Input | [EN](docs/gtk4_text_input_reference_en.md) | [RU](docs/gtk4_text_input_reference_ru.md) |
 | Multiline Text | [EN](docs/gtk4_multiline_text_reference_en.md) | [RU](docs/gtk4_multiline_text_reference_ru.md) |
 | Numeric Choice | [EN](docs/gtk4_numeric_choice_reference_en.md) | [RU](docs/gtk4_numeric_choice_reference_ru.md) |
-| Multiview Containers | — | [RU](docs/gtk4_multiview_containers_reference_ru.md) |
-| Display Widgets | — | [RU](docs/gtk4_display_widgets_reference_ru.md) |
-| Signals | — | [RU](<docs/Сигналы GTK4.md>) |
-| Mouse & Keyboard Signals | — | [RU](<docs/Сигналы мыши и клавиатуры.md>) |
+| Multiview Containers | [EN](docs/gtk4_multiview_containers_reference_en.md) | [RU](docs/gtk4_multiview_containers_reference_ru.md) |
+| Display Widgets | [EN](docs/gtk4_display_widgets_reference_en.md) | [RU](docs/gtk4_display_widgets_reference_ru.md) |
+| Signals | [EN](docs/GTK4_Signals.md) | [RU](<docs/Сигналы GTK4.md>) |
+| Mouse & Keyboard Signals | [EN](docs/Mouse_and_Keyboard_Signals.md) | [RU](<docs/Сигналы мыши и клавиатуры.md>) |
 
 Older, superseded reference material is kept for history in [`docs/archive/`](docs/archive).
 
