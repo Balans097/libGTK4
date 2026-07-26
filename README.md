@@ -31,14 +31,14 @@ The documentation is a work in progress and will keep expanding.
 
 The `examples/` directory contains complete, runnable examples demonstrating various widgets and features:
 
-- [`Test_1_Hello_world.nim`](examples/Test_1_Hello_world.nim) — minimal "Hello, World!" window
-- [`Test_2_Text_editor.nim`](examples/Test_2_Text_editor.nim) — simple text editor
-- [`Test_3_Calculator.nim`](examples/Test_3_Calculator.nim) — basic calculator
-- [`Test_4_Drawing.nim`](examples/Test_4_Drawing.nim) — drawing/canvas widget
-- [`Test_5_App.nim`](examples/Test_5_App.nim) — small full application example
-- [`Calculator/`](examples/Calculator) — calculator app with a standalone build
-- [`GUI-0/`](examples/GUI-0) — general widget/GUI test
-- [`GUI-1/`](examples/GUI-1) — general widget/GUI test
-- [`GUI-2/`](examples/GUI-2) — GUI example with actions and a menu
-- [`MenuApp/`](examples/MenuApp) — application menu built from a JSON menu definition
-- [`Portable GUI for Windows/`](<examples/Portable GUI for Windows>) — self-contained portable build for Windows (with bundled libraries and screenshots)
+- [`Test_1_Hello_world.nim`](examples/Test_1_Hello_world.nim) — minimal "Hello, World!" window with a button click handler
+- [`Test_2_Text_editor.nim`](examples/Test_2_Text_editor.nim) — text editor with a header bar, Open/Save buttons and a file chooser dialog
+- [`Test_3_Calculator.nim`](examples/Test_3_Calculator.nim) — four-operation calculator with a running display
+- [`Test_4_Drawing.nim`](examples/Test_4_Drawing.nim) — freehand drawing on a `GtkDrawingArea` using a Cairo context and drag gestures
+- [`Test_5_App.nim`](examples/Test_5_App.nim) — placeholder, not implemented yet
+- [`Calculator/`](examples/Calculator) — addition calculator, built as a standalone binary
+- [`GUI-0/`](examples/GUI-0) — toolbar/status bar demo with a text view, progress bar and custom CSS styling
+- [`GUI-1/`](examples/GUI-1) — freehand drawing test using drag gestures and a Cairo context
+- [`GUI-2/`](examples/GUI-2) — text editor split into modules (entry point, GUI layout, app state and actions/file I/O) to demonstrate structuring a larger app
+- [`MenuApp/`](examples/MenuApp) — application menu and keyboard shortcuts built at runtime from a JSON menu definition
+- [`Portable GUI for Windows/`](<examples/Portable GUI for Windows>) — calculator packaged as a portable Windows build, with a launcher that adds the bundled `libs/` directory to `PATH`
