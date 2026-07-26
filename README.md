@@ -20,6 +20,8 @@ A full-featured wrapper for the GTK4 library in the Nim programming language
 - [API Reference (English)](docs/gtk4_core_reference_en.md)
 - [API Reference (Russian)](docs/gtk4_core_reference_ru.md)
 - [Basic Controls Reference (Russian)](docs/gtk4_basic_controls_reference_ru.md)
+- [Text Input Reference (Russian)](docs/gtk4_text_input_reference_ru.md)
+- [Multiline Text Reference (Russian)](docs/gtk4_multiline_text_reference_ru.md)
 - [GTK4 Signals (Russian)](<docs/Сигналы GTK4.md>)
 - [Mouse and Keyboard Signals (Russian)](<docs/Сигналы мыши и клавиатуры.md>)
 
