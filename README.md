@@ -35,7 +35,7 @@ The `examples/` directory contains complete, runnable examples demonstrating var
 - [`Test_2_Text_editor.nim`](examples/Test_2_Text_editor.nim) — text editor with a header bar, Open/Save buttons and a file chooser dialog
 - [`Test_3_Calculator.nim`](examples/Test_3_Calculator.nim) — four-operation calculator with a running display
 - [`Test_4_Drawing.nim`](examples/Test_4_Drawing.nim) — freehand drawing on a `GtkDrawingArea` using a Cairo context and drag gestures
-- [`Test_5_App.nim`](examples/Test_5_App.nim) — placeholder, not implemented yet
+- [`Test_5_App.nim`](examples/Test_5_App.nim) — Conway's Game of Life on a toroidal grid: click to toggle cells, Start/Stop/Step/Randomize/Clear controls, GLib timer-driven simulation
 - [`Calculator/`](examples/Calculator) — addition calculator, built as a standalone binary
 - [`GUI-0/`](examples/GUI-0) — toolbar/status bar demo with a text view, progress bar and custom CSS styling
 - [`GUI-1/`](examples/GUI-1) — freehand drawing test using drag gestures and a Cairo context

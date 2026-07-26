@@ -1,5 +1,12 @@
+
+# nim c -d:release --app:gui GUI_test_1.nim
+
 import libGTK4
 import math
+
+
+
+
 
 var points: seq[tuple[x, y: float]] = @[]
 
@@ -19,8 +26,13 @@ proc drawCallback(area: GtkDrawingArea, cr: ptr cairo_t,
     cairo_stroke(cr)
 
 proc onDrag(gesture: GtkGesture, x: gdouble, y: gdouble, area: gpointer) {.cdecl.} =
-  points.add((x, y))
-  gtk_widget_queue_draw(cast[GtkWidget](area))
+  # x, y, приходящие в сигнале "drag-update", - это смещение (offset)
+  # от точки начала drag-жеста, а не абсолютные координаты внутри
+  # drawingArea. Поэтому нужно прибавить их к стартовой точке жеста.
+  var startX, startY: gdouble
+  discard gtk_gesture_drag_get_start_point(gesture, addr startX, addr startY)
+  points.add((startX + x, startY + y))
+  discard gtk_widget_queue_draw(cast[GtkWidget](area))
 
 proc onDragEnd(gesture: GtkGesture, x: gdouble, y: gdouble, data: gpointer) {.cdecl.} =
   points = @[]
