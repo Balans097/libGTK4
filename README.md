@@ -50,6 +50,9 @@ The reference is organized by widget category, each available in English and Rus
 | Numeric Choice | [EN](docs/gtk4_numeric_choice_reference_en.md) | [RU](docs/gtk4_numeric_choice_reference_ru.md) |
 | Multiview Containers | [EN](docs/gtk4_multiview_containers_reference_en.md) | [RU](docs/gtk4_multiview_containers_reference_ru.md) |
 | Display Widgets | [EN](docs/gtk4_display_widgets_reference_en.md) | [RU](docs/gtk4_display_widgets_reference_ru.md) |
+| Drawing, Style & GLib | [EN](docs/gtk4_drawing_style_glib_reference_en.md) | [RU](docs/gtk4_drawing_style_glib_reference_ru.md) |
+| Popups & Auxiliary | [EN](docs/gtk4_popups_auxiliary_reference_en.md) | [RU](docs/gtk4_popups_auxiliary_reference_ru.md) |
+| Window Chrome & Dialogs | [EN](docs/gtk4_window_chrome_dialogs_reference_en.md) | [RU](docs/gtk4_window_chrome_dialogs_reference_ru.md) |
 | Signals | [EN](docs/GTK4_Signals.md) | [RU](<docs/Сигналы GTK4.md>) |
 | Mouse & Keyboard Signals | [EN](docs/Mouse_and_Keyboard_Signals.md) | [RU](<docs/Сигналы мыши и клавиатуры.md>) |
 
@@ -76,6 +79,25 @@ Complete, runnable examples live in [`examples/`](examples):
 | [GUI-2/](examples/GUI-2) | Text editor split into modules (entry point, GUI layout, app state, actions/file I/O) — demonstrates structuring a larger app |
 | [MenuApp/](examples/MenuApp) | Application menu and keyboard shortcuts built at runtime from a JSON menu definition |
 | [Portable GUI for Windows/](<examples/Portable GUI for Windows>) | Calculator packaged as a portable Windows build, with a launcher that adds the bundled `libs/` directory to `PATH` |
+
+---
+
+## Reference Application
+
+[`examples/ReferenceApp/`](examples/ReferenceApp) is the flagship, most complete example — a full desktop application split into dedicated modules:
+
+| Module | Responsibility |
+|---|---|
+| [main.nim](examples/ReferenceApp/main.nim) | Application entry point |
+| [gui.nim](examples/ReferenceApp/gui.nim) | GUI layout and widget construction |
+| [config.nim](examples/ReferenceApp/config.nim) | Application configuration |
+| [dialogs.nim](examples/ReferenceApp/dialogs.nim) | Dialog windows |
+| [docmodel.nim](examples/ReferenceApp/docmodel.nim) | Document/data model |
+| [fileio.nim](examples/ReferenceApp/fileio.nim) | File loading and saving |
+| [i18n.nim](examples/ReferenceApp/i18n.nim) | Internationalization/localization |
+| [actions.nim](examples/ReferenceApp/actions.nim) | Application actions |
+
+See [`examples/ReferenceApp/README.md`](examples/ReferenceApp/README.md) for details. A packaged copy is also available as [`examples/ReferenceApp.7z`](examples/ReferenceApp.7z).
 
 ---
 
