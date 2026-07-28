@@ -13,9 +13,15 @@
 
 ## Screenshots
 
-| Fedora Linux | Windows 11 |
-|---|---|
-| ![Fedora](./images/Screen-01.png) | ![Windows](./images/Screen-02.png) |
+<p align="center">
+  <img src="./images/Screen-01.png" alt="Fedora Linux" width="700"><br>
+  <sub><b>Fedora Linux</b></sub>
+</p>
+
+<p align="center">
+  <img src="./images/Screen-02.png" alt="Windows 11" width="700"><br>
+  <sub><b>Windows 11</b></sub>
+</p>
 
 ---
 
@@ -53,7 +59,8 @@ The reference is organized by widget category, each available in English and Rus
 | Drawing, Style & GLib | [EN](docs/gtk4_drawing_style_glib_reference_en.md) | [RU](docs/gtk4_drawing_style_glib_reference_ru.md) |
 | Popups & Auxiliary | [EN](docs/gtk4_popups_auxiliary_reference_en.md) | [RU](docs/gtk4_popups_auxiliary_reference_ru.md) |
 | Window Chrome & Dialogs | [EN](docs/gtk4_window_chrome_dialogs_reference_en.md) | [RU](docs/gtk4_window_chrome_dialogs_reference_ru.md) |
-| Signals | [EN](docs/GTK4_Signals.md) | [RU](<docs/Сигналы GTK4.md>) |
+| Bars & Misc | — | [RU](docs/gtk4_bars_misc_reference_ru.md) |
+| Signals | [EN](<docs/Signals in GTK4.md>) | [RU](<docs/Сигналы GTK4.md>) |
 | Mouse & Keyboard Signals | [EN](docs/Mouse_and_Keyboard_Signals.md) | [RU](<docs/Сигналы мыши и клавиатуры.md>) |
 
 Older, superseded reference material is kept for history in [`docs/archive/`](docs/archive).
