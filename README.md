@@ -11,17 +11,43 @@
 
 ---
 
-## Screenshots
+## How it looks on Fedora
 
 <p align="center">
-  <img src="./images/Screen-01.png" alt="Fedora Linux" width="700"><br>
-  <sub><b>Fedora Linux</b></sub>
+  <img src="./images/Screen-01.png" alt="libGTK4 application running on Fedora Linux" width="700">
 </p>
 
+## How it looks on Windows
+
 <p align="center">
-  <img src="./images/Screen-02.png" alt="Windows 11" width="700"><br>
-  <sub><b>Windows 11</b></sub>
+  <img src="./images/Screen-02.png" alt="libGTK4 application running on Windows 11" width="700">
 </p>
+
+---
+
+## What is GTK4?
+
+[GTK4](https://www.gtk.org) is a mature, cross-platform toolkit for building graphical user interfaces, used by GNOME and countless desktop applications on Linux, Windows and macOS. It provides everything a native desktop app needs: a rich widget set (buttons, text entries, lists, trees, menus, dialogs), a scene-graph-based rendering pipeline, CSS-driven theming, an event/signal system built on GLib, drag-and-drop, accessibility support, and integration with Cairo for custom drawing. It's the toolkit behind applications like GIMP, Inkscape, and the entire GNOME desktop environment.
+
+## What libGTK4 gives you
+
+libGTK4 exposes this toolkit to Nim as a thin, idiomatic wrapper, so you can build native desktop GUIs without leaving the Nim ecosystem. It currently covers:
+
+- **Core API** — application/window lifecycle, object system fundamentals, GLib main loop integration
+- **Basic controls** — buttons, checkboxes, switches, sliders and other everyday widgets
+- **Text input & multiline text** — entries, text views, and buffer manipulation
+- **Numeric & choice widgets** — spin buttons, combo boxes, dropdowns
+- **Multiview containers** — notebooks, stacks, paned views for organizing complex layouts
+- **Display widgets** — labels, images, progress bars, and other read-only widgets
+- **Drawing, style & GLib** — Cairo-based custom drawing on `GtkDrawingArea`, CSS styling, GLib utilities
+- **Popups & auxiliary widgets** — popovers, tooltips, and other transient UI
+- **Window chrome & dialogs** — header bars, file choosers, message dialogs
+- **Bars & misc widgets** — toolbars, status bars, and related components
+- **Signals** — a full reference for GTK4's signal system, plus a dedicated guide to mouse and keyboard signal handling
+
+Every reference document is available in both English and Russian (see [Documentation](#documentation) below), and older material is preserved in [`docs/archive/`](docs/archive) for historical reference.
+
+On top of the widget wrapper, the [examples](#examples) demonstrate real application patterns: multi-module app structure, JSON-driven runtime menu/shortcut construction, file I/O with dialogs, Cairo drawing with drag gestures, a GLib-timer-driven simulation (Conway's Game of Life), and packaging a portable build for Windows with bundled libraries.
 
 ---
 
