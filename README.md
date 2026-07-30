@@ -65,7 +65,7 @@ import libGTK4
 # Minimal window with a button — see Test_1_Hello_world.nim for the full example
 ```
 
-See [`examples/Test_1_Hello_world.nim`](examples/Test_1_Hello_world.nim) for a complete, runnable "Hello, World!".
+See [`examples/Tests/Test_1_Hello_world.nim`](examples/Test_1_Hello_world.nim) for a complete, runnable "Hello, World!".
 
 ---
 
