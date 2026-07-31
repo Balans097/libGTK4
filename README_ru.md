@@ -46,7 +46,12 @@ libGTK4 предоставляет этот тулкит в Nim в виде то
 - **Отрисовка, стиль и GLib** — собственная отрисовка на `GtkDrawingArea` через Cairo, стилизация через CSS, утилиты GLib
 - **Всплывающие и вспомогательные виджеты** — поповеры, тултипы и другой временный UI
 - **Оформление окна и диалоги** — header bar'ы, диалоги выбора файлов, диалоги сообщений
+- **Диалоги и медиа** — расширенные диалоговые и медиа-виджеты
 - **Панели и разное** — тулбары, статус-бары и связанные компоненты
+- **Базовые утилиты GLib** — дополнительные строительные блоки GLib сверх основного Core API
+- **Ввод и drag-and-drop** — контроллеры ввода и поддержка drag-and-drop
+- **Текстовые теги и итераторы** — форматирование rich-текста и обход буфера в `GtkTextBuffer`
+- **TreeView (устарел)** — справочник по legacy-виджету `GtkTreeView`, сохранён для старого кода
 - **Сигналы** — полный справочник по системе сигналов GTK4, а также отдельное руководство по обработке сигналов мыши и клавиатуры
 
 Каждый справочный документ доступен на английском и русском языках (см. [Документацию](#документация) ниже), а более старые материалы сохранены для истории в [`docs/archive/`](docs/archive).
@@ -89,11 +94,16 @@ import libGTK4
 | Отрисовка, стиль и GLib | [EN](docs/gtk4_drawing_style_glib_reference_en.md) | [RU](docs/gtk4_drawing_style_glib_reference_ru.md) |
 | Всплывающие и вспомогательные виджеты | [EN](docs/gtk4_popups_auxiliary_reference_en.md) | [RU](docs/gtk4_popups_auxiliary_reference_ru.md) |
 | Оформление окна и диалоги | [EN](docs/gtk4_window_chrome_dialogs_reference_en.md) | [RU](docs/gtk4_window_chrome_dialogs_reference_ru.md) |
-| Панели и разное | — | [RU](docs/gtk4_bars_misc_reference_ru.md) |
+| Диалоги и медиа | [EN](docs/gtk4_dialogs_media_reference_en.md) | [RU](docs/gtk4_dialogs_media_reference_ru.md) |
+| Панели и разное | [EN](docs/gtk4_bars_misc_reference_en.md) | [RU](docs/gtk4_bars_misc_reference_ru.md) |
+| Базовые утилиты GLib | [EN](docs/gtk4_glib_core_reference_en.md) | [RU](docs/gtk4_glib_core_reference_ru.md) |
+| Ввод и Drag-and-Drop | [EN](docs/gtk4_input_dnd_reference_en.md) | [RU](docs/gtk4_input_dnd_reference_ru.md) |
+| Текстовые теги и итераторы | [EN](docs/gtk4_text_tags_iter_reference_en.md) | [RU](docs/gtk4_text_tags_iter_reference_ru.md) |
+| TreeView (отмечен как устаревший) | [EN](docs/gtk4_deprecated_treeview_reference_en.md) | [RU](docs/gtk4_deprecated_treeview_reference_ru.md) |
 | Сигналы | [EN](<docs/Signals in GTK4.md>) | [RU](<docs/Сигналы GTK4.md>) |
 | Сигналы мыши и клавиатуры | [EN](docs/Mouse_and_Keyboard_Signals.md) | [RU](<docs/Сигналы мыши и клавиатуры.md>) |
 
-Более старые, устаревшие справочные материалы сохранены для истории в [`docs/archive/`](docs/archive).
+Более старые справочные материалы сохранены для истории в [`docs/archive/`](docs/archive).
 
 > Документация находится в процессе написания и будет пополняться.
 
