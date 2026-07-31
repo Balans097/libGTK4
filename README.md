@@ -47,7 +47,7 @@ libGTK4 exposes this toolkit to Nim as a thin, idiomatic wrapper, so you can bui
 - **GLib core utilities** — additional GLib building blocks beyond the main Core API
 - **Input & drag-and-drop** — input controllers and drag-and-drop support
 - **Text tags & iterators** — rich-text formatting and buffer iteration in `GtkTextBuffer`
-- **Deprecated TreeView** — legacy `GtkTreeView` reference, kept for older codebases
+- **TreeView (deprecated)** — legacy `GtkTreeView` reference, kept for older codebases
 - **Signals** — a full reference for GTK4's signal system, plus a dedicated guide to mouse and keyboard signal handling
 
 Every reference document is available in both English and Russian (see [Documentation](#documentation) below), and older material is preserved in [`docs/archive/`](docs/archive) for historical reference.
@@ -95,7 +95,7 @@ The reference is organized by widget category, each available in English and Rus
 | GLib Core | [EN](docs/gtk4_glib_core_reference_en.md) | [RU](docs/gtk4_glib_core_reference_ru.md) |
 | Input & Drag-and-Drop | [EN](docs/gtk4_input_dnd_reference_en.md) | [RU](docs/gtk4_input_dnd_reference_ru.md) |
 | Text Tags & Iterators | [EN](docs/gtk4_text_tags_iter_reference_en.md) | [RU](docs/gtk4_text_tags_iter_reference_ru.md) |
-| Deprecated TreeView | [EN](docs/gtk4_deprecated_treeview_reference_en.md) | [RU](docs/gtk4_deprecated_treeview_reference_ru.md) |
+| TreeView (deprecated) | [EN](docs/gtk4_deprecated_treeview_reference_en.md) | [RU](docs/gtk4_deprecated_treeview_reference_ru.md) |
 | Signals | [EN](<docs/Signals in GTK4.md>) | [RU](<docs/Сигналы GTK4.md>) |
 | Mouse & Keyboard Signals | [EN](docs/Mouse_and_Keyboard_Signals.md) | [RU](<docs/Сигналы мыши и клавиатуры.md>) |
 
