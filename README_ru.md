@@ -42,13 +42,16 @@ libGTK4 предоставляет этот тулкит в Nim в виде то
 - **Текстовый ввод и многострочный текст** — поля ввода, текстовые области и работа с буферами
 - **Числовой ввод и выбор** — spin-кнопки, комбобоксы, выпадающие списки
 - **Многовидовые контейнеры** — notebook'и, стеки, paned-виджеты для организации сложных макетов
+- **Современные списки** — виджеты списков и колонок на основе `GtkListView`/`GtkColumnView` *(пока только на русском)*
 - **Виджеты отображения** — метки, изображения, прогресс-бары и другие виджеты только для чтения
 - **Отрисовка, стиль и GLib** — собственная отрисовка на `GtkDrawingArea` через Cairo, стилизация через CSS, утилиты GLib
 - **Всплывающие и вспомогательные виджеты** — поповеры, тултипы и другой временный UI
+- **Меню-поповер и revealer** — меню на основе `GtkPopoverMenu` и анимированные переходы `GtkRevealer` *(пока только на русском)*
 - **Оформление окна и диалоги** — header bar'ы, диалоги выбора файлов, диалоги сообщений
 - **Диалоги и медиа** — расширенные диалоговые и медиа-виджеты
 - **Панели и разное** — тулбары, статус-бары и связанные компоненты
 - **Базовые утилиты GLib** — дополнительные строительные блоки GLib сверх основного Core API
+- **Системные утилиты** — дополнительные утилитарные функции GLib/системного уровня *(пока только на русском)*
 - **Ввод и drag-and-drop** — контроллеры ввода и поддержка drag-and-drop
 - **Текстовые теги и итераторы** — форматирование rich-текста и обход буфера в `GtkTextBuffer`
 - **TreeView (устарел)** — справочник по legacy-виджету `GtkTreeView`, сохранён для старого кода
@@ -90,13 +93,16 @@ import libGTK4
 | Многострочный текст | [EN](docs/gtk4_multiline_text_reference_en.md) | [RU](docs/gtk4_multiline_text_reference_ru.md) |
 | Числовой выбор | [EN](docs/gtk4_numeric_choice_reference_en.md) | [RU](docs/gtk4_numeric_choice_reference_ru.md) |
 | Многовидовые контейнеры | [EN](docs/gtk4_multiview_containers_reference_en.md) | [RU](docs/gtk4_multiview_containers_reference_ru.md) |
+| Современные списки | — | [RU](docs/gtk4_modern_lists_reference_ru.md) |
 | Виджеты отображения | [EN](docs/gtk4_display_widgets_reference_en.md) | [RU](docs/gtk4_display_widgets_reference_ru.md) |
 | Отрисовка, стиль и GLib | [EN](docs/gtk4_drawing_style_glib_reference_en.md) | [RU](docs/gtk4_drawing_style_glib_reference_ru.md) |
 | Всплывающие и вспомогательные виджеты | [EN](docs/gtk4_popups_auxiliary_reference_en.md) | [RU](docs/gtk4_popups_auxiliary_reference_ru.md) |
+| Меню-поповер и revealer | — | [RU](docs/gtk4_popovermenu_revealer_reference_ru.md) |
 | Оформление окна и диалоги | [EN](docs/gtk4_window_chrome_dialogs_reference_en.md) | [RU](docs/gtk4_window_chrome_dialogs_reference_ru.md) |
 | Диалоги и медиа | [EN](docs/gtk4_dialogs_media_reference_en.md) | [RU](docs/gtk4_dialogs_media_reference_ru.md) |
 | Панели и разное | [EN](docs/gtk4_bars_misc_reference_en.md) | [RU](docs/gtk4_bars_misc_reference_ru.md) |
 | Базовые утилиты GLib | [EN](docs/gtk4_glib_core_reference_en.md) | [RU](docs/gtk4_glib_core_reference_ru.md) |
+| Системные утилиты | — | [RU](docs/gtk4_system_utils_reference_ru.md) |
 | Ввод и Drag-and-Drop | [EN](docs/gtk4_input_dnd_reference_en.md) | [RU](docs/gtk4_input_dnd_reference_ru.md) |
 | Текстовые теги и итераторы | [EN](docs/gtk4_text_tags_iter_reference_en.md) | [RU](docs/gtk4_text_tags_iter_reference_ru.md) |
 | TreeView (отмечен как устаревший) | [EN](docs/gtk4_deprecated_treeview_reference_en.md) | [RU](docs/gtk4_deprecated_treeview_reference_ru.md) |
@@ -105,7 +111,7 @@ import libGTK4
 
 Более старые справочные материалы сохранены для истории в [`docs/archive/`](docs/archive).
 
-> Документация находится в процессе написания и будет пополняться.
+> Документация находится в процессе написания и будет пополняться. Разделы, отмеченные «—» в колонке English (Современные списки, Меню-поповер и revealer, Системные утилиты), пока существуют только на русском языке — перевод на английский в работе.
 
 ---
 

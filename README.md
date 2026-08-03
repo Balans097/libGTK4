@@ -38,13 +38,16 @@ libGTK4 exposes this toolkit to Nim as a thin, idiomatic wrapper, so you can bui
 - **Text input & multiline text** — entries, text views, and buffer manipulation
 - **Numeric & choice widgets** — spin buttons, combo boxes, dropdowns
 - **Multiview containers** — notebooks, stacks, paned views for organizing complex layouts
+- **Modern lists** — `GtkListView`/`GtkColumnView`-based list and column widgets *(Russian documentation only so far)*
 - **Display widgets** — labels, images, progress bars, and other read-only widgets
 - **Drawing, style & GLib** — Cairo-based custom drawing on `GtkDrawingArea`, CSS styling, GLib utilities
 - **Popups & auxiliary widgets** — popovers, tooltips, and other transient UI
+- **Popover menu & revealer** — `GtkPopoverMenu`-based menus and animated `GtkRevealer` transitions *(Russian documentation only so far)*
 - **Window chrome & dialogs** — header bars, file choosers, message dialogs
 - **Dialogs & media** — extended dialog and media-related widgets
 - **Bars & misc widgets** — toolbars, status bars, and related components
 - **GLib core utilities** — additional GLib building blocks beyond the main Core API
+- **System utils** — additional GLib/system-level utility functions *(Russian documentation only so far)*
 - **Input & drag-and-drop** — input controllers and drag-and-drop support
 - **Text tags & iterators** — rich-text formatting and buffer iteration in `GtkTextBuffer`
 - **TreeView (deprecated)** — legacy `GtkTreeView` reference, kept for older codebases
@@ -86,13 +89,16 @@ The reference is organized by widget category, each available in English and Rus
 | Multiline Text | [EN](docs/gtk4_multiline_text_reference_en.md) | [RU](docs/gtk4_multiline_text_reference_ru.md) |
 | Numeric Choice | [EN](docs/gtk4_numeric_choice_reference_en.md) | [RU](docs/gtk4_numeric_choice_reference_ru.md) |
 | Multiview Containers | [EN](docs/gtk4_multiview_containers_reference_en.md) | [RU](docs/gtk4_multiview_containers_reference_ru.md) |
+| Modern Lists | — | [RU](docs/gtk4_modern_lists_reference_ru.md) |
 | Display Widgets | [EN](docs/gtk4_display_widgets_reference_en.md) | [RU](docs/gtk4_display_widgets_reference_ru.md) |
 | Drawing, Style & GLib | [EN](docs/gtk4_drawing_style_glib_reference_en.md) | [RU](docs/gtk4_drawing_style_glib_reference_ru.md) |
 | Popups & Auxiliary | [EN](docs/gtk4_popups_auxiliary_reference_en.md) | [RU](docs/gtk4_popups_auxiliary_reference_ru.md) |
+| Popover Menu & Revealer | — | [RU](docs/gtk4_popovermenu_revealer_reference_ru.md) |
 | Window Chrome & Dialogs | [EN](docs/gtk4_window_chrome_dialogs_reference_en.md) | [RU](docs/gtk4_window_chrome_dialogs_reference_ru.md) |
 | Dialogs & Media | [EN](docs/gtk4_dialogs_media_reference_en.md) | [RU](docs/gtk4_dialogs_media_reference_ru.md) |
 | Bars & Misc | [EN](docs/gtk4_bars_misc_reference_en.md) | [RU](docs/gtk4_bars_misc_reference_ru.md) |
 | GLib Core | [EN](docs/gtk4_glib_core_reference_en.md) | [RU](docs/gtk4_glib_core_reference_ru.md) |
+| System Utils | — | [RU](docs/gtk4_system_utils_reference_ru.md) |
 | Input & Drag-and-Drop | [EN](docs/gtk4_input_dnd_reference_en.md) | [RU](docs/gtk4_input_dnd_reference_ru.md) |
 | Text Tags & Iterators | [EN](docs/gtk4_text_tags_iter_reference_en.md) | [RU](docs/gtk4_text_tags_iter_reference_ru.md) |
 | TreeView (deprecated) | [EN](docs/gtk4_deprecated_treeview_reference_en.md) | [RU](docs/gtk4_deprecated_treeview_reference_ru.md) |
@@ -101,7 +107,7 @@ The reference is organized by widget category, each available in English and Rus
 
 Older, superseded reference material is kept for history in [`docs/archive/`](docs/archive).
 
-> The documentation is a work in progress and will keep expanding.
+> The documentation is a work in progress and will keep expanding. Topics marked with "—" in the English column (Modern Lists, Popover Menu & Revealer, System Utils) currently have Russian documentation only; English translations are pending.
 
 ---
 
